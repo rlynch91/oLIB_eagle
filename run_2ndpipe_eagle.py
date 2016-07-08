@@ -188,11 +188,6 @@ def executable(run_dic):
 														
 						#write pipeline dag and submit to condor
 						run_write_and_submit_dag(run_dic=run_dic)
-						
-						#save run_dic
-						if not os.path.exists("%s/run_dic"%segdir):
-							os.makedirs("%s/run_dic"%segdir)
-						pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,start,stop),'wt'))
 																				
 						#move on to next time segment
 						start += (stride - overlap)
@@ -224,11 +219,6 @@ def executable(run_dic):
 						#write pipeline dag and submit to condor
 						run_write_and_submit_dag(run_dic=run_dic)
 						
-						#save run_dic
-						if not os.path.exists("%s/run_dic"%segdir):
-							os.makedirs("%s/run_dic"%segdir)
-						pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,start,stop),'wt'))
-						
 						#move on to next time interval
 						start += (stride - overlap)
 						stop = start + stride
@@ -257,11 +247,6 @@ def executable(run_dic):
 													
 					#write pipeline dag and submit to condor
 					run_write_and_submit_dag(run_dic=run_dic)
-					
-					#save run_dic
-					if not os.path.exists("%s/run_dic"%segdir):
-						os.makedirs("%s/run_dic"%segdir)
-					pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,start,stop),'wt'))
 					
 					#catch up to real time
 					actual_start = int(commands.getstatusoutput('%s/lalapps_tconvert now'%bindir)[1])

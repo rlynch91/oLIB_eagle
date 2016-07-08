@@ -54,6 +54,11 @@ def executable(run_dic):
 			cache_files[ifo] = run_dic['data']['cache files'][ifo]
 			channel_names[ifo] = run_dic['ifos'][ifo]['channel name']
 			channel_types[ifo] = run_dic['ifos'][ifo]['channel type']
+			
+		if train_runmode == 'Train':
+			sig_train_cache_files = {}
+			for ifo in ifos:
+				sig_train_cache_files[ifo] = run_dic['data']['signal train cache files'][ifo]
 
 		#############################################
 
@@ -86,7 +91,7 @@ def executable(run_dic):
 		omicron_jobs=[]
 
 		#Loop over all ifos
-		for i,ifo in enumerate(ifos):
+		for ifo in ifos:
 			
 			#make raw directory
 			if not os.path.exists("%s/raw/%s"%(segdir,ifo)):
@@ -95,14 +100,12 @@ def executable(run_dic):
 			#replace all IFO in omicron sub file with ifo
 			os.system('sed -e "s|IFO|%s|g" -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_%s_eagle.sub'%(ifo,segdir,infodir,segdir,ifo))
 			#replace all necessary variables in params file
-			os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_params_%s_eagle.txt'%(ifo, cache_files[i], channel_names[i], sample_freq, overlap, stride, segdir+'/raw/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
-#??			if train_runmode == 'Signal':
-				os.system('sed -e "s|//INJECTION|INJECTION|g" %s/runfiles/omicron_params_%s_eagle.txt > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/omicron_params_%s_eagle.txt'%(segdir,ifo,segdir,segdir,segdir,ifo))
+			os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_params_%s_eagle.txt'%(ifo, cache_files[ifo], channel_names[ifo], sample_freq, overlap, stride, segdir+'/raw/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
 
 			#write JOB
 			dagfile.write('JOB %s %s/runfiles/omicron_%s_eagle.sub\n'%(job,segdir,ifo))
 			#write VARS
-			dagfile.write('VARS %s macroid="omicron-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[i], segdir+'/runfiles/omicron_params_%s_eagle.txt'%ifo))
+			dagfile.write('VARS %s macroid="omicron-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_params_%s_eagle.txt'%ifo))
 			#write RETRY
 			dagfile.write('RETRY %s 0\n\n'%job)
 			
@@ -111,14 +114,44 @@ def executable(run_dic):
 			
 			#Done with job
 			job += 1
-#??here??
+
+		##################################################################
+		### Write DAG to run omicron signal training jobs for each ifo ###
+		##################################################################
+		
+		omicron_sig_train_jobs=[]
+		
+		#Check if in training mode
+		if train_runmode == 'Train':
+			
+			#Loop over all ifos
+			for ifo in ifos:
+				
+				#make raw directory
+				if not os.path.exists("%s/raw_sig_train/%s"%(segdir,ifo)):
+					os.makedirs("%s/raw_sig_train/%s"%(segdir,ifo))
+
+				#replace all IFO in omicron sub file with ifo
+				os.system('sed -e "s|IFO|%s|g" -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_sig_train_%s_eagle.sub'%(ifo,segdir,infodir,segdir,ifo))
+				#replace all necessary variables in params file
+				os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" -e "s|//INJECTION|INJECTION|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_sig_train_params_%s_eagle.txt'%(ifo, sig_train_cache_files[ifo], channel_names[ifo], sample_freq, overlap, stride, segdir+'/raw_sig_train/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
+
+				#write JOB
+				dagfile.write('JOB %s %s/runfiles/omicron_sig_train_%s_eagle.sub\n'%(job,segdir,ifo))
+				#write VARS
+				dagfile.write('VARS %s macroid="omicron_sig_train-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_sign_train_params_%s_eagle.txt'%ifo))
+				#write RETRY
+				dagfile.write('RETRY %s 0\n\n'%job)
+				
+				#Record omicron job numbers
+				omicron_sig_train_jobs += [job]
+				
+				#Done with job
+				job += 1
+
 		####################################
 		### Write DAG to run omicron2LIB ###
 		####################################
-
-		#first cluster triggers for each ifo
-		#then do coincidence for each listed combination (0-lag,background,sig train, noise train), stepping through ifos as listed
-		#finally, cluster LIB trigs and mark down what ifos LIB needs to analyze each trig with
 
 		omicron2LIB_jobs = []
 
@@ -132,18 +165,20 @@ def executable(run_dic):
 		#Create vetoes folder with empty veto file
 		if not os.path.exists("%s/vetoes/"%segdir):
 			os.makedirs("%s/vetoes/"%segdir)
-		os.system('touch %s/vetoes/null_vetoes.txt'%segdir)
+		os.system('> %s/vetoes/null_vetoes.txt'%segdir)
 		run_dic['vetoes'] = {}
 		for ifo in ifos:
 			run_dic['vetoes'][ifo] = '%s/vetoes/null_vetoes.txt'%segdir
 	
 		#Save run_dic
-		???pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,start,stop),'wt'))
+		if not os.path.exists("%s/run_dic"%segdir):
+			os.makedirs("%s/run_dic"%segdir)
+		pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),'wt'))
 		
 		#Write JOB
 		dagfile.write('JOB %s %s/runfiles/omicron2LIB_eagle.sub\n'%(job,segdir))
 		#Write VARS
-		dagfile.write('VARS %s macroid="omicron2LIB-%s" macroarguments="-p %s/PostProc -i %s -I %s -r %s/raw -c %s --cluster-t=0.1 --coin-t=0.05 --coin-snr=0. --t-shift-start=%s --t-shift-stop=%s --t-shift-num=%s --segs=%s --veto-files=%s/vetoes/null_vetoes.txt,%s/vetoes/null_vetoes.txt --overlap=%s --log-like-thresh=0. --LIB-window=0.1 --signal-kde-coords=%s --signal-kde-values=%s --noise-kde-coords=%s --noise-kde-values=%s --train-runmode=%s"\n'%(job,job,segdir,infodir,opts.IFOs,segdir,",".join(channel_names),t_shift_start,t_shift_stop,t_shift_num,opts.seg_files,segdir,segdir,overlap,dt_signal_kde_coords,dt_signal_kde_values,dt_noise_kde_coords,dt_noise_kde_values,train_runmode))
+		dagfile.write('VARS %s macroid="omicron2LIB-%s" macroarguments="-r %s"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
 		#Write RETRY
 		dagfile.write('RETRY %s 0\n\n'%job)
 
@@ -153,6 +188,48 @@ def executable(run_dic):
 		#Done with job
 		job += 1
 
+		########################################################
+		### Write DAG to run omicron2LIB for signal training ###
+		########################################################
+
+		omicron2LIB_sig_train_jobs = []
+		
+		#Check if in training mode
+		if train_runmode == 'Train':
+
+			#Copy omicron2LIB sub file to segdir
+			os.system('sed "s|RUNDIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_sig_train_eagle.sub'%(segdir,infodir,segdir))
+
+			#Create PostProc folder
+			if not os.path.exists("%s/PostProc_sig_train/"%segdir):
+				os.makedirs("%s/PostProc_sig_train/"%segdir)
+
+			#Create vetoes folder with empty veto file
+			if not os.path.exists("%s/vetoes/"%segdir):
+				os.makedirs("%s/vetoes/"%segdir)
+			os.system('> %s/vetoes/null_vetoes.txt'%segdir)
+			run_dic['vetoes'] = {}
+			for ifo in ifos:
+				run_dic['vetoes'][ifo] = '%s/vetoes/null_vetoes.txt'%segdir
+		
+			#Save run_dic
+			if not os.path.exists("%s/run_dic"%segdir):
+				os.makedirs("%s/run_dic"%segdir)
+			pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),'wt'))
+			
+			#Write JOB
+			dagfile.write('JOB %s %s/runfiles/omicron2LIB_sig_train_eagle.sub\n'%(job,segdir))
+			#Write VARS
+			dagfile.write('VARS %s macroid="omicron2LIB-%s" macroarguments="-r %s --sig-train"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
+			#Write RETRY
+			dagfile.write('RETRY %s 0\n\n'%job)
+
+			#Record omicron2LIB job number
+			omicron2LIB_sig_train_jobs += [job]
+
+			#Done with job
+			job += 1
+#??here??
 		####################################
 		### Check if supposed to run LIB ###
 		####################################
