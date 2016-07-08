@@ -44,6 +44,7 @@ def executable(run_dic):
 		max_quality = run_dic['prior ranges']['max quality']
 		sample_freq = run_dic['config']['sample freq']
 		osnr_thresh = run_dic['config']['oSNR thresh']
+		LIB_window = run_dic['prior ranges']['LIB window']
 
 		seg_files = {}
 		cache_files = {}
@@ -90,20 +91,21 @@ def executable(run_dic):
 
 		omicron_jobs=[]
 
+		#Copy omicron sub file to segdir
+		os.system('sed -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_eagle.sub'%(segdir,infodir,segdir))
+
 		#Loop over all ifos
 		for ifo in ifos:
 			
 			#make raw directory
 			if not os.path.exists("%s/raw/%s"%(segdir,ifo)):
 				os.makedirs("%s/raw/%s"%(segdir,ifo))
-
-			#replace all IFO in omicron sub file with ifo
-			os.system('sed -e "s|IFO|%s|g" -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_%s_eagle.sub'%(ifo,segdir,infodir,segdir,ifo))
+			
 			#replace all necessary variables in params file
 			os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_params_%s_eagle.txt'%(ifo, cache_files[ifo], channel_names[ifo], sample_freq, overlap, stride, segdir+'/raw/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
 
 			#write JOB
-			dagfile.write('JOB %s %s/runfiles/omicron_%s_eagle.sub\n'%(job,segdir,ifo))
+			dagfile.write('JOB %s %s/runfiles/omicron_eagle.sub\n'%(job,segdir))
 			#write VARS
 			dagfile.write('VARS %s macroid="omicron-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_params_%s_eagle.txt'%ifo))
 			#write RETRY
@@ -131,13 +133,11 @@ def executable(run_dic):
 				if not os.path.exists("%s/raw_sig_train/%s"%(segdir,ifo)):
 					os.makedirs("%s/raw_sig_train/%s"%(segdir,ifo))
 
-				#replace all IFO in omicron sub file with ifo
-				os.system('sed -e "s|IFO|%s|g" -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_sig_train_%s_eagle.sub'%(ifo,segdir,infodir,segdir,ifo))
 				#replace all necessary variables in params file
 				os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" -e "s|//INJECTION|INJECTION|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_sig_train_params_%s_eagle.txt'%(ifo, sig_train_cache_files[ifo], channel_names[ifo], sample_freq, overlap, stride, segdir+'/raw_sig_train/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
 
 				#write JOB
-				dagfile.write('JOB %s %s/runfiles/omicron_sig_train_%s_eagle.sub\n'%(job,segdir,ifo))
+				dagfile.write('JOB %s %s/runfiles/omicron_eagle.sub\n'%(job,segdir))
 				#write VARS
 				dagfile.write('VARS %s macroid="omicron_sig_train-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_sign_train_params_%s_eagle.txt'%ifo))
 				#write RETRY
@@ -156,7 +156,7 @@ def executable(run_dic):
 		omicron2LIB_jobs = []
 
 		#Copy omicron2LIB sub file to segdir
-		os.system('sed "s|RUNDIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_eagle.sub'%(segdir,infodir,segdir))
+		os.system('sed "s|SEGDIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_eagle.sub'%(segdir,infodir,segdir))
 
 		#Create PostProc folder
 		if not os.path.exists("%s/PostProc/"%segdir):
@@ -197,30 +197,14 @@ def executable(run_dic):
 		#Check if in training mode
 		if train_runmode == 'Train':
 
-			#Copy omicron2LIB sub file to segdir
-			os.system('sed "s|RUNDIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_sig_train_eagle.sub'%(segdir,infodir,segdir))
-
 			#Create PostProc folder
 			if not os.path.exists("%s/PostProc_sig_train/"%segdir):
 				os.makedirs("%s/PostProc_sig_train/"%segdir)
-
-			#Create vetoes folder with empty veto file
-			if not os.path.exists("%s/vetoes/"%segdir):
-				os.makedirs("%s/vetoes/"%segdir)
-			os.system('> %s/vetoes/null_vetoes.txt'%segdir)
-			run_dic['vetoes'] = {}
-			for ifo in ifos:
-				run_dic['vetoes'][ifo] = '%s/vetoes/null_vetoes.txt'%segdir
-		
-			#Save run_dic
-			if not os.path.exists("%s/run_dic"%segdir):
-				os.makedirs("%s/run_dic"%segdir)
-			pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),'wt'))
 			
 			#Write JOB
-			dagfile.write('JOB %s %s/runfiles/omicron2LIB_sig_train_eagle.sub\n'%(job,segdir))
+			dagfile.write('JOB %s %s/runfiles/omicron2LIB_eagle.sub\n'%(job,segdir))
 			#Write VARS
-			dagfile.write('VARS %s macroid="omicron2LIB-%s" macroarguments="-r %s --sig-train"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
+			dagfile.write('VARS %s macroid="omicron2LIB_sig_train-%s" macroarguments="-r %s --sig-train"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
 			#Write RETRY
 			dagfile.write('RETRY %s 0\n\n'%job)
 
@@ -229,183 +213,164 @@ def executable(run_dic):
 
 			#Done with job
 			job += 1
-#??here??
+
 		####################################
 		### Check if supposed to run LIB ###
 		####################################
 
 		if LIB_flag:
 
-			####################################################
-			### Write DAG to run lalinference_pipe on 0-lags ###
-			####################################################
+			lalinference_pipe_jobs = []
+			LIB_runs_jobs = []
+			Bayes2LIB_jobs = []
+			
+			lalinference_sig_train_pipe_jobs = []
+			LIB_sig_train_runs_jobs = []
+			Bayes2LIB_sig_train_jobs = []
 
-			lalinference_pipe_0lag_jobs = []
-
-			#Create LIB_0lag folder
-			if not os.path.exists("%s/LIB_0lag/"%segdir):
-				os.makedirs("%s/LIB_0lag/"%segdir)
-
-			#replace all necessary fields in LIB_runs_eagle.ini file
-			os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|0lag|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_runs_eagle.ini > %s/runfiles/LIB_0lag_runs_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
-			if train_runmode == 'Signal':
-				os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_0lag_runs_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_0lag_runs_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
-				
 			#Copy lalinference_pipe sub file to segdir
-			os.system('sed "s|RUNDIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,segdir))
-
-			#Write JOB
-			dagfile.write('JOB %s %s/runfiles/lalinference_pipe_eagle.sub\n'%(job,segdir))
-			#Write VARS
-			dagfile.write('VARS %s macroid="lalinference_pipe_0lag-%s" macroarguments="%s -r %s -p /usr1/ryan.lynch/logs/ -g %s/PostProc/LIB_trigs/LIB_0lag_times_%s.txt"\n'%(job,job,segdir+'/runfiles/LIB_0lag_runs_eagle.ini',segdir+'/LIB_0lag/',segdir,"".join(ifos)))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
-
-			#Record lalinference_pipe job number
-			lalinference_pipe_0lag_jobs += [job]
-
-			#Done with job
-			job += 1
+			os.system('sed "s|SEGDIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,segdir))
 			
-			########################################################
-			### Write DAG to run lalinference_pipe on timeslides ###
-			########################################################
-
-			lalinference_pipe_ts_jobs = []
-
-			#Create LIB_ts folder
-			if not os.path.exists("%s/LIB_ts/"%segdir):
-				os.makedirs("%s/LIB_ts/"%segdir)
-
-			#replace all necessary fields in LIB_runs_eagle.ini file
-			os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|ts|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_runs_eagle.ini > %s/runfiles/LIB_ts_runs_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
-			if train_runmode == 'Signal':
-				os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_ts_runs_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_ts_runs_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
-			
-			#Write JOB
-			dagfile.write('JOB %s %s/runfiles/lalinference_pipe_eagle.sub\n'%(job,segdir))
-			#Write VARS
-			dagfile.write('VARS %s macroid="lalinference_pipe_ts-%s" macroarguments="%s -r %s -p /usr1/ryan.lynch/logs/ -g %s/PostProc/LIB_trigs/LIB_ts_times_%s.txt"\n'%(job,job,segdir+'/runfiles/LIB_ts_runs_eagle.ini',segdir+'/LIB_ts/',segdir,"".join(ifos)))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
-
-			#Record lalinference_pipe job number
-			lalinference_pipe_ts_jobs += [job]
-
-			#Done with job
-			job += 1
-
-			###############################################
-			### Write DAG to point to LIB_0lag_runs dag ###
-			###############################################
-
-			LIB_0lag_runs_jobs = []
-
-			#Write SUBDAG EXTERNAL
-			dagfile.write('SUBDAG EXTERNAL %s %s/LIB_0lag/LIB_runs.dag\n'%(job,segdir))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
-
-			#Record LIB_runs job number
-			LIB_0lag_runs_jobs += [job]
-
-			#Done with job
-			job += 1
-			
-			#############################################
-			### Write DAG to point to LIB_ts_runs dag ###
-			#############################################
-
-			LIB_ts_runs_jobs = []
-
-			#Write SUBDAG EXTERNAL
-			dagfile.write('SUBDAG EXTERNAL %s %s/LIB_ts/LIB_runs.dag\n'%(job,segdir))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
-
-			#Record LIB_runs job number
-			LIB_ts_runs_jobs += [job]
-
-			#Done with job
-			job += 1
-
-			######################################################
-			### Write DAG to run Bayes_factors_2_LIB for 0-lag ###
-			######################################################
-
-			Bayes2LIB_0lag_jobs = []
-
-			#Create LIB_0lag_rr folder
-			if not os.path.exists("%s/LIB_0lag_rr/"%segdir):
-				os.makedirs("%s/LIB_0lag_rr/"%segdir)
-			
-			#Create GraceDb folder
-			if not os.path.exists("%s/GDB/"%segdir):
-				os.makedirs("%s/GDB/"%segdir)
-
-			#replace all necessary fields in LIB_reruns_eagle.ini file if running follow-up
-			if LIB_followup_flag:
-				os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|0lag|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_reruns_eagle.ini > %s/runfiles/LIB_0lag_reruns_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
-				if train_runmode == 'Signal':
-					os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_0lag_reruns_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_0lag_reruns_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
-
 			#Copy Bayes2LIB sub file to segdir
-			os.system('sed "s|RUNDIR|%s|g" %s/Bayes2LIB_eagle.sub > %s/runfiles/Bayes2LIB_eagle.sub'%(segdir,infodir,segdir))
+			os.system('sed "s|SEGDIR|%s|g" %s/Bayes2LIB_eagle.sub > %s/runfiles/Bayes2LIB_eagle.sub'%(segdir,infodir,segdir))
 
-			#Write JOB
-			dagfile.write('JOB %s %s/runfiles/Bayes2LIB_eagle.sub\n'%(job,segdir))
-			#Write VARS
-			B2L_args = "-I %s -r %s -i %s -b %s --lib-label=%s --start=%s --stride=%s --overlap=%s --lag=0lag --FAR-thresh=%s --background-dic=%s --background-livetime=%s --signal-kde-coords=%s --signal-kde-values=%s --noise-kde-coords=%s --noise-kde-values=%s --train-runmode=%s --LIB-window=0.1"%(",".join(ifos),segdir,infodir,bindir,lib_label,actual_start,stride,overlap,FAR_thresh,back_dic_path,back_livetime,oLIB_signal_kde_coords,oLIB_signal_kde_values,oLIB_noise_kde_coords,oLIB_noise_kde_values,train_runmode)
-			if gdb_flag:
-				B2L_args += " --gdb"
-			if LIB_followup_flag:
-				B2L_args += " --LIB-followup"
-			dagfile.write('VARS %s macroid="Bayes2LIB_0lag-%s" macroarguments="%s"\n'%(job,job,B2L_args))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
+			#Loop over all coincidence groups
+			for key in run_dic['coincidence']:
+				#Check to see if all ifos of the coincidence group are analyzable
+				coin_flag = True
+				for ifo in run_dic['coincidence'][key]['ifos']:
+					if run_dic['data']['success flags'][ifo]:
+						continue
+					else:
+						coin_flag = False
+						break
+				
+				#If all ifos in coincidence group are analyzable, then write to dag
+				if coin_flag:
 
-			#Record lalinference_pipe job number
-			Bayes2LIB_0lag_jobs += [job]
+					LIB_mode_options = [('analyze 0lag','0lag'), ('analyze back','back'), ('analyze noise training','noise_train')]
+					if train_runmode == 'Train':
+						LIB_mode_options += [('analyze signal training','sig_train')]
 
-			#Done with job
-			job += 1
+					for analyze_tag,mode_label in LIB_mode_options:
+						
+						if run_dic['coincidence'][key][analyze_tag] == True:
+							
+							##########################################
+							### Write DAG to run lalinference_pipe ###
+							##########################################
+
+							#Create LIB folder for this coincidence group
+							if not os.path.exists("%s/LIB/%s/%s/"%(segdir, key, mode_label)):
+								os.makedirs("%s/LIB/%s/%s/"%(segdir, key, mode_label))
+
+							#Get necessary info for this coincidence group
+							tmp_ifos = run_dic['coincidence'][key]['ifos']
+							tmp_channel_names = {}
+							tmp_channel_types = {}
+							for ifo in tmp_ifos:
+								tmp_channel_names[ifo] = channel_names[ifo]
+								tmp_channel_types[ifo] =  channel_types[ifo]
+
+							#replace all necessary fields in LIB_runs_eagle.ini file
+							sed_string = 'sed -e "s|IFOSCOMMA|%s|g" -e "s|SEGDIR|%s|g" -e "s|BINDIR|%s|g"'%(tmp_ifos,segdir,bindir)
+							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g"'%(tmp_channel_types,tmp_channel_names)
+							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(min_hrss,max_hrss,min_quality,max_quality,min_freq,max_freq)
+							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g"'%(LIB_window,key,mode_label)
+							
+							if mode_label == '0lag' or mode_label == 'sig_train':
+								sed_string += ' -e "s|LAG|0lag|g"'
+							else:
+								sed_string += ' -e "s|LAG|ts|g"'
+							
+							if mode_label == 'sig_train':
+								tmp_mdc_channels = {}
+								tmp_mdc_caches = {}
+								for ifo in tmp_ifos:
+									tmp_mdc_channels[ifo] = "%s:Science"%ifo
+									tmp_mdc_caches[ifo] = run_dic['data']['signal train cache files'][ifo]
+								
+								sed_string += ' -e "s|MDCCHANNELS|%s|g" -e "s|MDCCACHES|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" -e "s|PostProc|PostProc_sig_train|g"'%(tmp_mdc_channels,tmp_mdc_caches)
+								
+							sed_string += ' %s/LIB_runs_eagle.ini > %s/runfiles/LIB_%s_runs_eagle.ini'%(infodir,segdir,mode_label)
+
+							os.system(sed_string)
+
+							#Write JOB
+							dagfile.write('JOB %s %s/runfiles/lalinference_pipe_eagle.sub\n'%(job,segdir))
+							#Write VARS
+							if mode_label == '0lag':
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
+							elif mode_label != 'sig_train':
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key))
+							else:
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
+							#Write RETRY
+							dagfile.write('RETRY %s 0\n\n'%job)
+
+							#Record lalinference_pipe job number
+							if mode_label != 'sig_train':
+								lalinference_pipe_jobs += [job]
+							else:
+								lalinference_sig_train_pipe_jobs += [job]
+
+							#Done with job
+							job += 1
+							
+							###############################################
+							### Write DAG to point to LIB_0lag_runs dag ###
+							###############################################
+
+							#Write SUBDAG EXTERNAL
+							dagfile.write('SUBDAG EXTERNAL %s %s/LIB/%s/LIB_runs.dag\n'%(job,segdir,mode_label))
+							#Write RETRY
+							dagfile.write('RETRY %s 0\n\n'%job)
+
+							#Record LIB_runs job number
+							if mode_label != 'sig_train':
+								LIB_runs_jobs += [job]
+							else:
+								LIB_sig_train_runs_jobs += [job]
+
+							#Done with job
+							job += 1
+#??here??							
+							######################################################
+							### Write DAG to run Bayes_factors_2_LIB for 0-lag ###
+							######################################################
+
+							#Create LIB_0lag_rr folder
+							if not os.path.exists("%s/LIB_0lag_rr/"%segdir):
+								os.makedirs("%s/LIB_0lag_rr/"%segdir)
+							
+							#Create GraceDb folder
+							if not os.path.exists("%s/GDB/"%segdir):
+								os.makedirs("%s/GDB/"%segdir)
+
+							#replace all necessary fields in LIB_reruns_eagle.ini file if running follow-up
+							if LIB_followup_flag:
+								os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|0lag|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_reruns_eagle.ini > %s/runfiles/LIB_0lag_reruns_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
+								if train_runmode == 'Signal':
+									os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_0lag_reruns_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_0lag_reruns_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
+
+							#Write JOB
+							dagfile.write('JOB %s %s/runfiles/Bayes2LIB_eagle.sub\n'%(job,segdir))
+							#Write VARS
+							B2L_args = "-I %s -r %s -i %s -b %s --lib-label=%s --start=%s --stride=%s --overlap=%s --lag=0lag --FAR-thresh=%s --background-dic=%s --background-livetime=%s --signal-kde-coords=%s --signal-kde-values=%s --noise-kde-coords=%s --noise-kde-values=%s --train-runmode=%s --LIB-window=0.1"%(",".join(ifos),segdir,infodir,bindir,lib_label,actual_start,stride,overlap,FAR_thresh,back_dic_path,back_livetime,oLIB_signal_kde_coords,oLIB_signal_kde_values,oLIB_noise_kde_coords,oLIB_noise_kde_values,train_runmode)
+							if gdb_flag:
+								B2L_args += " --gdb"
+							if LIB_followup_flag:
+								B2L_args += " --LIB-followup"
+							dagfile.write('VARS %s macroid="Bayes2LIB_0lag-%s" macroarguments="%s"\n'%(job,job,B2L_args))
+							#Write RETRY
+							dagfile.write('RETRY %s 0\n\n'%job)
+
+							#Record lalinference_pipe job number
+							Bayes2LIB_0lag_jobs += [job]
+
+							#Done with job
+							job += 1
 			
-			###########################################################
-			### Write DAG to run Bayes_factors_2_LIB for timeslides ###
-			###########################################################
-
-			Bayes2LIB_ts_jobs = []
-				
-			#Create LIB_ts_rr folder
-			if not os.path.exists("%s/LIB_ts_rr/"%segdir):
-				os.makedirs("%s/LIB_ts_rr/"%segdir)
-				
-			#Create GraceDb folder
-			if not os.path.exists("%s/GDB/"%segdir):
-				os.makedirs("%s/GDB/"%segdir)
-
-			#replace all necessary fields in LIB_reruns_eagle.ini file if running follow-up
-			if LIB_followup_flag:
-				os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|ts|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_reruns_eagle.ini > %s/runfiles/LIB_ts_reruns_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
-				if train_runmode == 'Signal':
-					os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_ts_reruns_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_ts_reruns_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
-
-			#Write JOB
-			dagfile.write('JOB %s %s/runfiles/Bayes2LIB_eagle.sub\n'%(job,segdir))
-			#Write VARS
-			B2L_args = "-I %s -r %s -i %s -b %s --lib-label=%s --start=%s --stride=%s --overlap=%s --lag=ts --FAR-thresh=%s --background-dic=%s --background-livetime=%s --signal-kde-coords=%s --signal-kde-values=%s --noise-kde-coords=%s --noise-kde-values=%s --train-runmode=%s --LIB-window=0.1"%(",".join(ifos),segdir,infodir,bindir,lib_label,actual_start,stride,overlap,FAR_thresh,back_dic_path,back_livetime,oLIB_signal_kde_coords,oLIB_signal_kde_values,oLIB_noise_kde_coords,oLIB_noise_kde_values,train_runmode)
-			if LIB_followup_flag:
-				B2L_args += " --LIB-followup"
-			dagfile.write('VARS %s macroid="Bayes2LIB_ts-%s" macroarguments="%s"\n'%(job,job,B2L_args))
-			#Write RETRY
-			dagfile.write('RETRY %s 0\n\n'%job)
-
-			#Record lalinference_pipe job number
-			Bayes2LIB_ts_jobs += [job]
-
-			#Done with job
-			job += 1	
-
 		####################################
 		### Write parent-child relations ###
 		####################################
@@ -447,18 +412,6 @@ def executable(run_dic):
 				for child in Bayes2LIB_ts_jobs:
 					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 					
-			if LIB_followup_flag:
-			
-				#make each Bayes2LIB_0lag job a parent to each LIB_0lag_reruns job
-				for parent in Bayes2LIB_0lag_jobs:
-					for child in LIB_0lag_reruns_jobs:
-						dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-						
-				#make each Bayes2LIB_ts job a parent to each LIB_ts_reruns job
-				for parent in Bayes2LIB_ts_jobs:
-					for child in LIB_ts_reruns_jobs:
-						dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-
 		#################
 		### Close DAG ###
 		#################

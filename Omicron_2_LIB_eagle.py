@@ -283,7 +283,7 @@ def time_slide(trig_files1, trig_files2, ts_list_1, ts_list_2, ifos1, ifo2, t_co
 	return new_trigfiles
 
 ###
-def LIB_trig_production(ifo_list, tshift_dic, coin_group, coin_mode, ppdir):
+def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode, ppdir):
 	"""
 	Downselect triggers by performing log likelihood ratio thresholding test
 	"""
@@ -324,11 +324,11 @@ def LIB_trig_production(ifo_list, tshift_dic, coin_group, coin_mode, ppdir):
 			
 			#Save LIB triggers
 			np.savetxt('%s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, ifos_together, tshift_num), final_trigs)
-			if (coin_mode == "0lag") or (coin_mode == "signal train"):
+			if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 				for i in xrange(len(trigs_above_thresh)):
 					lib_0lag_times.write('%10.10f\n'%final_trigs[i,0])
 					lib_0lag_timeslides.write('%s\n'%( " ".join([tshift_dic[ifo][i] for ifo in ifo_list]) ))
-			elif (coin_mode == "background") or (coin_mode == "noise train"):
+			elif (coin_mode == "back") or (coin_mode == "noise_train"):
 				for i in xrange(len(trigs_above_thresh)):
 					lib_ts_times.write('%10.10f\n'%final_trigs[i,0])
 					lib_ts_timeslides.write('%s\n'%( " ".join([tshift_dic[ifo][i] for ifo in ifo_list]) ))
@@ -675,22 +675,22 @@ def calculate_livetimes(seg_files1, seg_files2, ts_list_1, ts_list_2, ifos1, ifo
 		read_tmp_intersected_segs.close()
 		
 		#Add livetime to appropriate sum
-		if (coin_mode == "0lag") or (coin_mode == "signal train"):
+		if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 			zero_lag_lt += ts_lt
-		elif (coin_mode == "background") or (coin_mode == "noise train"):
+		elif (coin_mode == "back") or (coin_mode == "noise_train"):
 			timeslide_lt += ts_lt
 		
 	#Write summed livetimes to file
-	if (coin_mode == "0lag") or (coin_mode == "signal train"):
+	if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 		np.savetxt("%s/live_segs/%s/%s/livetime_0lag_%s%s.txt"%(ppdir,coin_group,coin_mode,ifos1,ifo2), np.array([zero_lag_lt]))
-	elif (coin_mode == "background") or (coin_mode == "noise train"):
+	elif (coin_mode == "back") or (coin_mode == "noise_train"):
 		np.savetxt("%s/live_segs/%s/%s/livetime_timeslides_%s%s.txt"%(ppdir,coin_group,coin_mode,ifos1,ifo2), np.array([timeslide_lt]))
 	
 	#Return list of new intersected segment files
 	return new_segfiles
 	
 ###
-def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, coin_group, coin_mode, ppdir):
+def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, LIB_window, coin_group, coin_mode, ppdir):
 	"""
 	"""
 	#Get coincidence parameters
@@ -698,15 +698,15 @@ def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, coin_gro
 	snr_coin = run_dic['coincidence'][coin_group]['coincidence snr thresh']
 	coin_ifos = run_dic['coincidence'][coin_group]['ifos']
 	
-	if (coin_mode == "0lag") or (coin_mode == "signal train"):
+	if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 		coin_ts_dic = {}
 		for ifo in coin_ifos:
 			coin_ts_dic = np.array([0.])
 		
-	elif coin_mode == "background":
+	elif coin_mode == "back":
 		coin_ts_dic = run_dic['coincidence'][coin_group]['back timeslides']
 	
-	elif coin_mode == "noise train":
+	elif coin_mode == "noise_train":
 		coin_ts_dic = run_dic['coincidence'][coin_group]['training timeslides']
 
 	#Make necessary folders
@@ -750,7 +750,7 @@ def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, coin_gro
 		os.makedirs("%s/LIB_trigs/%s/%s/"%(ppdir,coin_group,coin_mode))
 	os.system('rm %s/LIB_trigs/%s/%s/*'%(ppdir,coin_group,coin_mode))
 
-	LIB_trig_production(ifo_list=coin_ifos, tshift_dic=coin_ts_dic, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir)
+	LIB_trig_production(ifo_list=coin_ifos, tshift_dic=coin_ts_dic, LIB_window=LIB_window, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir)
 	print "Down-selected trigs to run LIB on for %s %s"%(coin_group, coin_mode)
 	
 ##############################################
@@ -790,6 +790,7 @@ if __name__=='__main__':
 				ifos += [ifo]
 		overlap = run_dic['config']['overlap']
 		t_clust = run_dic['config']['dt clust']
+		LIB_window = run_dic['prior ranges']['LIB window']
 		
 		channel_names = {}
 		segs = {}
@@ -858,20 +859,20 @@ if __name__=='__main__':
 				if not sig_train_flag:			
 					#Do 0-lag coincidence				
 					if run_dic['coincidence'][key]['analyze 0lag'] == True:
-						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, coin_group=key, coin_mode='0lag', ppdir=ppdir)
+						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='0lag', ppdir=ppdir)
 					
 					#Do background coincidence	
 					if run_dic['coincidence'][key]['analyze back'] == True:
-						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, coin_group=key, coin_mode='background', ppdir=ppdir)	
+						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='back', ppdir=ppdir)	
 					
 					#Do noise training coincidence		
 					if run_dic['coincidence'][key]['analyze noise training'] == True:
-						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, coin_group=key, coin_mode='noise train', ppdir=ppdir)
+						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='noise_train', ppdir=ppdir)
 				
 				else:
 					#Do signal training coincidence		
 					if run_dic['coincidence'][key]['analyze signal training'] == True:
-						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, coin_group=key, coin_mode='signal train', ppdir=ppdir)
+						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='sig_train', ppdir=ppdir)
 							
 		#Complete
 		print "Complete"

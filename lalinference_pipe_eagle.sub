@@ -1,9 +1,9 @@
 universe     = vanilla
 accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
-executable   = /home/detchar/opt/virgosoft/Omicron/v2r1/Linux-x86_64/omicron.exe
+executable   = /home/ryan.lynch/2nd_pipeline/pipeline_eagle/lalinference_pipe_eagle.py 
 arguments    = $(macroarguments)
 getenv	     = True
-log          = SEGDIR/log/$(macroid).log
+log          = SEGDIR/log/$(macroid).log 
 output       = SEGDIR/log/$(macroid).out
 error        = SEGDIR/log/$(macroid).err
 notification = never

@@ -135,6 +135,7 @@ run_dic['training']['asd files']['V1'] = asd_file
 
 ###
 run_dic['prior ranges'] = {}
+run_dic['prior ranges']['LIB window'] = LIB_window
 run_dic['prior ranges']['min hrss'] = min_hrss
 run_dic['prior ranges']['max hrss'] = max_hrss
 run_dic['prior ranges']['min freq'] = min_freq
