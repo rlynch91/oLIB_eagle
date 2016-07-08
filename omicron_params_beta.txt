@@ -1,0 +1,68 @@
+//*************************************************************************************
+//************************   Omicron configuration file   *****************************
+//*************************************************************************************
+
+//*************************************************************************************
+//************************           INPUT DATA           *****************************
+//*************************************************************************************
+
+//** full path to CACHE file pointing to frame files
+DATA    FFL	FRAMECACHE
+
+//** list of channels you want to process
+DATA    CHANNELS        IFO:CHNAME
+
+//INJECTION	CHANNELS	IFO:Science
+
+//INJECTION	FACTORS         1.0
+
+//** working sampling (one value for all channels)
+DATA    SAMPLEFREQUENCY SAMPFREQ
+
+//*************************************************************************************
+//************************        SEARCH PARAMETERS      *****************************
+//*************************************************************************************
+
+//** chunk duration in seconds (must be an integer)
+PARAMETER       CHUNKDURATION   STRIDE
+
+//** segment duration in seconds (must be an integer)
+PARAMETER       SEGMENTDURATION   4
+
+//** overlap duration between segments in seconds (must be an integer)
+PARAMETER       OVERLAPDURATION   OLAP 
+
+//** search frequency range
+PARAMETER       FREQUENCYRANGE  MINFREQ      MAXFREQ
+
+//** search Q range
+PARAMETER       QRANGE          3.3166  141
+
+//** maximal mismatch between 2 consecutive tiles (0<MM<1)
+//** for dark-fringe channel, 0.2 is a good value
+//** for auxiliary channels,  0.4 is a good value (faster)
+PARAMETER       MISMATCHMAX     0.2
+
+//** tile SNR threshold
+PARAMETER         SNRTHRESHOLD    THRESHSNR
+
+//*************************************************************************************
+//************************             OUTPUT            *****************************
+//*************************************************************************************
+
+//** full path to output directory
+OUTPUT  DIRECTORY	RAWDIR
+
+//** list of data products
+OUTPUT     PRODUCTS        triggers
+
+//** full path to output directory
+OUTPUT  FORMAT                  txt
+
+//** maximum number of triggers per file
+OUTPUT         NTRIGGERMAX            100000000
+
+//** verbosity level (0-1-2-3)
+OUTPUT  VERBOSITY               0
+
+

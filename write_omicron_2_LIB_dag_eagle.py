@@ -43,7 +43,7 @@ def executable(run_dic):
 		min_quality = run_dic['prior ranges']['min quality']
 		max_quality = run_dic['prior ranges']['max quality']
 		sample_freq = run_dic['config']['sample freq']
-		snr_thresh = run_dic['config']['SNR thresh']
+		osnr_thresh = run_dic['config']['oSNR thresh']
 
 		seg_files = {}
 		cache_files = {}
@@ -95,8 +95,8 @@ def executable(run_dic):
 			#replace all IFO in omicron sub file with ifo
 			os.system('sed -e "s|IFO|%s|g" -e "s|SEGDIR|%s|g" %s/omicron_eagle.sub > %s/runfiles/omicron_%s_eagle.sub'%(ifo,segdir,infodir,segdir,ifo))
 			#replace all necessary variables in params file
-			os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_params_%s_eagle.txt'%(ifo, cache_files[i], channel_names[i], sample_freq, overlap, stride, segdir+'/raw/'+ifo, min_freq, max_freq, snr_thresh, infodir, segdir, ifo))
-			if train_runmode == 'Signal':
+			os.system('sed -e "s|IFO|%s|g" -e "s|FRAMECACHE|%s|g" -e "s|CHNAME|%s|g" -e "s|SAMPFREQ|%s|g" -e "s|OLAP|%s|g" -e "s|STRIDE|%s|g" -e "s|RAWDIR|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g" -e "s|THRESHSNR|%s|g" %s/omicron_params_eagle.txt > %s/runfiles/omicron_params_%s_eagle.txt'%(ifo, cache_files[i], channel_names[i], sample_freq, overlap, stride, segdir+'/raw/'+ifo, min_freq, max_freq, osnr_thresh, infodir, segdir, ifo))
+#??			if train_runmode == 'Signal':
 				os.system('sed -e "s|//INJECTION|INJECTION|g" %s/runfiles/omicron_params_%s_eagle.txt > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/omicron_params_%s_eagle.txt'%(segdir,ifo,segdir,segdir,segdir,ifo))
 
 			#write JOB
@@ -133,7 +133,13 @@ def executable(run_dic):
 		if not os.path.exists("%s/vetoes/"%segdir):
 			os.makedirs("%s/vetoes/"%segdir)
 		os.system('touch %s/vetoes/null_vetoes.txt'%segdir)
-			
+		run_dic['vetoes'] = {}
+		for ifo in ifos:
+			run_dic['vetoes'][ifo] = '%s/vetoes/null_vetoes.txt'%segdir
+	
+		#Save run_dic
+		???pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,start,stop),'wt'))
+		
 		#Write JOB
 		dagfile.write('JOB %s %s/runfiles/omicron2LIB_eagle.sub\n'%(job,segdir))
 		#Write VARS
