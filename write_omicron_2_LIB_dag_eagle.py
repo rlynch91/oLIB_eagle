@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import os
 
@@ -24,16 +22,7 @@ def executable(run_dic):
 		actual_start = run_dic['times']['actual start']
 		stride = run_dic['config']['stride']
 		overlap = run_dic['config']['overlap']
-		gdb_flag = run_dic['run mode']['gdb flag']
 		LIB_flag = run_dic['run mode']['LIB flag']
-
-		FAR_thresh = run_dic['LLRT']['FAR thresh']
-		back_dic_path = run_dic['LLRT']['back dic path']
-		back_livetime = run_dic['LLRT']['back livetime']
-		oLIB_signal_kde_coords = run_dic['LLRT']['oLIB signal kde coords']
-		oLIB_signal_kde_values = run_dic['LLRT']['oLIB signal kde values']
-		oLIB_noise_kde_coords = run_dic['LLRT']['oLIB noise kde coords']
-		oLIB_noise_kde_values = run_dic['LLRT']['oLIB noise kde values']
 		
 		train_runmode = run_dic['run mode']['train runmode']
 		min_hrss = run_dic['prior ranges']['min hrss']
@@ -170,12 +159,7 @@ def executable(run_dic):
 		run_dic['vetoes'] = {}
 		for ifo in ifos:
 			run_dic['vetoes'][ifo] = '%s/vetoes/null_vetoes.txt'%segdir
-	
-		#Save run_dic
-		if not os.path.exists("%s/run_dic"%segdir):
-			os.makedirs("%s/run_dic"%segdir)
-		pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),'wt'))
-		
+			
 		#Write JOB
 		dagfile.write('JOB %s %s/runfiles/omicron2LIB_eagle.sub\n'%(job,segdir))
 		#Write VARS
@@ -276,7 +260,7 @@ def executable(run_dic):
 							#replace all necessary fields in LIB_runs_eagle.ini file
 							sed_string = 'sed -e "s|IFOSCOMMA|%s|g" -e "s|SEGDIR|%s|g" -e "s|BINDIR|%s|g"'%(tmp_ifos,segdir,bindir)
 							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|SAMPFREQ|%s|g"'%(tmp_channel_types,tmp_channel_names,sample_freq)
-							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(min_hrss,max_hrss,min_quality,max_quality,min_freq,max_freq)
+							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(np.log(min_hrss),np.log(max_hrss),min_quality,max_quality,min_freq,max_freq)
 							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g"'%(LIB_window,key,mode_label)
 							
 							if mode_label == '0lag' or mode_label == 'sig_train':
@@ -390,11 +374,20 @@ def executable(run_dic):
 			for i in xrange(len(lalinference_pipe_jobs)):
 				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_sig_train_jobs[i],LIB_runs_sig_train_jobs[i]))
 				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_sig_train_jobs[i],Bayes2FAR_sig_train_jobs[i]))					
+		
+		####################
+		### Save run_dic ###
+		####################
+		
+		if not os.path.exists("%s/run_dic"%segdir):
+			os.makedirs("%s/run_dic"%segdir)
+		pickle.dump(run_dic,open('%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),'wt'))
 			
 		#################
 		### Close DAG ###
 		#################
+		
 		dagfile.close()
 
-	elif run_dic['run mode'['line'] == 'Offline':
+	elif run_dic['run mode']['line'] == 'Offline':
 		pass

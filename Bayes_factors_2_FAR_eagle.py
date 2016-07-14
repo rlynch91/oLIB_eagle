@@ -310,7 +310,7 @@ if __name__=='__main__':
 				background_data['BCI']['data'] = back_coords[:,1]
 
 				#Initialize the LLRT object
-				LLRT = LLRT_object_beta.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=foreground_data, background_data=background_data)
+				LLRT = LLRT_object_eagle.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=foreground_data, background_data=background_data)
 
 				#Calculate FAR for each foreground event wrt background events
 				event_LLRs = LLRT.log_likelihood_ratios(groundtype='Foreground')

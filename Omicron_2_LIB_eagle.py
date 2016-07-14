@@ -812,8 +812,8 @@ if __name__=='__main__':
 			os.makedirs("%s/unclustered/"%ppdir)
 		os.system('rm %s/unclustered/*'%ppdir)
 		unclust_files = {}
-		for i,ifo in enumerate(ifos):
-			unclust_files[ifo] = collect_trigs(rawdir=rawdir, ifo=ifo, channel_name=channel_names[i], ppdir=ppdir)
+		for ifo in ifos:
+			unclust_files[ifo] = collect_trigs(rawdir=rawdir, ifo=ifo, channel_name=channel_names[ifo], ppdir=ppdir)
 			print "Collected and sorted trigs for %s"%ifo
 
 		#cluster
@@ -830,8 +830,8 @@ if __name__=='__main__':
 			os.makedirs("%s/live_segs/"%ppdir)
 		os.system('rm %s/live_segs/*'%ppdir)
 		seg_files = {}
-		for i,ifo in enumerate(ifos):
-			seg_files[ifo] = merge_segs(seg_file=segs[i], ifo=ifo, ppdir=ppdir)
+		for ifo in ifos:
+			seg_files[ifo] = merge_segs(seg_file=segs[ifo], ifo=ifo, ppdir=ppdir)
 			seg_files[ifo] = crop_segs(seg_file=seg_files[ifo], overlap=overlap, ifo=ifo, ppdir=ppdir)
 			seg_files[ifo] = effective_segs(seg_file=seg_files[ifo], veto_file=veto_files[ifo], ifo=ifo, ppdir=ppdir)
 			print "Cropped Omicron overlaps and removed vetoes to create effective segments for %s"%ifo

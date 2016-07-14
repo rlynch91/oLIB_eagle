@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import os
 import commands
@@ -28,7 +26,7 @@ def executable(run_dic):
 	max_freq = run_dic['prior ranges']['max freq']
 	min_quality = run_dic['prior ranges']['min quality']
 	max_quality = run_dic['prior ranges']['max quality']
-	snr_thresh = run_dic['config']['SNR thresh']
+	snr_thresh = run_dic['config']['oSNR thresh']
 	
 	cache_files = {}
 	asd_files = {}

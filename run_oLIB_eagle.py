@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import numpy as np
 import time
 import os
@@ -72,6 +70,8 @@ def initialize_segment(run_dic):
 		run_dic['data']['success flags'][ifo] = False
 		run_dic['data']['skip flags'][ifo] = False
 		run_dic['data']['inj flags'][ifo] = False
+		
+	return segdir
 
 ###
 def executable(run_dic):
@@ -82,22 +82,18 @@ def executable(run_dic):
 		#initialize the variables we need 
 		ifos = run_dic['ifos']['names']
 		rundir = run_dic['config']['run dir']
-		infodir = run_dic['config']['info dir']
 		bindir = run_dic['config']['LIB bin dir']
 		initial_start = run_dic['config']['initial start']
 		stride = run_dic['config']['stride']
 		overlap = run_dic['config']['overlap']		
 		wait = run_dic['config']['wait']
 		max_wait = run_dic['config']['max wait']
-		bitmask = run_dic['config']['bitmask']
 		inj_runmode = run_dic['run mode']['inj runmode']
 		train_runmode = run_dic['run mode']['train runmode']
 		
 		channel_types = {}
-		state_channels = {}
 		for ifo in ifos:
 			channel_types[ifo] = run_dic['ifos'][ifo]['channel type']
-			state_channels[ifo] = run_dic['ifos'][ifo]['state channel name']
 
 		#############################################
 
@@ -115,7 +111,7 @@ def executable(run_dic):
 		run_dic['times']['stop'] = stop
 
 		#Initialize this segment
-		initialize_segment(run_dic=run_dic)
+		segdir = initialize_segment(run_dic=run_dic)
 
 		#start a while loop
 		while True:
@@ -137,7 +133,7 @@ def executable(run_dic):
 				#if we haven't reached stop time yet, fetch frames again
 				if not check_after_stop:
 					print "haven't reached stop time, fetching frames for", ifo, start, stop
-					run_dic['data']['frame files'][ifo] = commands.getstatusoutput("%s/gw_data_find --server=datafind.ldas.cit:80 --observatory=%s --url-type=file --type=%s --gps-start-time=%s --gps-end-time=%s"%(bindir, ifo.strip("1"), channel_types[ifo], start, stop))[1].split("\n")
+					run_dic['data']['frame files'][ifo] = commands.getstatusoutput("%s/gw_data_find --observatory=%s --url-type=file --type=%s --gps-start-time=%s --gps-end-time=%s"%(bindir, ifo.strip("1"), channel_types[ifo], start, stop))[1].split("\n")
 					if run_dic['data']['frame files'][ifo] == [""]:
 						print "no frames found for ifo", ifo, start, stop
 						run_dic['data']['frame times'][ifo] = [np.nan]
@@ -173,11 +169,11 @@ def executable(run_dic):
 							run_dic['data']['skip flags'][ifo] = True
 								
 						#check if inj_flag corresponds to inj_runmode
-						if (run_dic['data']['inj flags'][ifo] == True and inj_runmode == 'NonInj') or (run_dic['data']['inj flags'][ifo] == False and inj_runmode == 'Inj'):
+						if ( (run_dic['data']['inj flags'][ifo] == True) and (inj_runmode == 'NonInj') ) or ( (run_dic['data']['inj flags'][ifo] == False) and (inj_runmode == 'Inj') ):
 							run_dic['data']['skip flags'][ifo] = True
 						
 						#flag that ifo is ready for condor submission (if not intended to be skipped)
-						if run_dic['data']['skip flags'][ifo] = False:
+						if run_dic['data']['skip flags'][ifo] == False:
 							run_dic['data']['success flags'][ifo] = True
 
 					#check to see if all ifos have been flagged as ready for condor submission
@@ -200,7 +196,7 @@ def executable(run_dic):
 						run_dic['times']['start'] = start
 						run_dic['times']['stop'] = stop
 						
-						initialize_segment(run_dic=run_dic)
+						segdir = initialize_segment(run_dic=run_dic)
 					
 				#here we have passed stop time, if we don't still have the start time frame then we will skip this segment
 				else:
@@ -230,7 +226,7 @@ def executable(run_dic):
 						run_dic['times']['start'] = start
 						run_dic['times']['stop'] = stop
 						
-						initialize_segment(run_dic=run_dic)
+						segdir = initialize_segment(run_dic=run_dic)
 				
 				#Check to see if we have exceeded the maximum wait
 				if running_wait > max_wait:
@@ -259,7 +255,7 @@ def executable(run_dic):
 					run_dic['times']['start'] = start
 					run_dic['times']['stop'] = stop
 					
-					initialize_segment(run_dic=run_dic)
+					seg_dir = initialize_segment(run_dic=run_dic)
 					
-	elif run_dic['run mode'['line'] == 'Offline':
+	elif run_dic['run mode']['line'] == 'Offline':
 		pass
