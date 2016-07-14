@@ -312,7 +312,7 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 	for f in files_final:
 		#Load in coincident omicron data for each timeslide
 		terms = f.split("_")
-		tshift_num = float(terms[5].split("ts")[1])
+		tshift_num = float(terms[5].split("tsnum")[1])
 		try:
 			data_array = np.genfromtxt("%s/coincident/%s/%s/%s"%(ppdir,coin_group,coin_mode,f)).reshape( (-1,4*(len(ifo_list)+1)) )
 		except IOError:
@@ -323,7 +323,7 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 			final_trigs = cluster_LIB_trigs(LIB_trig_array=data_array, LIB_window=LIB_window)
 			
 			#Save LIB triggers
-			np.savetxt('%s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, ifos_together, tshift_num), final_trigs)
+			np.savetxt('%s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, coin_group, tshift_num), final_trigs)
 			if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 				for i in xrange(len(trigs_above_thresh)):
 					lib_0lag_times.write('%10.10f\n'%final_trigs[i,0])
@@ -333,7 +333,7 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 					lib_ts_times.write('%10.10f\n'%final_trigs[i,0])
 					lib_ts_timeslides.write('%s\n'%( " ".join([tshift_dic[ifo][i] for ifo in ifo_list]) ))
 		else:
-			os.system('> %s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, ifos_together, tshift_num))
+			os.system('> %s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, coin_group, tshift_num))
 	
 	lib_0lag_times.close()
 	lib_0lag_timeslides.close()
@@ -873,6 +873,11 @@ if __name__=='__main__':
 					#Do signal training coincidence		
 					if run_dic['coincidence'][key]['analyze signal training'] == True:
 						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='sig_train', ppdir=ppdir)
+		
+		#Tar Omicron triggers now that they are no longer needed
+		if run_dic['run mode']['tar Omicron']:
+			os.system('tar -zcvf %s.tar.gz %s'%(rawdir,rawdir))
+			os.system('rm %s -r'%rawdir)
 							
 		#Complete
 		print "Complete"
@@ -880,5 +885,5 @@ if __name__=='__main__':
 	#----------------------------------------------
 
 	#Check if in offline run mode
-	if run_mode == 'Offline':
+	elif run_mode == 'Offline':
 		pass

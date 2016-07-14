@@ -65,7 +65,7 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, b
 					current_stop = None
 
 			#Check if state vector denotes that an injection is present
-			if ((int(value) & 448) != 448):  #(e.g., we want bits 6, 7, or 8 to be on)
+			if ((int(value) & 480) != 480):  #(e.g., we want bits 5, 6, 7, or 8 to be on if there are no HW injections)
 				inj_flag = True
 
 		#Write final segment for this frame if needed

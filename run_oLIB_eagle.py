@@ -173,7 +173,7 @@ def executable(run_dic):
 							run_dic['data']['skip flags'][ifo] = True
 								
 						#check if inj_flag corresponds to inj_runmode
-						if (run_dic['data']['inj flags'][ifo] == 'True' and inj_runmode == 'NonInj') or (run_dic['data']['inj flags'][ifo] == 'False' and inj_runmode == 'Inj'):
+						if (run_dic['data']['inj flags'][ifo] == True and inj_runmode == 'NonInj') or (run_dic['data']['inj flags'][ifo] == False and inj_runmode == 'Inj'):
 							run_dic['data']['skip flags'][ifo] = True
 						
 						#flag that ifo is ready for condor submission (if not intended to be skipped)

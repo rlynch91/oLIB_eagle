@@ -34,6 +34,8 @@ run_dic['run mode']['inj runmode'] = inj_runmode
 run_dic['run mode']['train runmode'] = train_runmode
 run_dic['run mode']['gdb flag'] = gdb_flag
 run_dic['run mode']['LIB flag'] = LIB_flag
+run_dic['run mode']['tar Omicron'] = tar_omicron
+run_dic['run mode']['tar LIB'] = tar_lib
 
 ###
 run_dic['ifos'] = {}
@@ -118,13 +120,54 @@ run_dic['coincidence']['H1L1V1']['training timeslides']['V1'] = train_time_slide
 
 ###
 run_dic['LLRT'] = {}
-run_dic['LLRT']['oLIB signal kde coords'] = oLIB_signal_kde_coords
-run_dic['LLRT']['oLIB signal kde values'] = oLIB_signal_kde_values
-run_dic['LLRT']['oLIB noise kde coords'] = oLIB_noise_kde_coords
-run_dic['LLRT']['oLIB noise kde values'] = oLIB_noise_kde_values
 run_dic['LLRT']['FAR thresh'] = FAR_thresh
-run_dic['LLRT']['back dic path'] = back_dic_path
-run_dic['LLRT']['back livetime'] = back_livetime
+
+run_dic['LLRT']['param info'] = {}
+run_dic['LLRT']['param info']['low f'] = {}
+run_dic['LLRT']['param info']['low f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['dimension'] = 2
+run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['param names'] = ['logBSN','BCI']
+run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['interp range'] = np.array([[??., ??],[??, ??]])
+
+run_dic['LLRT']['H1L1'] = {}
+run_dic['LLRT']['H1L1']['back dic path'] = back_dic_path_H1L1
+run_dic['LLRT']['H1L1']['back livetime'] = back_livetime_H1L1
+run_dic['LLRT']['H1L1']['low f'] = {}
+run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = oLIB_signal_kde_coords_H1L1
+run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = oLIB_signal_kde_values_H1L1
+run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = oLIB_noise_kde_coords_H1L1
+run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = oLIB_noise_kde_values_H1L1
+
+run_dic['LLRT']['H1V1'] = {}
+run_dic['LLRT']['H1V1']['back dic path'] = back_dic_path_H1V1
+run_dic['LLRT']['H1V1']['back livetime'] = back_livetime_H1V1
+run_dic['LLRT']['H1V1']['low f'] = {}
+run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = oLIB_signal_kde_coords_H1V1
+run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = oLIB_signal_kde_values_H1V1
+run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = oLIB_noise_kde_coords_H1V1
+run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = oLIB_noise_kde_values_H1V1
+
+run_dic['LLRT']['L1V1'] = {}
+run_dic['LLRT']['L1V1']['back dic path'] = back_dic_path_L1V1
+run_dic['LLRT']['L1V1']['back livetime'] = back_livetime_L1V1
+run_dic['LLRT']['L1V1']['low f'] = {}
+run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = oLIB_signal_kde_coords_L1V1
+run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = oLIB_signal_kde_values_L1V1
+run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = oLIB_noise_kde_coords_L1V1
+run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = oLIB_noise_kde_values_L1V1
+
+run_dic['LLRT']['H1L1V1'] = {}
+run_dic['LLRT']['H1L1V1']['back dic path'] = back_dic_path_H1L1V1
+run_dic['LLRT']['H1L1V1']['back livetime'] = back_livetime_H1L1V1
+run_dic['LLRT']['H1L1V1']['low f'] = {}
+run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = oLIB_signal_kde_coords_H1L1V1
+run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = oLIB_signal_kde_values_H1L1V1
+run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = oLIB_noise_kde_coords_H1L1V1
+run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = oLIB_noise_kde_values_H1L1V1
 
 ###
 run_dic['training'] = {}

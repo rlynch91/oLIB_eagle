@@ -301,7 +301,7 @@ def executable(run_dic):
 							#Write VARS
 							if mode_label == '0lag':
 								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
-							elif mode_label != 'sig_train':
+							elif mode_label == 'sig_train':
 								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key))
 							else:
 								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
@@ -334,39 +334,27 @@ def executable(run_dic):
 
 							#Done with job
 							job += 1
-#??here??							
+							
 							######################################################
 							### Write DAG to run Bayes_factors_2_LIB for 0-lag ###
 							######################################################
-
-							#Create LIB_0lag_rr folder
-							if not os.path.exists("%s/LIB_0lag_rr/"%segdir):
-								os.makedirs("%s/LIB_0lag_rr/"%segdir)
 							
 							#Create GraceDb folder
 							if not os.path.exists("%s/GDB/"%segdir):
 								os.makedirs("%s/GDB/"%segdir)
 
-							#replace all necessary fields in LIB_reruns_eagle.ini file if running follow-up
-							if LIB_followup_flag:
-								os.system('sed -e "s|IFOSCOMMA|%s|g" -e "s|IFOSTOGETHER|%s|g" -e "s|LIBLABEL|%s|g" -e "s|SEGNAME|%s|g" -e "s|RUNDIR|%s|g" -e "s|BINDIR|%s|g" -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|LAG|0lag|g" -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" %s/LIB_reruns_eagle.ini > %s/runfiles/LIB_0lag_reruns_eagle.ini'%(ifos,"".join(ifos),lib_label,"%s_%s_%s"%("".join(ifos),actual_start,stride-overlap),segdir,bindir,channel_types,channel_names,np.log(min_hrss),np.log(max_hrss),infodir,segdir))
-								if train_runmode == 'Signal':
-									os.system('sed -e "s|START|%s|g" -e "s|STOP|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" %s/runfiles/LIB_0lag_reruns_eagle.ini > %s/tmp.txt; mv %s/tmp.txt %s/runfiles/LIB_0lag_reruns_eagle.ini'%(actual_start-int(0.5*overlap),actual_start-int(0.5*overlap)+stride,segdir,segdir,segdir,segdir))
-
 							#Write JOB
 							dagfile.write('JOB %s %s/runfiles/Bayes2LIB_eagle.sub\n'%(job,segdir))
 							#Write VARS
-							B2L_args = "-I %s -r %s -i %s -b %s --lib-label=%s --start=%s --stride=%s --overlap=%s --lag=0lag --FAR-thresh=%s --background-dic=%s --background-livetime=%s --signal-kde-coords=%s --signal-kde-values=%s --noise-kde-coords=%s --noise-kde-values=%s --train-runmode=%s --LIB-window=0.1"%(",".join(ifos),segdir,infodir,bindir,lib_label,actual_start,stride,overlap,FAR_thresh,back_dic_path,back_livetime,oLIB_signal_kde_coords,oLIB_signal_kde_values,oLIB_noise_kde_coords,oLIB_noise_kde_values,train_runmode)
-							if gdb_flag:
-								B2L_args += " --gdb"
-							if LIB_followup_flag:
-								B2L_args += " --LIB-followup"
-							dagfile.write('VARS %s macroid="Bayes2LIB_0lag-%s" macroarguments="%s"\n'%(job,job,B2L_args))
+							dagfile.write('VARS %s macroid="Bayes2LIB_%s-%s" macroarguments="-r %s -g %s -m %s"\n'%(job,mode_label,job,run_dic,key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
 							#Record lalinference_pipe job number
-							Bayes2LIB_0lag_jobs += [job]
+							if mode_label != 'sig_train':
+								Bayes2LIB_jobs += [job]
+							else:
+								Bayes2LIB_sig_train_jobs += [job]
 
 							#Done with job
 							job += 1
@@ -374,7 +362,7 @@ def executable(run_dic):
 		####################################
 		### Write parent-child relations ###
 		####################################
-
+#??here??
 		#make each omicron job a parent to each omicron2LIB job
 		for parent in omicron_jobs:
 			for child in omicron2LIB_jobs:
