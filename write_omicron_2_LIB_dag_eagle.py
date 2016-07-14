@@ -45,6 +45,7 @@ def executable(run_dic):
 		sample_freq = run_dic['config']['sample freq']
 		osnr_thresh = run_dic['config']['oSNR thresh']
 		LIB_window = run_dic['prior ranges']['LIB window']
+		sample_freq = run_dic['config']['sample freq']
 
 		seg_files = {}
 		cache_files = {}
@@ -222,17 +223,17 @@ def executable(run_dic):
 
 			lalinference_pipe_jobs = []
 			LIB_runs_jobs = []
-			Bayes2LIB_jobs = []
+			Bayes2FAR_jobs = []
 			
-			lalinference_sig_train_pipe_jobs = []
-			LIB_sig_train_runs_jobs = []
-			Bayes2LIB_sig_train_jobs = []
+			lalinference_pipe_sig_train_jobs = []
+			LIB_runs_sig_train_jobs = []
+			Bayes2FAR_sig_train_jobs = []
 
 			#Copy lalinference_pipe sub file to segdir
 			os.system('sed "s|SEGDIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,segdir))
 			
-			#Copy Bayes2LIB sub file to segdir
-			os.system('sed "s|SEGDIR|%s|g" %s/Bayes2LIB_eagle.sub > %s/runfiles/Bayes2LIB_eagle.sub'%(segdir,infodir,segdir))
+			#Copy Bayes2FAR sub file to segdir
+			os.system('sed "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle.sub'%(segdir,infodir,segdir))
 
 			#Loop over all coincidence groups
 			for key in run_dic['coincidence']:
@@ -274,7 +275,7 @@ def executable(run_dic):
 
 							#replace all necessary fields in LIB_runs_eagle.ini file
 							sed_string = 'sed -e "s|IFOSCOMMA|%s|g" -e "s|SEGDIR|%s|g" -e "s|BINDIR|%s|g"'%(tmp_ifos,segdir,bindir)
-							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g"'%(tmp_channel_types,tmp_channel_names)
+							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|SAMPFREQ|%s|g"'%(tmp_channel_types,tmp_channel_names,sample_freq)
 							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(min_hrss,max_hrss,min_quality,max_quality,min_freq,max_freq)
 							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g"'%(LIB_window,key,mode_label)
 							
@@ -312,14 +313,14 @@ def executable(run_dic):
 							if mode_label != 'sig_train':
 								lalinference_pipe_jobs += [job]
 							else:
-								lalinference_sig_train_pipe_jobs += [job]
+								lalinference_pipe_sig_train_jobs += [job]
 
 							#Done with job
 							job += 1
 							
-							###############################################
-							### Write DAG to point to LIB_0lag_runs dag ###
-							###############################################
+							##########################################
+							### Write DAG to point to LIB_runs dag ###
+							##########################################
 
 							#Write SUBDAG EXTERNAL
 							dagfile.write('SUBDAG EXTERNAL %s %s/LIB/%s/LIB_runs.dag\n'%(job,segdir,mode_label))
@@ -330,31 +331,31 @@ def executable(run_dic):
 							if mode_label != 'sig_train':
 								LIB_runs_jobs += [job]
 							else:
-								LIB_sig_train_runs_jobs += [job]
+								LIB_runs_sig_train_jobs += [job]
 
 							#Done with job
 							job += 1
 							
-							######################################################
-							### Write DAG to run Bayes_factors_2_LIB for 0-lag ###
-							######################################################
+							############################################
+							### Write DAG to run Bayes_factors_2_FAR ###
+							############################################
 							
 							#Create GraceDb folder
 							if not os.path.exists("%s/GDB/"%segdir):
 								os.makedirs("%s/GDB/"%segdir)
 
 							#Write JOB
-							dagfile.write('JOB %s %s/runfiles/Bayes2LIB_eagle.sub\n'%(job,segdir))
+							dagfile.write('JOB %s %s/runfiles/Bayes2FAR_eagle.sub\n'%(job,segdir))
 							#Write VARS
-							dagfile.write('VARS %s macroid="Bayes2LIB_%s-%s" macroarguments="-r %s -g %s -m %s"\n'%(job,mode_label,job,run_dic,key,mode_label))
+							dagfile.write('VARS %s macroid="Bayes2FAR_%s-%s" macroarguments="-r %s -g %s -m %s"\n'%(job,mode_label,job,run_dic,key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
 							#Record lalinference_pipe job number
 							if mode_label != 'sig_train':
-								Bayes2LIB_jobs += [job]
+								Bayes2FAR_jobs += [job]
 							else:
-								Bayes2LIB_sig_train_jobs += [job]
+								Bayes2FAR_sig_train_jobs += [job]
 
 							#Done with job
 							job += 1
@@ -362,44 +363,34 @@ def executable(run_dic):
 		####################################
 		### Write parent-child relations ###
 		####################################
-#??here??
+
 		#make each omicron job a parent to each omicron2LIB job
 		for parent in omicron_jobs:
 			for child in omicron2LIB_jobs:
+				dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+
+		#make each omicron_sig_train job a parent to each omicron2LIB_sig_train job
+		for parent in omicron_sig_train_jobs:
+			for child in omicron2LIB_sig_train_jobs:
 				dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 
 		if LIB_flag:
 
 			#make each omicron2LIB job a parent to each lalinference_pipe_0lag job
 			for parent in omicron2LIB_jobs:
-				for child in lalinference_pipe_0lag_jobs:
+				for child in lalinference_pipe_jobs:
 					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 					
-			#make each omicron2LIB job a parent to each lalinference_pipe_ts job
-			for parent in omicron2LIB_jobs:
-				for child in lalinference_pipe_ts_jobs:
-					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-					
-			#make each lalinference_pipe_0lag job a parent to each LIB_0lag_runs job
-			for parent in lalinference_pipe_0lag_jobs:
-				for child in LIB_0lag_runs_jobs:
-					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+			#make lalinference_pipe jobs parents to LIB_runs jobs, and LIB_runs jobs parents to Bayes2FAR jobs for each run mode 
+			for i in xrange(len(lalinference_pipe_jobs)):
+				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_jobs[i],LIB_runs_jobs[i]))
+				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_jobs[i],Bayes2FAR_jobs[i]))
+
+			#make lalinference_pipe_sig_train jobs parents to LIB_runs_sig_train jobs, and LIB_runs_sig_train jobs parents to Bayes2FAR_sig_train jobs 
+			for i in xrange(len(lalinference_pipe_jobs)):
+				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_sig_train_jobs[i],LIB_runs_sig_train_jobs[i]))
+				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_sig_train_jobs[i],Bayes2FAR_sig_train_jobs[i]))					
 			
-			#make each lalinference_pipe_ts job a parent to each LIB_ts_runs job
-			for parent in lalinference_pipe_ts_jobs:
-				for child in LIB_ts_runs_jobs:
-					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-					
-			#make each LIB_0lag_runs job a parent to each Bayes2LIB_0lag job
-			for parent in LIB_0lag_runs_jobs:
-				for child in Bayes2LIB_0lag_jobs:
-					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-			
-			#make each LIB_ts_runs job a parent to each Bayes2LIB_ts job
-			for parent in LIB_ts_runs_jobs:
-				for child in Bayes2LIB_ts_jobs:
-					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-					
 		#################
 		### Close DAG ###
 		#################
