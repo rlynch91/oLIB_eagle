@@ -13,6 +13,7 @@ import pickle
 import matplotlib.lines as mlines
 from matplotlib import cm
 import scipy.ndimage.interpolation as ndimage_interp
+import scipy.optimize as scipy_optimize
 
 #=================================================
 #
@@ -49,8 +50,10 @@ class LLRT(object):
 				
 		*The optimize_*_training options should be dictionaries with the following structure:
 			-['group name']
-				*['optimization grid dimensions'] -->  The number of points to grid over for each parameter in the group
-				*['optimization grid ranges'] -->  The range of values to logarithmically grid over for each parameter in the group
+				*['optimization method'] -->  Either 'BFGS' (quasi-Newtonian peak finder) or 'grid'
+				*['optimization initial coords'] -->  The coordinates at which to initialize the BFGS algorithm (for BFGS only)
+				*['optimization grid dimensions'] -->  The number of points to grid over for each parameter in the group (for grid only)
+				*['optimization grid ranges'] -->  The range of values to logarithmically grid over for each parameter in the group (for grid only)
 		"""
 		#Should do necessary checks on passed stuff here
 		
@@ -102,7 +105,10 @@ class LLRT(object):
 			
 			#If flagged, find optimal bandwidths to train with
 			if optimize_signal_training:
-				self.signal[key]['KDE bandwidths'],__ = self.find_opt_gaussian_band_grid(groupname=key, model="Signal", grid_points=np.reshape( optimize_signal_training[key]['optimization grid dimensions'], (self.signal[key]['dimension']) ), grid_ranges=np.reshape( optimize_signal_training[key]['optimization grid ranges'], (self.signal[key]['dimension'],2) ))
+				if optimize_signal_training[key]['optimization method'] == 'BFGS':
+					self.signal[key]['KDE bandwidths'] = self.find_opt_gaussian_band_BFGS(groupname=key, model="Signal", init_coords=np.reshape( optimize_signal_training[key]['optimization initial coords'], (self.signal[key]['dimension']) ))
+				elif optimize_signal_training[key]['optimization method'] == 'grid':
+					self.signal[key]['KDE bandwidths'] = self.find_opt_gaussian_band_grid(groupname=key, model="Signal", grid_points=np.reshape( optimize_signal_training[key]['optimization grid dimensions'], (self.signal[key]['dimension']) ), grid_ranges=np.reshape( optimize_signal_training[key]['optimization grid ranges'], (self.signal[key]['dimension'],2) ))
 			
 			#If no KDE data passed, do KDE smoothing
 			if self.signal[key]['KDE'] == None:
@@ -151,7 +157,10 @@ class LLRT(object):
 		
 			#If flagged, find optimal bandwidths to train with
 			if optimize_noise_training:
-				self.noise[key]['KDE bandwidths'],__ = self.find_opt_gaussian_band_grid(groupname=key, model="Noise", grid_points=np.reshape( optimize_noise_training[key]['optimization grid dimensions'], (self.noise[key]['dimension']) ), grid_ranges=np.reshape( optimize_noise_training[key]['optimization grid ranges'], (self.noise[key]['dimension'],2) ))
+				if optimize_noise_training[key]['optimization method'] == 'BFGS':
+					self.noise[key]['KDE bandwidths'] = self.find_opt_gaussian_band_BFGS(groupname=key, model="Noise", init_coords=np.reshape( optimize_noise_training[key]['optimization initial coords'], (self.noise[key]['dimension']) ))
+				elif optimize_noise_training[key]['optimization method'] == 'grid':
+					self.noise[key]['KDE bandwidths'] = self.find_opt_gaussian_band_grid(groupname=key, model="Noise", grid_points=np.reshape( optimize_noise_training[key]['optimization grid dimensions'], (self.noise[key]['dimension']) ), grid_ranges=np.reshape( optimize_noise_training[key]['optimization grid ranges'], (self.noise[key]['dimension'],2) ))
 				
 			#If no KDE data passed, do KDE smoothing
 			if self.noise[key]['KDE'] == None:
@@ -837,7 +846,7 @@ class LLRT(object):
 		
 		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
 		min_coords = None
-		min_val = None
+		min_val = np.inf
 		min_jacob = None
 		for tmp_coords in coords:
 			tmp_val,tmp_jacob = self.KL_function_gaussian(tmp_coords, data)
@@ -846,4 +855,37 @@ class LLRT(object):
 				min_coords = tmp_coords
 				min_jacob = tmp_jacob
 		
-		return min_coords,min_jacob
+		return min_coords
+
+	###	
+	def find_opt_gaussian_band_BFGS(self, groupname, model, init_coords=None):
+		"""
+		Calculates optimal bandwidth for a parameter group using the KL criteria and the BFGS algorithm
+		"""
+		#Load in necessary info for either data or noise depending on the passed model
+		if model == 'Signal':
+			dic = self.signal
+		elif model == 'Noise':
+			dic = self.noise
+		else:
+			#Raise error here
+			pass
+		
+		n_dim = dic[groupname]['dimension']
+		data = dic[groupname]['data']
+				
+		#Initialize initial coords 
+		if init_coords == None:
+			#Find rule-of-thumb estimate of optimal bandwidth for each parameter in the group
+			init_coords = np.zeros(n_dim)
+			for d in xrange(n_dim):
+				init_coords[d] = self.oneD_rule_of_thumb_bandwidth_gaussian(data[:,d])
+		
+		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
+		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True)
+		
+		#Check to make sure the minimum was found successfully
+		if min_object['success'] == False:
+			raise ValueError, "Optimization of the bandwidths has failed with message: ", min_object['message']
+			
+		return min_object['x']
