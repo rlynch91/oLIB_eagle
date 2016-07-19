@@ -102,7 +102,7 @@ class LLRT(object):
 			
 			#If flagged, find optimal bandwidths to train with
 			if optimize_signal_training:
-				self.signal[key]['KDE bandwidths'] = self.find_opt_gaussian_band_grid(groupname=key, model="Signal", grid_points=np.reshape( optimize_signal_training[key]['optimization grid dimensions'], (self.signal[key]['dimension']) ), grid_ranges=np.reshape( optimize_signal_training[key]['optimization grid ranges'], (self.signal[key]['dimension'],2) ))
+				self.signal[key]['KDE bandwidths'],__ = self.find_opt_gaussian_band_grid(groupname=key, model="Signal", grid_points=np.reshape( optimize_signal_training[key]['optimization grid dimensions'], (self.signal[key]['dimension']) ), grid_ranges=np.reshape( optimize_signal_training[key]['optimization grid ranges'], (self.signal[key]['dimension'],2) ))
 			
 			#If no KDE data passed, do KDE smoothing
 			if self.signal[key]['KDE'] == None:
@@ -151,7 +151,7 @@ class LLRT(object):
 		
 			#If flagged, find optimal bandwidths to train with
 			if optimize_noise_training:
-				self.noise[key]['KDE bandwidths'] = self.find_opt_gaussian_band_grid(groupname=key, model="Noise", grid_points=np.reshape( optimize_noise_training[key]['optimization grid dimensions'], (self.noise[key]['dimension']) ), grid_ranges=np.reshape( optimize_noise_training[key]['optimization grid ranges'], (self.noise[key]['dimension'],2) ))
+				self.noise[key]['KDE bandwidths'],__ = self.find_opt_gaussian_band_grid(groupname=key, model="Noise", grid_points=np.reshape( optimize_noise_training[key]['optimization grid dimensions'], (self.noise[key]['dimension']) ), grid_ranges=np.reshape( optimize_noise_training[key]['optimization grid ranges'], (self.noise[key]['dimension'],2) ))
 				
 			#If no KDE data passed, do KDE smoothing
 			if self.noise[key]['KDE'] == None:
@@ -756,7 +756,7 @@ class LLRT(object):
 	###
 	def KL_function_gaussian(self, H, data):
 		"""
-		Calculate the function that needs to be maximized to optimize the bandwidths according to the KL criteria
+		Calculate the function that needs to be minimized to optimize the bandwidths according to the KL criteria
 		"""
 		#Initialize stuff
 		n_data = float(len(data))
@@ -764,12 +764,21 @@ class LLRT(object):
 		
 		#Calculate the KL function by iterating
 		KL_func = 0.
+		KL_jacob = np.zeros(len(H))
+		
 		for i in xrange(int(n_data)):
-			KL_func += np.log10( -0.9999999999999999 + np.sum( np.exp(-0.5 * np.sum( ((data[i,:] - data[:,:])/H[:])**2., axis=-1)), axis=-1) )
+			tmp_KL_func = np.sum( np.exp(-0.5 * np.sum( ((data[i,:] - data[:,:])/H[:])**2., axis=-1)), axis=-1) - 0.9999999999999999
+			tmp_KL_deriv = np.sum( np.transpose(((data[i,:] - data[:,:])/H[:])**2.) * np.exp(-0.5 * np.sum( ((data[i,:] - data[:,:])/H[:])**2., axis=-1)), axis=-1)
+			
+			KL_func += np.log10(tmp_KL_func)
+			KL_jacob += tmp_KL_deriv / tmp_KL_func - 1.
+			
 		KL_func /= n_data
 		KL_func -= np.log10( (n_data-1.) * np.sqrt( (2.*np.pi)**n_dim * np.prod(H[:])**2.) )
+		
+		KL_jacob /= (n_data * np.log(10.) * H[:])
 
-		return KL_func		
+		return -KL_func, -KL_jacob		
 
 	###
 	def oneD_rule_of_thumb_bandwidth_gaussian(self, data):
@@ -826,13 +835,15 @@ class LLRT(object):
 		
 		coords = np.reshape(coords,(-1,n_dim))
 		
-		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the maximum value
-		max_coords = None
-		max_val = None
+		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
+		min_coords = None
+		min_val = None
+		min_jacob = None
 		for tmp_coords in coords:
-			tmp_val = self.KL_function_gaussian(tmp_coords, data)
-			if tmp_val > max_val:
-				max_val = tmp_val
-				max_coords = tmp_coords
+			tmp_val,tmp_jacob = self.KL_function_gaussian(tmp_coords, data)
+			if tmp_val < min_val:
+				min_val = tmp_val
+				min_coords = tmp_coords
+				min_jacob = tmp_jacob
 		
-		return max_coords
+		return min_coords,min_jacob
