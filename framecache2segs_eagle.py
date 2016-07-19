@@ -5,7 +5,7 @@ import commands
 #=======================================================================
 
 ###
-def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, bitmask):
+def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, run_bitmask, inj_bitmask):
 	"""
 	Takes a file containing the data quality state vetor and converts it to segments of a desired bitmask, returning injection status
 	"""
@@ -48,7 +48,7 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, b
 				break
 				
 			#Check if state vector corresponds to desired bitmask
-			elif (int(value) & bitmask) == bitmask:  #(e.g., 0b00011 = 3 and we want bits 0 and 1 to be on, so we do & with 3)
+			elif (int(value) & run_bitmask) == run_bitmask:  #(e.g., 0b00011 = 3 and we want bits 0 and 1 to be on, so we do & with 3)
 				#Data is good, start new seg if needed
 				if not current_start:
 					current_start = int(np.ceil(frame_start + i/float(samp_rate) ))  #data good starting at ith sample, use ceiling so don't underestimate start
@@ -63,7 +63,7 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, b
 					current_stop = None
 
 			#Check if state vector denotes that an injection is present
-			if ((int(value) & 480) != 480):  #(e.g., we want bits 5, 6, 7, or 8 to be on if there are no HW injections)
+			if ((int(value) & inj_bitmask) != inj_bitmask):  #(e.g., we might want bits 5, 6, 7, or 8 to be on if there are no HW injections)
 				inj_flag = True
 
 		#Write final segment for this frame if needed
@@ -150,10 +150,11 @@ def executable(ifo, run_dic):
 	abs_start = run_dic['times']['start']
 	abs_stop = run_dic['times']['stop']
 	outdir = '%s/segments/'%run_dic['seg dir']
-	bitmask = run_dic['config']['bitmask']
+	run_bitmask = run_dic['config']['run bitmask']
+	inj_bitmask = run_dic['config']['inj bitmask']
 	
 	#Produce and merge segments from framecache state vectors
-	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, bitmask=bitmask)
+	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, run_bitmask=run_bitmask, inj_bitmask=inj_bitmask)
 	try:
 		merge_segs(seg_file='%s/%s_%s_%s.seg'%(outdir,ifo,abs_start,abs_stop))
 	except IOError:
@@ -174,7 +175,8 @@ if __name__=='__main__':
 	parser.add_option("","--stop", default=None, type='int', help="Absolute stop time of segments")
 	parser.add_option("-o","--outdir", default=None, type="string", help="Path to directory in which to output segments")
 	parser.add_option("-I","--IFO", default=None, type="string", help="Name of ifo, e.g., H1")
-	parser.add_option("-b","--bitmask", default=None, type="int", help="Number corresponding to bitmask to search for")
+	parser.add_option("","--run-bitmask", default=None, type="int", help="Number corresponding to bitmask to search for")
+	parser.add_option("","--inj-bitmask", default=None, type="int", help="Number corresponding to bitmask that signifies no injections are in the data")
 
 	#---------------------------------------------
 
@@ -186,11 +188,12 @@ if __name__=='__main__':
 	abs_stop = opts.stop
 	outdir = opts.outdir
 	ifo = opts.IFO
-	bitmask = opts.bitmask
+	run_bitmask = opts.run_bitmask
+	inj_bitmask = opts.inj_bitmask
 	
 	#---------------------------------------------
 	
-	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, bitmask=bitmask)
+	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, run_bitmask=run_bitmask, inj_bitmask=inj_bitmask)
 	try:
 		merge_segs(seg_file='%s/%s_%s_%s.seg'%(outdir,ifo,abs_start,abs_stop))
 	except IOError:

@@ -3,6 +3,7 @@
 import numpy as np
 import os
 import time
+import pickle
 
 #############################################
 #Define Functions
@@ -603,6 +604,7 @@ def merge_segs(seg_file, ifo, ppdir):
 				
 	#Close seg_file
 	write_seg_file.close()
+	return write_seg_file_nm
 	
 	
 ###
