@@ -326,13 +326,13 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 			#Save LIB triggers
 			np.savetxt('%s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, coin_group, tshift_num), final_trigs)
 			if (coin_mode == "0lag") or (coin_mode == "sig_train"):
-				for i in xrange(len(trigs_above_thresh)):
+				for i in xrange(len(final_trigs)):
 					lib_0lag_times.write('%10.10f\n'%final_trigs[i,0])
-					lib_0lag_timeslides.write('%s\n'%( " ".join([tshift_dic[ifo][i] for ifo in ifo_list]) ))
+					lib_0lag_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][i]) for ifo in ifo_list]) ))
 			elif (coin_mode == "back") or (coin_mode == "noise_train"):
-				for i in xrange(len(trigs_above_thresh)):
+				for i in xrange(len(final_trigs)):
 					lib_ts_times.write('%10.10f\n'%final_trigs[i,0])
-					lib_ts_timeslides.write('%s\n'%( " ".join([tshift_dic[ifo][i] for ifo in ifo_list]) ))
+					lib_ts_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][i]) for ifo in ifo_list]) ))
 		else:
 			os.system('> %s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, coin_group, tshift_num))
 	
@@ -613,7 +613,7 @@ def intersect_segments(seg_array1, seg_array2, ifos1, ifo2, ts_num, coin_group, 
 	For time-sorted segments, find intersection of livetime between two detectors
 	"""
 		
-	seg_intersect_nm = "%s/live_segs/%s/%s/intersect_%s%s_tsnum%s.seg"%(ppdir, coin_group, coin_mode, ifos1, ifo1, ts_num)
+	seg_intersect_nm = "%s/live_segs/%s/%s/intersect_%s%s_tsnum%s.seg"%(ppdir, coin_group, coin_mode, ifos1, ifo2, ts_num)
 	if not os.path.exists("%s/live_segs/%s/%s/"%(ppdir, coin_group, coin_mode)):
 		os.makedirs("%s/live_segs/%s/%s/"%(ppdir, coin_group, coin_mode))
 	seg_intersect = open(seg_intersect_nm,'wt')
@@ -703,7 +703,7 @@ def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, LIB_wind
 	if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 		coin_ts_dic = {}
 		for ifo in coin_ifos:
-			coin_ts_dic = np.array([0.])
+			coin_ts_dic[ifo] = np.array([0.])
 		
 	elif coin_mode == "back":
 		coin_ts_dic = run_dic['coincidence'][coin_group]['back timeslides']
