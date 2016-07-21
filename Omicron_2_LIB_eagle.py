@@ -2,8 +2,8 @@
 
 import numpy as np
 import os
-import time
 import pickle
+import tarfile
 
 #############################################
 #Define Functions
@@ -328,11 +328,11 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 			if (coin_mode == "0lag") or (coin_mode == "sig_train"):
 				for i in xrange(len(final_trigs)):
 					lib_0lag_times.write('%10.10f\n'%final_trigs[i,0])
-					lib_0lag_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][i]) for ifo in ifo_list]) ))
+					lib_0lag_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][tshift_num]) for ifo in ifo_list]) ))
 			elif (coin_mode == "back") or (coin_mode == "noise_train"):
 				for i in xrange(len(final_trigs)):
 					lib_ts_times.write('%10.10f\n'%final_trigs[i,0])
-					lib_ts_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][i]) for ifo in ifo_list]) ))
+					lib_ts_timeslides.write('%s\n'%( " ".join([str(tshift_dic[ifo][tshift_num]) for ifo in ifo_list]) ))
 		else:
 			os.system('> %s/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt'%(ppdir, coin_group, coin_mode, coin_group, tshift_num))
 	
@@ -878,8 +878,14 @@ if __name__=='__main__':
 		
 		#Tar Omicron triggers now that they are no longer needed
 		if run_dic['run mode']['tar Omicron']:
-			os.system('tar -zcvf %s.tar.gz %s'%(rawdir,rawdir))
-			os.system('rm %s -r'%rawdir)
+			if not sig_train_flag:
+				with tarfile.open('%s/raw.tar.gz'%run_dic['seg dir'], "w:gz") as tar:
+					tar.add('%s/raw'%run_dic['seg dir'])
+				os.system('rm %s/raw -r'%run_dic['seg dir'])
+			else:
+				with tarfile.open('%s/raw_sig_train.tar.gz'%run_dic['seg dir'], "w:gz") as tar:
+					tar.add('%s/raw_sig_train'%run_dic['seg dir'])
+				os.system('rm %s/raw_sig_train -r'%run_dic['seg dir'])
 							
 		#Complete
 		print "Complete"

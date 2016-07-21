@@ -7,7 +7,7 @@ from ligo.gracedb.rest import GraceDb
 import json
 import LLRT_object_eagle
 import commands
-import time
+import tarfile
 
 #############################################
 #Define Functions
@@ -386,7 +386,8 @@ if __name__=='__main__':
 
 		#Zip LIB folders now that they are no longer needed
 		if run_dic['run mode']['tar LIB']:
-			os.system('tar -zcvf %s/LIB/%s/%s.tar.gz %s/LIB/%s/%s'%(segdir,coin_group,coin_mode,segdir,coin_group,coin_mode))
+			with tarfile.open('%s/LIB/%s/%s.tar.gz'%(segdir,coin_group,coin_mode), "w:gz") as tar:
+				tar.add('%s/LIB/%s/%s'%(segdir,coin_group,coin_mode))
 			os.system('rm %s/LIB/%s/%s -r'(segdir,coin_group,coin_mode))
 		
 	elif run_mode == 'Offline':

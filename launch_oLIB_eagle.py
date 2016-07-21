@@ -18,24 +18,24 @@ run_dic['config']['wait'] = 5
 run_dic['config']['max wait'] = 600
 run_dic['config']['run dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_runs/'
 run_dic['config']['info dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/'
-run_dic['config']['LIB bin dir'] = '/home/salvatore.vitale/lalsuites/burst_dev/noflags_opt/bin/'
+run_dic['config']['LIB bin dir'] = '/home/salvatore.vitale/lalsuites/burst_dev/o2_lib_20160720/bin/'
 run_dic['config']['initial start'] = None
 run_dic['config']['stride'] = 32
 run_dic['config']['overlap'] = 2
 run_dic['config']['run bitmask'] = 3
 run_dic['config']['inj bitmask'] = 448  #480
 run_dic['config']['sample freq'] = 2048
-run_dic['config']['oSNR thresh'] = 5
+run_dic['config']['oSNR thresh'] = 4.  #5
 run_dic['config']['dt clust'] = 0.1
 
 ###
 run_dic['run mode'] = {}
 run_dic['run mode']['line'] = 'Online'
 run_dic['run mode']['inj runmode'] = 'NonInj'
-run_dic['run mode']['train runmode'] = "NonTrain"
+run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = False
 run_dic['run mode']['LIB flag'] = False
-run_dic['run mode']['tar Omicron'] = False
+run_dic['run mode']['tar Omicron'] = True
 run_dic['run mode']['tar LIB'] = False
 
 ###
@@ -59,12 +59,12 @@ run_dic['coincidence'] = {}
 
 run_dic['coincidence']['H1L1'] = {}
 run_dic['coincidence']['H1L1']['ifos'] = ['H1','L1']
-run_dic['coincidence']['H1L1']['coincidence window'] = 0.015
-run_dic['coincidence']['H1L1']['coincidence snr thresh'] = 5.0*np.sqrt(2.)
+run_dic['coincidence']['H1L1']['coincidence window'] = 5.0  #0.015
+run_dic['coincidence']['H1L1']['coincidence snr thresh'] = 4.0  #5.0
 run_dic['coincidence']['H1L1']['analyze 0lag'] = True
 run_dic['coincidence']['H1L1']['analyze back'] = True
-run_dic['coincidence']['H1L1']['analyze noise training'] = False
-run_dic['coincidence']['H1L1']['analyze signal training'] = False
+run_dic['coincidence']['H1L1']['analyze noise training'] = True
+run_dic['coincidence']['H1L1']['analyze signal training'] = True
 run_dic['coincidence']['H1L1']['back timeslides'] = {}
 run_dic['coincidence']['H1L1']['back timeslides']['H1'] = np.zeros(50)
 run_dic['coincidence']['H1L1']['back timeslides']['L1'] = np.arange(1,51,1)

@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import numpy as np
 import os
 import pickle
@@ -130,7 +132,7 @@ def executable(run_dic):
 				#write JOB
 				dagfile.write('JOB %s %s/runfiles/omicron_eagle.sub\n'%(job,segdir))
 				#write VARS
-				dagfile.write('VARS %s macroid="omicron_sig_train-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_sign_train_params_%s_eagle.txt'%ifo))
+				dagfile.write('VARS %s macroid="omicron_sig_train-%s-%s" macroarguments="%s %s"\n'%(job, ifo, job, seg_files[ifo], segdir+'/runfiles/omicron_sig_train_params_%s_eagle.txt'%ifo))
 				#write RETRY
 				dagfile.write('RETRY %s 0\n\n'%job)
 				
