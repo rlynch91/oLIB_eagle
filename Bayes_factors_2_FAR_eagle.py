@@ -71,7 +71,7 @@ if __name__=='__main__':
 			if gdb_flag:
 				gdb = GraceDb()
 		
-		elif coin_mode == 'sig_train'
+		elif coin_mode == 'sig_train':
 			bindir = run_dic['config']['LIB bin dir']
 			LIB_window = run_dic['prior ranges']['LIB window']
 
@@ -85,11 +85,11 @@ if __name__=='__main__':
 			timeslide_array = np.genfromtxt('%s/PostProc/LIB_trigs/%s/%s/LIB_0lag_timeslides_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,len(ifos))
 			trigtime_array = np.genfromtxt('%s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,1)
 		elif coin_mode == 'sig_train':
-			timeslide_array = np.genfromtxt('%s/PostProc_sig_train/%s/%s/LIB_trigs/LIB_0lag_timeslides_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,len(ifos))
-			trigtime_array = np.genfromtxt('%s/PostProc_sig_train/%s/%s/LIB_trigs/LIB_0lag_times_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,1)
+			timeslide_array = np.genfromtxt('%s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_timeslides_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,len(ifos))
+			trigtime_array = np.genfromtxt('%s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,1)
 		elif coin_mode == 'back' or coin_mode == 'noise_train':
-			timeslide_array = np.genfromtxt('%s/PostProc_sig_train/%s/%s/LIB_trigs/LIB_ts_timeslides_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,len(ifos))
-			trigtime_array = np.genfromtxt('%s/PostProc_sig_train/%s/%s/LIB_trigs/LIB_ts_times_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,1)
+			timeslide_array = np.genfromtxt('%s/PostProc/LIB_trigs/%s/%s/LIB_ts_timeslides_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,len(ifos))
+			trigtime_array = np.genfromtxt('%s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt'%(segdir,coin_group, coin_mode, coin_group)).reshape(-1,1)
 
 		for event in xrange(len(trigtime_array)):
 			dictionary[event] = {}
@@ -148,9 +148,17 @@ if __name__=='__main__':
 						hrss_samps[iline-1] = np.exp(float(params[hrss_ind]))
 					
 				#With samples, add necessary estimators to dictionaries
-				dictionary[event]['frequency'] = np.mean(freq_samps)
-				dictionary[event]['quality'] = np.mean(qual_samps)
-				dictionary[event]['hrss'] = np.mean(hrss_samps)
+				dictionary[event]['frequency'] = {}
+				dictionary[event]['frequency']['posterior mean'] = np.mean(freq_samps)
+				dictionary[event]['frequency']['posterior median'] = np.median(freq_samps)
+				
+				dictionary[event]['quality'] = {}
+				dictionary[event]['quality']['posterior mean'] = np.mean(qual_samps)
+				dictionary[event]['quality']['posterior median'] = np.median(qual_samps)
+				
+				dictionary[event]['hrss'] = {}
+				dictionary[event]['hrss']['posterior mean'] = np.mean(hrss_samps)
+				dictionary[event]['hrss']['posterior median'] = np.median(hrss_samps)
 
 		#Find BCIs		
 		coherence_files = os.listdir("%s/LIB/%s/%s/coherence_test/"%(segdir,coin_group,coin_mode))
@@ -170,33 +178,33 @@ if __name__=='__main__':
 
 		if coin_mode == '0lag':
 			try:
-				trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
+				trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0.0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
 				for line in trig_info_array:
-					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.001:
+					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
 						dictionary[event]['Omicron SNR'] = {}
 						dictionary[event]['Omicron SNR']['Network'] = line[2]
-						for i,ifo in ifos:
+						for i,ifo in enumerate(ifos):
 							dictionary[event]['Omicron SNR'][ifo] = line[4*(i+1) + 2]
 						event += 1
 					else:
 						raise ValueError("The event and trig time do not match up when finding Omicron SNR")
 			except IOError:
-				continue
+				pass
 		
 		elif coin_mode == 'sig_train':
 			try:
-				trig_info_array = np.genfromtxt("%s/PostProc_sig_train/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
+				trig_info_array = np.genfromtxt("%s/PostProc_sig_train/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0.0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
 				for line in trig_info_array:
-					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.001:
+					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
 						dictionary[event]['Omicron SNR'] = {}
 						dictionary[event]['Omicron SNR']['Network'] = line[2]
-						for i,ifo in ifos:
+						for i,ifo in enumerate(ifos):
 							dictionary[event]['Omicron SNR'][ifo] = line[4*(i+1) + 2]
 						event += 1
 					else:
 						raise ValueError("The event and trig time do not match up when finding Omicron SNR")
 			except IOError:
-				continue
+				pass
 		
 		elif coin_mode == 'back' or coin_mode == 'noise_train':
 			trig_files = sorted(os.listdir("%s/PostProc/LIB_trigs/%s/%s/"%(segdir,coin_group,coin_mode)))
@@ -206,21 +214,21 @@ if __name__=='__main__':
 					try:
 						trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,f)).reshape((-1,4*(len(ifos)+1)))
 						for line in trig_info_array:
-							if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.001:
+							if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
 								dictionary[event]['Omicron SNR'] = {}
 								dictionary[event]['Omicron SNR']['Network'] = line[2]
-								for i,ifo in ifos:
+								for i,ifo in enumerate(ifos):
 									dictionary[event]['Omicron SNR'][ifo] = line[4*(i+1) + 2]
 								event += 1
 							else:
 								raise ValueError("The event and trig time do not match up when finding Omicron SNR")
 					except IOError:
-						continue
+						pass
 
 		#Construct LLRT object for the set of events if dealing with 0lag runs
 		if coin_mode == '0lag':
 			#Get necessary LLRT parameters and save background info to runfiles
-			FAR_thresh_raw = run_dic['LLRT']['FAR thresh']
+			FAR_thresh = run_dic['LLRT']['FAR thresh']
 			back_dic_path = run_dic['LLRT'][coin_group]['back dic path']
 			back_livetime_path = run_dic['LLRT'][coin_group]['back livetime']
 			trials_factor = len(run_dic['search bins']['bin names'])
@@ -267,7 +275,7 @@ if __name__=='__main__':
 				events = np.ones(len(dictionary))*np.nan
 
 				for i,event in enumerate(dictionary):
-					if check_parameter_space(dictionary[event]) == True:
+					if check_parameter_space(dictionary[event],search_bin=search_bin,run_dic=run_dic) == True:
 						logBSNs[i] = np.log10(dictionary[event]['BSN'])
 						BCIs[i] = dictionary[event]['BCI']
 						events[i] = event
@@ -294,7 +302,7 @@ if __name__=='__main__':
 				back_coords = np.ones((len(back_dic),2))*np.nan
 
 				for i,key in enumerate(back_dic):
-					if check_parameter_space(back_dic[key]) == True:
+					if check_parameter_space(back_dic[key],search_bin=search_bin,run_dic=run_dic) == True:
 						back_coords[i,0] = np.log10(back_dic[key]['BSN'])
 						back_coords[i,1] = back_dic[key]['BCI']
 					else:
@@ -345,8 +353,12 @@ if __name__=='__main__':
 		#If in signal training mode, match the LIB event with its injection 
 		if coin_mode == 'sig_train':
 			#find the times of the training injections
-			inj_times = commands.getstatusoutput('%s/ligolw_print %s/training_injections/raw/*.xml -c "time_geocent_gps -c "time_geocent_gps_ns" -d "."'%(bindir,segdir))[1].split()
+			inj_times = commands.getstatusoutput('%s/ligolw_print %s/training_injections/raw/*.xml -c "time_geocent_gps" -c "time_geocent_gps_ns" -d "."'%(bindir,segdir))[1].split()
 			print "Inj times: ", inj_times
+
+			#First mark all events as non-detections
+			for event in dictionary:
+				dictionary[event]['Training injection'] = False
 
 			#Loop through time-sorted injections and events, doing coincidence
 			inj_times = sorted(np.array(inj_times).astype(float))
@@ -355,9 +367,9 @@ if __name__=='__main__':
 			for inj_time in inj_times:
 				#Iterate through events until within coincidence window or past the injection time
 				while np.absolute(inj_time - float(dictionary[events[i_event_min]]['gpstime'])) > 0.5*LIB_window:
-					if (float(dictionary[events[i_event_min]]['gpstime']) - inj_time) > 0.5*LIB_window
+					if (float(dictionary[events[i_event_min]]['gpstime']) - inj_time) > 0.5*LIB_window:
 						break
-					elif (i_event_min + 1) >= len(events)
+					elif (i_event_min + 1) >= len(events):
 						break
 					else:
 						i_event_min += 1
@@ -374,7 +386,7 @@ if __name__=='__main__':
 						
 				#Choose the coincident injection with the highest network SNR
 				if len(tmp_inj_dic) > 0:
-					event_coin = max(tmp_inj_dic)
+					event_coin = tmp_inj_dic[max(tmp_inj_dic)]
 					dictionary[event_coin]['Training injection'] = True
 				
 		#Save dictionary and mark that it is ready for cumulative collection

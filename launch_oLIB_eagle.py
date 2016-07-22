@@ -25,7 +25,7 @@ run_dic['config']['overlap'] = 2
 run_dic['config']['run bitmask'] = 3
 run_dic['config']['inj bitmask'] = 448  #480
 run_dic['config']['sample freq'] = 2048
-run_dic['config']['oSNR thresh'] = 4.  #5
+run_dic['config']['oSNR thresh'] = 4.0  #5.0
 run_dic['config']['dt clust'] = 0.1
 
 ###
@@ -34,9 +34,9 @@ run_dic['run mode']['line'] = 'Online'
 run_dic['run mode']['inj runmode'] = 'NonInj'
 run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = False
-run_dic['run mode']['LIB flag'] = False
+run_dic['run mode']['LIB flag'] = True
 run_dic['run mode']['tar Omicron'] = True
-run_dic['run mode']['tar LIB'] = False
+run_dic['run mode']['tar LIB'] = True
 
 ###
 run_dic['ifos'] = {}
@@ -59,7 +59,7 @@ run_dic['coincidence'] = {}
 
 run_dic['coincidence']['H1L1'] = {}
 run_dic['coincidence']['H1L1']['ifos'] = ['H1','L1']
-run_dic['coincidence']['H1L1']['coincidence window'] = 5.0  #0.015
+run_dic['coincidence']['H1L1']['coincidence window'] = 0.015
 run_dic['coincidence']['H1L1']['coincidence snr thresh'] = 4.0  #5.0
 run_dic['coincidence']['H1L1']['analyze 0lag'] = True
 run_dic['coincidence']['H1L1']['analyze back'] = True
@@ -180,7 +180,7 @@ run_dic['training']['asd files']['L1'] = '/home/ryan.lynch/2nd_pipeline/pipeline
 ###
 run_dic['prior ranges'] = {}
 run_dic['prior ranges']['LIB window'] = 0.1
-run_dic['prior ranges']['min hrss'] = 3.3e-23
+run_dic['prior ranges']['min hrss'] = 5.0e-22  #3.3e-23
 run_dic['prior ranges']['max hrss'] = 1.0e-15
 run_dic['prior ranges']['min freq'] = 32
 run_dic['prior ranges']['max freq'] = 1024

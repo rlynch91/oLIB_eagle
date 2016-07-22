@@ -1,0 +1,10 @@
+universe     = vanilla
+accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
+executable   = /bin/true
+getenv	     = True
+log          = SEGDIR/log/$(macroid).log 
+output       = SEGDIR/log/$(macroid).out
+error        = SEGDIR/log/$(macroid).err
+notification = never
+queue 1
+

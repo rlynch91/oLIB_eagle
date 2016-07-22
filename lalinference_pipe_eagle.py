@@ -40,88 +40,112 @@ parser.add_option("--condor-submit",action="store_true",default=False,help="Auto
 parser.add_option("-x", "--dax",action="store_true",default=False, help="Delete the ligo_data_find jobs and populate frame LFNs in the DAX")
 parser.add_option("-G", "--grid-site",action="store",type="string",metavar="SITE", help="Specify remote site in conjunction with --dax option. e.g. --grid-site=creamce for Bologna cluster.\
 Supported options are: creamce and local",default=None)
+parser.add_option("","--segdir",default=None,action="store",type="string",help="oLIB segment directory for this stride, i.e. the base directory for each stride",metavar="SEGDIR")
+parser.add_option("","--infodir",default=None,action="store",type="string",help="oLIB parent directory containing all scripts and .sub files",metavar="INFODIR")
+parser.add_option("","--coin-group",default=None,action="store",type="string",help="Coincidence IFO group to collect LIB results for (i.e., H1L1)",metavar="COINGROUP")
+parser.add_option("","--coin-mode",default=None,action="store",type="string",help="Coincidence mode to collect LIB results for (i.e., 0lag, back, noise train, sig train)",metavar="COINMODE")
 
 (opts,args)=parser.parse_args()
 
-if len(args)!=1:
-  parser.print_help()
-  print 'Error: must specify one ini file'
-  sys.exit(1)
+#-----------------------------------------------------------------------
+#Check to see if there are any triggers to run on
 
-inifile=args[0]
+if os.path.getsize(opts.gps_time_file) > 0:
+	#There are triggers to run on, so create LIB dag
+	
+	if len(args)!=1:
+	  parser.print_help()
+	  print 'Error: must specify one ini file'
+	  sys.exit(1)
 
-cp=ConfigParser.ConfigParser()
-cp.optionxform = str
-cp.readfp(open(inifile))
+	inifile=args[0]
 
-if opts.run_path is not None:
-  cp.set('paths','basedir',os.path.abspath(opts.run_path))
+	cp=ConfigParser.ConfigParser()
+	cp.optionxform = str
+	cp.readfp(open(inifile))
 
-if not cp.has_option('paths','basedir'):
-  print 'Error: Must specify a directory with --run-path DIR'
-  sys.exit(1)
+	if opts.run_path is not None:
+	  cp.set('paths','basedir',os.path.abspath(opts.run_path))
 
-if opts.daglog_path is not None:
-  cp.set('paths','daglogdir',os.path.abspath(opts.daglog_path))
-elif opts.run_path is not None:
-  cp.set('paths','daglogdir',os.path.abspath(opts.run_path))
+	if not cp.has_option('paths','basedir'):
+	  print 'Error: Must specify a directory with --run-path DIR'
+	  sys.exit(1)
+
+	if opts.daglog_path is not None:
+	  cp.set('paths','daglogdir',os.path.abspath(opts.daglog_path))
+	elif opts.run_path is not None:
+	  cp.set('paths','daglogdir',os.path.abspath(opts.run_path))
+	else:
+	  cp.set('paths','daglogdir',os.path.abspath(cp.get('paths','basedir')))
+
+	local_work_dir=cp.get('paths','daglogdir')
+
+	if opts.gps_time_file is not None:
+	  cp.set('input','gps-time-file',os.path.abspath(opts.gps_time_file))
+
+	if opts.single_triggers is not None:
+	  cp.set('input','sngl-inspiral-file',os.path.abspath(opts.single_triggers))
+
+	if opts.injections is not None:
+	  cp.set('input','injection-file',os.path.abspath(opts.injections))
+
+	if opts.burst_injections is not None:
+	  cp.set('input','burst-injection-file',opts.burst_injections)
+	  
+	if opts.coinc_triggers is not None:
+	  cp.set('input','coinc-inspiral-file',os.path.abspath(opts.coinc_triggers))
+
+	#if opts.lvalert is not None:
+	#  cp.set('input','lvalert-file',os.path.abspath(opts.lvalert))
+
+	if opts.gid is not None:
+	  cp.set('input','gid',opts.gid)
+
+	if opts.pipedown_db is not None:
+	  cp.set('input','pipedown-db',os.path.abspath(opts.pipedown_db))
+
+
+	# Create the DAG from the configparser object
+	dag=pipe_utils.LALInferencePipelineDAG(cp,dax=opts.dax,site=opts.grid_site)
+	if(opts.dax):
+	# Create a text file with the frames listed
+	  pfnfile = dag.create_frame_pfn_file()
+	  peg_frame_cache = inspiralutils.create_pegasus_cache_file(pfnfile)
+	else:
+	  peg_frame_cache = '/dev/null'
+
+	# A directory to store the DAX temporary files
+	import uuid
+	execdir=os.path.join(local_work_dir,'lalinference_pegasus_'+str(uuid.uuid1()))
+	olddir=os.getcwd()
+	os.chdir(cp.get('paths','basedir'))
+	if opts.grid_site is not None:
+		site='local,'+opts.grid_site
+	else:
+		site=None
+	# Create the DAX scripts
+	if opts.dax:
+	  dag.prepare_dax(tmp_exec_dir=execdir,grid_site=site,peg_frame_cache=peg_frame_cache)
+	dag.write_sub_files()
+	dag.write_dag()
+	dag.write_script()
+	os.chdir(olddir)
+	# End of program
+	print 'Successfully created DAG file.'
+
+	os.system('mv %s/%s %s/LIB_runs.dag'%(opts.run_path,dag.get_dag_file(),opts.run_path))
+
+#-----------------------------------------------------------------------	
 else:
-  cp.set('paths','daglogdir',os.path.abspath(cp.get('paths','basedir')))
-
-local_work_dir=cp.get('paths','daglogdir')
-
-if opts.gps_time_file is not None:
-  cp.set('input','gps-time-file',os.path.abspath(opts.gps_time_file))
-
-if opts.single_triggers is not None:
-  cp.set('input','sngl-inspiral-file',os.path.abspath(opts.single_triggers))
-
-if opts.injections is not None:
-  cp.set('input','injection-file',os.path.abspath(opts.injections))
-
-if opts.burst_injections is not None:
-  cp.set('input','burst-injection-file',opts.burst_injections)
-  
-if opts.coinc_triggers is not None:
-  cp.set('input','coinc-inspiral-file',os.path.abspath(opts.coinc_triggers))
-
-#if opts.lvalert is not None:
-#  cp.set('input','lvalert-file',os.path.abspath(opts.lvalert))
-
-if opts.gid is not None:
-  cp.set('input','gid',opts.gid)
-
-if opts.pipedown_db is not None:
-  cp.set('input','pipedown-db',os.path.abspath(opts.pipedown_db))
-
-
-# Create the DAG from the configparser object
-dag=pipe_utils.LALInferencePipelineDAG(cp,dax=opts.dax,site=opts.grid_site)
-if(opts.dax):
-# Create a text file with the frames listed
-  pfnfile = dag.create_frame_pfn_file()
-  peg_frame_cache = inspiralutils.create_pegasus_cache_file(pfnfile)
-else:
-  peg_frame_cache = '/dev/null'
-
-# A directory to store the DAX temporary files
-import uuid
-execdir=os.path.join(local_work_dir,'lalinference_pegasus_'+str(uuid.uuid1()))
-olddir=os.getcwd()
-os.chdir(cp.get('paths','basedir'))
-if opts.grid_site is not None:
-    site='local,'+opts.grid_site
-else:
-    site=None
-# Create the DAX scripts
-if opts.dax:
-  dag.prepare_dax(tmp_exec_dir=execdir,grid_site=site,peg_frame_cache=peg_frame_cache)
-dag.write_sub_files()
-dag.write_dag()
-dag.write_script()
-os.chdir(olddir)
-# End of program
-print 'Successfully created DAG file.'
-
-os.system('mv %s/%s %s/LIB_runs.dag'%(opts.run_path,dag.get_dag_file(),opts.run_path))
-os.system('sed -e "s|--lal-cache|--lal-cache --server=datafind.ldas.cit:80|g" %s/datafind.sub > %s/tmp.sub; mv %s/tmp.sub %s/datafind.sub'%(opts.run_path,opts.run_path,opts.run_path,opts.run_path))
+	#There are no triggers to run on, so make sure LIB and Bayes2FAR don't run
+	#First make LIB fail gracefully
+	os.system('sed "s|SEGDIR|%s|g" %s/LIB_pass_eagle.sub > %s/runfiles/LIB_pass_eagle_%s_%s.sub'%(opts.segdir,opts.infodir,opts.segdir,opts.coin_group,opts.coin_mode))
+	
+	dagfile = open("%s/LIB_runs.dag"%opts.run_path,'wt')
+	dagfile.write('JOB 0 %s/runfiles/LIB_pass_eagle_%s_%s.sub\n'%(opts.segdir,opts.coin_group,opts.coin_mode))
+	dagfile.write('VARS 0 macroid="omicron-%s-%s"\n'%(opts.coin_group,opts.coin_mode))
+	dagfile.write('RETRY 0 0\n\n')
+	dagfile.close()
+	
+	#Finally let Bayes2FAR fail gracefully
+	os.system('sed -e "s|%s|/bin/|g" -e "s|Bayes_factors_2_FAR_eagle.py|true|g" -e "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(opts.infodir,opts.segdir,opts.infodir,opts.segdir,opts.coin_group,opts.coin_mode))

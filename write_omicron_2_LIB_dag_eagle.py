@@ -219,9 +219,6 @@ def executable(run_dic):
 			#Copy lalinference_pipe sub file to segdir
 			os.system('sed "s|SEGDIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,segdir))
 			
-			#Copy Bayes2FAR sub file to segdir
-			os.system('sed "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle.sub'%(segdir,infodir,segdir))
-
 			#Loop over all coincidence groups
 			for key in run_dic['coincidence']:
 				#Check to see if all ifos of the coincidence group are analyzable
@@ -256,15 +253,17 @@ def executable(run_dic):
 							tmp_ifos = run_dic['coincidence'][key]['ifos']
 							tmp_channel_names = {}
 							tmp_channel_types = {}
+							tmp_freqs_low = {}
 							for ifo in tmp_ifos:
-								tmp_channel_names[ifo] = channel_names[ifo]
+								tmp_channel_names[ifo] = "%s:%s"%(ifo,channel_names[ifo])
 								tmp_channel_types[ifo] =  channel_types[ifo]
+								tmp_freqs_low[ifo] = int(min_freq)
 
 							#replace all necessary fields in LIB_runs_eagle.ini file
 							sed_string = 'sed -e "s|IFOSCOMMA|%s|g" -e "s|SEGDIR|%s|g" -e "s|BINDIR|%s|g"'%(tmp_ifos,segdir,bindir)
 							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|SAMPFREQ|%s|g"'%(tmp_channel_types,tmp_channel_names,sample_freq)
 							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(np.log(min_hrss),np.log(max_hrss),min_quality,max_quality,min_freq,max_freq)
-							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g"'%(LIB_window,key,mode_label)
+							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g" -e "s|FREQSLOW|%s|g"'%(LIB_window,key,mode_label,tmp_freqs_low)
 							
 							if mode_label == '0lag' or mode_label == 'sig_train':
 								sed_string += ' -e "s|LAG|0lag|g"'
@@ -288,11 +287,11 @@ def executable(run_dic):
 							dagfile.write('JOB %s %s/runfiles/lalinference_pipe_eagle.sub\n'%(job,segdir))
 							#Write VARS
 							if mode_label == '0lag':
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							elif mode_label == 'sig_train':
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							else:
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
@@ -310,7 +309,7 @@ def executable(run_dic):
 							##########################################
 
 							#Write SUBDAG EXTERNAL
-							dagfile.write('SUBDAG EXTERNAL %s %s/LIB/%s/LIB_runs.dag\n'%(job,segdir,mode_label))
+							dagfile.write('SUBDAG EXTERNAL %s %s/LIB/%s/%s/LIB_runs.dag\n'%(job,segdir,key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
@@ -331,10 +330,13 @@ def executable(run_dic):
 							if not os.path.exists("%s/GDB/"%segdir):
 								os.makedirs("%s/GDB/"%segdir)
 
+							#Copy Bayes2FAR sub file to segdir
+							os.system('sed "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(segdir,infodir,segdir,key,mode_label))
+
 							#Write JOB
-							dagfile.write('JOB %s %s/runfiles/Bayes2FAR_eagle.sub\n'%(job,segdir))
+							dagfile.write('JOB %s %s/runfiles/Bayes2FAR_eagle_%s_%s.sub\n'%(job,segdir,key,mode_label))
 							#Write VARS
-							dagfile.write('VARS %s macroid="Bayes2FAR_%s-%s" macroarguments="-r %s -g %s -m %s"\n'%(job,mode_label,job,run_dic,key,mode_label))
+							dagfile.write('VARS %s macroid="Bayes2FAR_%s-%s" macroarguments="-r %s -g %s -m %s"\n'%(job,mode_label,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap),key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
@@ -363,18 +365,23 @@ def executable(run_dic):
 
 		if LIB_flag:
 
-			#make each omicron2LIB job a parent to each lalinference_pipe_0lag job
+			#make each omicron2LIB job a parent to each lalinference_pipe job
 			for parent in omicron2LIB_jobs:
 				for child in lalinference_pipe_jobs:
 					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
-					
+			
+			#make each omicron2LIB_sig_train job a parent to each lalinference_pipe_sig_train job
+			for parent in omicron2LIB_sig_train_jobs:
+				for child in lalinference_pipe_sig_train_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+				
 			#make lalinference_pipe jobs parents to LIB_runs jobs, and LIB_runs jobs parents to Bayes2FAR jobs for each run mode 
 			for i in xrange(len(lalinference_pipe_jobs)):
 				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_jobs[i],LIB_runs_jobs[i]))
 				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_jobs[i],Bayes2FAR_jobs[i]))
 
 			#make lalinference_pipe_sig_train jobs parents to LIB_runs_sig_train jobs, and LIB_runs_sig_train jobs parents to Bayes2FAR_sig_train jobs 
-			for i in xrange(len(lalinference_pipe_jobs)):
+			for i in xrange(len(lalinference_pipe_sig_train_jobs)):
 				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_sig_train_jobs[i],LIB_runs_sig_train_jobs[i]))
 				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_sig_train_jobs[i],Bayes2FAR_sig_train_jobs[i]))					
 		
