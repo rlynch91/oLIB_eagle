@@ -300,19 +300,10 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, t_coin, snr_coin, coin
 	
 	#Create identifying label by merging ifos together
 	ifos_together = "".join(ifo_list)
-	
-	#Find necessary files to grab triggers from
-	files_all = os.listdir("%s/coincident/%s/%s/"%(ppdir,coin_group,coin_mode))
-	files_final = []
-	for f in files_all:
-		if f.split('_')[2] == ifos_together:
-			files_final += [f]
-	files_final = sorted(files_final)
-	
+		
 	#Loop through the files
 	for tshift_num in xrange(len(tshift_dic[ifo_list[0]])):
 		#Load in coincident omicron data for each timeslide
-		tshift_num = int(terms[5].split("tsnum")[1])
 		try:
 			data_array = np.genfromtxt("%s/coincident/%s/%s/triggers_coincident_%s_tc%s_snr%s_tsnum%s_.txt"%(ppdir,coin_group,coin_mode,ifos_together,t_coin,snr_coin,tshift_num)).reshape( (-1,4*(len(ifo_list)+1)) )
 		except IOError:
