@@ -284,7 +284,7 @@ def time_slide(trig_files1, trig_files2, ts_list_1, ts_list_2, ifos1, ifo2, t_co
 	return new_trigfiles
 
 ###
-def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode, ppdir):
+def LIB_trig_production(ifo_list, tshift_dic, LIB_window, t_coin, snr_coin, coin_group, coin_mode, ppdir):
 	"""
 	Downselect triggers by performing log likelihood ratio thresholding test
 	"""
@@ -310,12 +310,11 @@ def LIB_trig_production(ifo_list, tshift_dic, LIB_window, coin_group, coin_mode,
 	files_final = sorted(files_final)
 	
 	#Loop through the files
-	for f in files_final:
+	for tshift_num in xrange(len(tshift_dic[ifo_list[0]])):
 		#Load in coincident omicron data for each timeslide
-		terms = f.split("_")
-		tshift_num = float(terms[5].split("tsnum")[1])
+		tshift_num = int(terms[5].split("tsnum")[1])
 		try:
-			data_array = np.genfromtxt("%s/coincident/%s/%s/%s"%(ppdir,coin_group,coin_mode,f)).reshape( (-1,4*(len(ifo_list)+1)) )
+			data_array = np.genfromtxt("%s/coincident/%s/%s/triggers_coincident_%s_tc%s_snr%s_tsnum%s_.txt"%(ppdir,coin_group,coin_mode,ifos_together,t_coin,snr_coin,tshift_num)).reshape( (-1,4*(len(ifo_list)+1)) )
 		except IOError:
 			data_array = np.array([])
 				
@@ -752,7 +751,7 @@ def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, LIB_wind
 		os.makedirs("%s/LIB_trigs/%s/%s/"%(ppdir,coin_group,coin_mode))
 	os.system('rm %s/LIB_trigs/%s/%s/*'%(ppdir,coin_group,coin_mode))
 
-	LIB_trig_production(ifo_list=coin_ifos, tshift_dic=coin_ts_dic, LIB_window=LIB_window, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir)
+	LIB_trig_production(ifo_list=coin_ifos, tshift_dic=coin_ts_dic, LIB_window=LIB_window, t_coin=t_coin, snr_coin=snr_coin, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir)
 	print "Down-selected trigs to run LIB on for %s %s"%(coin_group, coin_mode)
 	
 ##############################################

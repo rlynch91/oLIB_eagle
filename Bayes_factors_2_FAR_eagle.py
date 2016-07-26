@@ -178,7 +178,7 @@ if __name__=='__main__':
 
 		if coin_mode == '0lag':
 			try:
-				trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0.0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
+				trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
 				for line in trig_info_array:
 					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
 						dictionary[event]['Omicron SNR'] = {}
@@ -193,7 +193,7 @@ if __name__=='__main__':
 		
 		elif coin_mode == 'sig_train':
 			try:
-				trig_info_array = np.genfromtxt("%s/PostProc_sig_train/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0.0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
+				trig_info_array = np.genfromtxt("%s/PostProc_sig_train/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,'LIB_trigs_%s_tsnum0_.txt'%coin_group)).reshape((-1,4*(len(ifos)+1)))
 				for line in trig_info_array:
 					if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
 						dictionary[event]['Omicron SNR'] = {}
@@ -207,23 +207,24 @@ if __name__=='__main__':
 				pass
 		
 		elif coin_mode == 'back' or coin_mode == 'noise_train':
-			trig_files = sorted(os.listdir("%s/PostProc/LIB_trigs/%s/%s/"%(segdir,coin_group,coin_mode)))
-			for f in trig_files:
-				f_split = f.split('tsnum')
-				if (f_split[0] == 'LIB_trigs_%s_'%coin_group) and (float(f_split[1].split('_.txt')[0]) != 0):
-					try:
-						trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/%s"%(segdir,coin_group,coin_mode,f)).reshape((-1,4*(len(ifos)+1)))
-						for line in trig_info_array:
-							if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
-								dictionary[event]['Omicron SNR'] = {}
-								dictionary[event]['Omicron SNR']['Network'] = line[2]
-								for i,ifo in enumerate(ifos):
-									dictionary[event]['Omicron SNR'][ifo] = line[4*(i+1) + 2]
-								event += 1
-							else:
-								raise ValueError("The event and trig time do not match up when finding Omicron SNR")
-					except IOError:
-						pass
+			if coin_mode == 'back':
+				ts_name = 'back timeslides'
+			elif coin_mode == 'noise_train':
+				ts_name = 'training timeslides'
+			for tshift_num in xrange(len(run_dic['coincidence'][coin_group][ts_name][ifos[0]])):
+				try:
+					trig_info_array = np.genfromtxt("%s/PostProc/LIB_trigs/%s/%s/LIB_trigs_%s_tsnum%s_.txt"%(segdir,coin_group,coin_mode,coin_group, tshift_num)).reshape((-1,4*(len(ifos)+1)))
+					for line in trig_info_array:
+						if np.absolute(float(dictionary[event]['gpstime']) - line[0]) <= 0.01:
+							dictionary[event]['Omicron SNR'] = {}
+							dictionary[event]['Omicron SNR']['Network'] = line[2]
+							for i,ifo in enumerate(ifos):
+								dictionary[event]['Omicron SNR'][ifo] = line[4*(i+1) + 2]
+							event += 1
+						else:
+							raise ValueError("The event and trig time do not match up when finding Omicron SNR")
+				except IOError:
+					pass
 
 		#Construct LLRT object for the set of events if dealing with 0lag runs
 		if coin_mode == '0lag':
@@ -318,37 +319,38 @@ if __name__=='__main__':
 				background_data['BCI']['data'] = back_coords[:,1]
 
 				#Initialize the LLRT object
-				LLRT = LLRT_object_eagle.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=foreground_data, background_data=background_data)
+				if foreground_data['npoints'] > 0:
+					LLRT = LLRT_object_eagle.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=foreground_data, background_data=background_data)
 
-				#Calculate FAR for each foreground event wrt background events
-				event_LLRs = LLRT.log_likelihood_ratios(groundtype='Foreground')
-				for event,event_LLR in zip(events,event_LLRs):
-					dictionary[event]['raw FAR'] = LLRT.calculate_FAR_of_thresh(threshold=event_LLR, livetime=float_back_livetime, groundtype='Background')
-					dictionary[event]['trials factor'] = trials_factor
-					dictionary[event]['FAR'] = dictionary[event]['raw FAR'] * trials_factor
-				
-					#Upload events to GDB if exceed FAR threshold
-					if (dictionary[event]['FAR'] <= FAR_thresh) and (gdb_flag):		
-						#Save dictionary as json file
-						dic_path = segdir+'/GDB/%s.json'%('%s-%s'%(dictionary[event]['gpstime'],event))
-						if not os.path.exists("%s/GDB/"%segdir):
-							os.makedirs("%s/GDB/"%segdir)
-						with open(dic_path, 'wt') as fp:
-							json.dump(dictionary[event], fp)
-						
-						#Upload dictionary to GraceDb
-						response = gdb.createEvent('Burst','LIB',dic_path, search='AllSky', filecontents=None)
-						
-						#Parse GraceDb ID so that labels can be applied
-						response = json.loads(response.read())
-						gid = response["graceid"]
-						
-						#Mark GraceDb event as hardware injection if need be
-						if any([run_dic['data']['inj flags'][ifo] for ifo in ifos]):
-							gdb.writeLabel(gid, 'INJ')
-		
-						#Mark that event has been uploaded to GDB
-						dictionary[event]['GDB upload'] = True
+					#Calculate FAR for each foreground event wrt background events
+					event_LLRs = LLRT.log_likelihood_ratios(groundtype='Foreground')
+					for event,event_LLR in zip(events,event_LLRs):
+						dictionary[event]['raw FAR'] = LLRT.calculate_FAR_of_thresh(threshold=event_LLR, livetime=float_back_livetime, groundtype='Background')
+						dictionary[event]['trials factor'] = trials_factor
+						dictionary[event]['FAR'] = dictionary[event]['raw FAR'] * trials_factor
+					
+						#Upload events to GDB if exceed FAR threshold
+						if (dictionary[event]['FAR'] <= FAR_thresh) and (gdb_flag):		
+							#Save dictionary as json file
+							dic_path = segdir+'/GDB/%s.json'%('%s-%s'%(dictionary[event]['gpstime'],event))
+							if not os.path.exists("%s/GDB/"%segdir):
+								os.makedirs("%s/GDB/"%segdir)
+							with open(dic_path, 'wt') as fp:
+								json.dump(dictionary[event], fp)
+							
+							#Upload dictionary to GraceDb
+							response = gdb.createEvent('Burst','LIB',dic_path, search='AllSky', filecontents=None)
+							
+							#Parse GraceDb ID so that labels can be applied
+							response = json.loads(response.read())
+							gid = response["graceid"]
+							
+							#Mark GraceDb event as hardware injection if need be
+							if any([run_dic['data']['inj flags'][ifo] for ifo in ifos]):
+								gdb.writeLabel(gid, 'INJ')
+			
+							#Mark that event has been uploaded to GDB
+							dictionary[event]['GDB upload'] = True
 		
 		#If in signal training mode, match the LIB event with its injection 
 		if coin_mode == 'sig_train':
@@ -400,7 +402,7 @@ if __name__=='__main__':
 		if run_dic['run mode']['tar LIB']:
 			with tarfile.open('%s/LIB/%s/%s.tar.gz'%(segdir,coin_group,coin_mode), "w:gz") as tar:
 				tar.add('%s/LIB/%s/%s'%(segdir,coin_group,coin_mode))
-			os.system('rm %s/LIB/%s/%s -r'(segdir,coin_group,coin_mode))
+			os.system('rm %s/LIB/%s/%s -r'%(segdir,coin_group,coin_mode))
 		
 	elif run_mode == 'Offline':
 		pass

@@ -3,6 +3,7 @@
 import numpy as np
 import os
 import commands
+from pylal import Fr
 
 #=======================================================================
 
@@ -29,12 +30,9 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, r
 		frame_start = int(words[2])
 		frame_stride = int(words[3])
 		frame_file = words[4].split('file://localhost')[1]
-			
-		#Output state vector contents into outdir/tmp.txt
-		os.system('FrameDataDump -I%s -C%s:%s -d -a > %s/tmp.txt'%(frame_file,ifo,chname,outdir))
-		
+					
 		#Open state vector as array
-		state_array = np.genfromtxt('%s/tmp.txt'%outdir).reshape(-1)
+		state_array = Fr.frgetvect1d(filename=frame_file,channel='%s:%s'%(ifo,chname))[0]
 		
 		#Calculate sample rate
 		samp_rate = len(state_array)/float(frame_stride)
@@ -80,7 +78,6 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, r
 
 	cache.close()
 	segfile.close()
-	os.system('rm %s/tmp.txt'%outdir)
 	
 	#Return injection flag
 	return inj_flag
