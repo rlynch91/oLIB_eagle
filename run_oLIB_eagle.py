@@ -67,10 +67,12 @@ def initialize_segment(run_dic):
 	run_dic['data']['success flags'] = {}
 	run_dic['data']['skip flags'] = {}
 	run_dic['data']['inj flags'] = {}
+	run_dic['data']['DQV flags'] = {}
 	for ifo in run_dic['ifos']['names']:
 		run_dic['data']['success flags'][ifo] = False
 		run_dic['data']['skip flags'][ifo] = False
 		run_dic['data']['inj flags'][ifo] = False
+		run_dic['data']['DQV flags'][ifo] = False
 		
 	return segdir
 
@@ -90,6 +92,7 @@ def executable(run_dic):
 		wait = run_dic['config']['wait']
 		max_wait = run_dic['config']['max wait']
 		inj_runmode = run_dic['run mode']['inj runmode']
+		DQ_runmode = run_dic['run mode']['DQ runmode']
 		train_runmode = run_dic['run mode']['train runmode']
 		
 		channel_types = {}
@@ -165,12 +168,23 @@ def executable(run_dic):
 						run_dic['data']['inj flags'][ifo] = framecache2segs_eagle.executable(ifo=ifo, run_dic=run_dic) 
 						run_dic['data']['seg files'][ifo] = "%s/segments/%s_%s_%s.seg"%(segdir,ifo,start,stop)
 						
+						#check for data-quality vetoes
+						for dq_ch_name,dq_bit_mask in zip(run_dic['ifos'][ifo]['DQ']['DQ channel names'],run_dic['ifos'][ifo]['DQ']['DQ bitmasks']):
+							if run_dic['data']['DQV flags'][ifo] == True:
+								break
+							else:
+								run_dic['data']['DQV flags'][ifo] = checkDQ_eagle.executable(ifo=ifo, dq_chname=dq_ch_name, dq_bitmask=dq_bit_mask, run_dic=run_dic)
+								
 						#check if segment file is empty
 						if os.path.getsize(run_dic['data']['seg files'][ifo]) == 0:
 							run_dic['data']['skip flags'][ifo] = True
 								
-						#check if inj_flag corresponds to inj_runmode
+						#check if inj flag corresponds to inj_runmode
 						if ( (run_dic['data']['inj flags'][ifo] == True) and (inj_runmode == 'NonInj') ) or ( (run_dic['data']['inj flags'][ifo] == False) and (inj_runmode == 'Inj') ):
+							run_dic['data']['skip flags'][ifo] = True
+						
+						#check if DQV flag corresponds to DQV_runmode
+						if ( (run_dic['data']['DQV flags'][ifo] == True) and (DQ_runmode == 'NonDQV') ) or ( (run_dic['data']['DQV flags'][ifo] == False) and (DQ_runmode == 'DQV') ):
 							run_dic['data']['skip flags'][ifo] = True
 						
 						#flag that ifo is ready for condor submission (if not intended to be skipped)

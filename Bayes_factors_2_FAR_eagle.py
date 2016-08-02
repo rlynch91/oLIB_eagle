@@ -349,6 +349,10 @@ if __name__=='__main__':
 							if any([run_dic['data']['inj flags'][ifo] for ifo in ifos]):
 								gdb.writeLabel(gid, 'INJ')
 			
+							#Mark GraceDb event as data-quality veto if need be
+							if any([run_dic['data']['DQV flags'][ifo] for ifo in ifos]):
+								gdb.writeLabel(gid, 'DQV')
+
 							#Mark that event has been uploaded to GDB
 							dictionary[event]['GDB upload'] = True
 		

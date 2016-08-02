@@ -1,8 +1,6 @@
 #!/usr/bin/python
 
 import numpy as np
-import os
-import commands
 from pylal import Fr
 
 #=======================================================================
@@ -12,7 +10,7 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, r
 	"""
 	Takes a file containing the data quality state vetor and converts it to segments of a desired bitmask, returning injection status
 	"""
-	#Initialize injection status as True (will change if 'No injection' bits are on)
+	#Initialize injection status as False (will change if 'No injection' bits are off)
 	inj_flag = False
 	
 	#Open framecache file and segment file to write to

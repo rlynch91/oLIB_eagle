@@ -85,7 +85,7 @@ def executable(run_dic):
 		"gps-start-time":trig_start_time,
 		"gps-end-time":trig_end_time,
 		"time-step":100.,
-		"min-snr":(snr_thresh*np.sqrt(len(ifos)))/2.0,
+		"min-snr":(snr_thresh*np.sqrt(len(ifos)))*0.67,
 		"max-snr":1000000.,
 		"ifos":",".join(ifos),
 		"output": "%s/training_injections/raw/SG_seed_%s_hrss_%s_%s_time_%s_%s.xml"%(segdir,seed,min_hrss,max_hrss,mdc_start_time,mdc_end_time)
