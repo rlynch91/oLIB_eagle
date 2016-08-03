@@ -7,6 +7,7 @@ import commands
 import framecache2segs_eagle
 import inject_signal_training_eagle
 import write_omicron_2_LIB_dag_eagle
+import checkDQ_eagle
 
 #=======================================================================
 
