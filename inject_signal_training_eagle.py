@@ -2,9 +2,52 @@ import numpy as np
 import os
 import commands
 import re
+from pylal import Fr
 
 #=======================================================================
 
+###
+def add_signal_frames_to_noise_frames(noise_frame_file, noise_frame_channel, inj_frame_files, inj_frame_channel, ifo, outfile):
+	"""
+	Take noise frame and time-sorted injection frames, and write a single output frame containing both channels between start and stop of noise frame
+	"""	
+	#Load in noise frames and create value and time arrays
+	noise_value_array, noise_start_time, __, noise_dt, __, __ = Fr.frgetvect1d(filename=noise_frame_file,channel='%s:%s'%(ifo,noise_frame_channel))
+	len_noise_array = len(noise_value_array)
+	noise_time_array = np.arange(noise_start_time, noise_start_time + noise_dt*len_noise_array, noise_dt)
+
+	#Load in inj frames and create value and time arrays
+	inj_value_array = np.array([])
+	inj_time_array = np.array([])
+	for i,inj_frame_file in enumerate(inj_frame_files):
+		inj_array, inj_start_time, __, inj_dt, __, __ = Fr.frgetvect1d(filename=inj_frame_file,channel='%s:%s'%(ifo,inj_frame_channel))
+		len_inj_array = len(inj_array)
+		inj_value_array = np.concatenate( (inj_value_array, inj_array) )
+		inj_time_array = np.concatenate( (inj_time_array, np.arange(inj_start_time, inj_start_time + inj_dt*len_inj_array, inj_dt)) )
+		
+	#Loop through noise times, keeping inj values at corresponding times
+	inj_final_array = np.ones(len(noise_value_array))*np.nan
+	i_inj = 0
+	t_inj = inj_time_array[i_inj]
+	for i_noise,t_noise in enumerate(noise_time_array):
+		while t_inj < t_noise:
+			if i_inj >= (len(inj_time_array)-1):
+				break
+			else:
+				i_inj += 1
+				t_inj = inj_time_array[i_inj]
+		if t_inj == t_noise:
+			inj_final_array[i_noise] = inj_value_array[i_inj]
+		else:
+			inj_final_array[i_noise] = 0.
+	
+	#Save the final noise + inj array
+	frames_dic = {}
+	frames_dic['noise'] = dict(name='%s:%s'%(ifo,noise_frame_channel), data=noise_value_array, start=noise_start_time, dx=noise_dt, type=1)
+	frames_dic['inj'] = dict(name='%s:%s'%(ifo,inj_frame_channel), data=inj_final_array, start=noise_start_time, dx=noise_dt, type=1)
+
+	Fr.frputvect(outfile, frames_dic.values())
+	
 ###
 def executable(run_dic):
 	"""
@@ -30,14 +73,18 @@ def executable(run_dic):
 	
 	cache_files = {}
 	asd_files = {}
+	ch_names = {}
 	for ifo in ifos:
 		cache_files[ifo] = run_dic['data']['cache files'][ifo]
 		asd_files[ifo] = run_dic['training']['asd files'][ifo]
-
+		ch_names[ifo] = run_dic['ifos'][ifo]['channel name']
+		
 	#=======================================================================
 	#Make necessary folders
-	os.makedirs("%s/training_injections/raw"%segdir)
-	os.makedirs("%s/training_injections/merged"%segdir)
+	if not os.path.exists("%s/training_injections/raw"%segdir):
+		os.makedirs("%s/training_injections/raw"%segdir)
+	if not os.path.exists("%s/training_injections/merged"%segdir):
+		os.makedirs("%s/training_injections/merged"%segdir)
 
 	#Initialize mdc parameters
 	ifos_str = repr(",".join(ifos))  #"'H1,L1'"
@@ -139,22 +186,25 @@ def executable(run_dic):
 
 		#Get paths of data frames
 		dat_files = []
+		dat_starts = []
+		dat_durations = []
 		dat_cache = open(cache_files[ifo],'rt')
 		for line in dat_cache:
 			#Get frame_file from data cache
 			words = line.split()
-			frame_file = words[4].split('file://localhost')[1]
+			frame_file = words[4].split('file://localhost')[1].strip()
 			dat_files.append(frame_file)
-		dat_files = " ".join(dat_files).strip()
+			dat_starts.append(int(words[2]))
+			dat_durations.append(int(words[3]))
 
 		#Get paths of injection frames
 		inj_files = commands.getstatusoutput("ls %s/training_injections/raw/*.gwf"%segdir)[1]
-		inj_files = re.split('\n', inj_files)
-		inj_files = " ".join(inj_files).strip()
+		inj_files = [i.strip() for i in re.split('\n', inj_files)]
 
-		out_file = "%s/training_injections/merged/%s-DatInjMerge-%u-%u.gwf"%(segdir, ifo, mdc_start_time, mdc_duration)
-		os.system("FrCopy -i %s %s -o %s"%(inj_files, dat_files, out_file))
-		out_file_actual = commands.getstatusoutput("readlink -f %s"%out_file)[1]
-		cache.write("%s DatInjMerge %s %s %s\n"%(ifo, mdc_start_time, mdc_duration, "file://localhost"+out_file_actual))
-			
+		for i,dat_file in enumerate(dat_files):
+			out_file = "%s/training_injections/merged/%s-DatInjMerge-%u-%u.gwf"%(segdir, ifo, dat_starts[i], dat_durations[i])
+			add_signal_frames_to_noise_frames(noise_frame_file=dat_file, noise_frame_channel=ch_names[ifo], inj_frame_files=inj_files, inj_frame_channel='Science', ifo=ifo, outfile=out_file)
+			out_file_actual = commands.getstatusoutput("readlink -f %s"%out_file)[1]
+			cache.write("%s DatInjMerge %s %s %s\n"%(ifo, dat_starts[i], dat_durations[i], "file://localhost"+out_file_actual))			
+		
 		cache.close()

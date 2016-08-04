@@ -188,7 +188,7 @@ run_dic['training']['asd files']['L1'] = '/home/ryan.lynch/2nd_pipeline/pipeline
 ###
 run_dic['prior ranges'] = {}
 run_dic['prior ranges']['LIB window'] = 0.1
-run_dic['prior ranges']['min hrss'] = 3.3e-23
+run_dic['prior ranges']['min hrss'] = 1.0e-21  #3.3e-23
 run_dic['prior ranges']['max hrss'] = 1.0e-15
 run_dic['prior ranges']['min freq'] = 32
 run_dic['prior ranges']['max freq'] = 1024
