@@ -17,12 +17,21 @@ def run_inject_signal_training(run_dic):
 	"""
 	if not os.path.exists("%s/training_injections"%run_dic['seg dir']):
 		os.makedirs("%s/training_injections"%run_dic['seg dir'])
-	inject_signal_training_eagle.executable(run_dic=run_dic)
 	
-	for ifo in run_dic['ifos']['names']:
-		if run_dic['data']['success flags'][ifo]:
-			run_dic['data']['signal train cache files'][ifo] = "%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf"%(run_dic['seg dir'],ifo,run_dic['times']['start'],run_dic['times']['stop'])
-	print "Injected event for signal training"
+	#Check if there is data to inject into
+	if np.sum([run_dic['data']['success flags'][ifo_test] for ifo_test in run_dic['ifos']['names']]):
+		
+		#Inject signals
+		inject_signal_training_eagle.executable(run_dic=run_dic)
+		
+		#Point to injection cache
+		for ifo in run_dic['ifos']['names']:
+			if run_dic['data']['success flags'][ifo]:
+				run_dic['data']['signal train cache files'][ifo] = "%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf"%(run_dic['seg dir'],ifo,run_dic['times']['start'],run_dic['times']['stop'])
+		print "Injected events for signal training"
+	
+	else:
+		print "No ifo data to inject signal training events into"
 	
 ###
 def run_write_and_submit_dag(run_dic):
@@ -32,7 +41,7 @@ def run_write_and_submit_dag(run_dic):
 	write_omicron_2_LIB_dag_eagle.executable(run_dic=run_dic) 
 
 	#launch pipeline dag if not all data labeled to be skipped
-	if np.any([not run_dic['data']['skip flags'][ifo_test] for ifo_test in run_dic['ifos']['names']]):
+	if np.sum([run_dic['data']['success flags'][ifo_test] for ifo_test in run_dic['ifos']['names']]):
 		os.system("condor_submit_dag %s/dag/2ndPipeDag_%s_%s_%s.dag"%(run_dic['seg dir'],"".join(run_dic['ifos']['names']),run_dic['times']['actual start'],run_dic['config']['stride']-run_dic['config']['overlap']))
 		print "Submitted dag"
 	else:
@@ -153,7 +162,7 @@ def executable(run_dic):
 				elif check_before_start:
 					print "filled time for ifo", ifo, start, stop
 					#check if ifo has already been flagged as ready for condor submission
-					if not run_dic['data']['success flags'][ifo]:
+					if (not run_dic['data']['success flags'][ifo]) and (not run_dic['data']['skip flags'][ifo]):
 						#create necessary framecache for each ifo
 						if not os.path.exists("%s/framecache"%segdir):
 							os.makedirs("%s/framecache"%segdir)
@@ -250,7 +259,7 @@ def executable(run_dic):
 
 					#set skip flags to true for non-success ifos
 					for ifo_test in ifos:
-						if not run_dic['data']['success flags'][ifo_test]:
+						if (not run_dic['data']['success flags'][ifo_test]):
 							run_dic['data']['skip flags'][ifo_test] = True
 					
 					#if in signal training mode, inject signals and point to new cache files

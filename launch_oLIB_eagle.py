@@ -180,8 +180,8 @@ run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = '/
 ###
 run_dic['training'] = {}
 run_dic['training']['asd files'] = {}
-run_dic['training']['asd files']['H1'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/training_info/O1-H1-ASD.dat'
-run_dic['training']['asd files']['L1'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/training_info/O1-H1-ASD.dat'
+run_dic['training']['asd files']['H1'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/training_info/S6-H1-ASD.dat'
+run_dic['training']['asd files']['L1'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/training_info/S6-H1-ASD.dat'
 #run_dic['training']['asd files']['V1'] = None
 
 ###
