@@ -147,8 +147,8 @@ def executable(ifo, run_dic):
 	abs_start = run_dic['times']['start']
 	abs_stop = run_dic['times']['stop']
 	outdir = '%s/segments/'%run_dic['seg dir']
-	run_bitmask = run_dic['config']['run bitmask']
-	inj_bitmask = run_dic['config']['inj bitmask']
+	run_bitmask = run_dic['ifos'][ifo]['run bitmask']
+	inj_bitmask = run_dic['ifos'][ifo]['inj bitmask']
 	
 	#Produce and merge segments from framecache state vectors
 	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, run_bitmask=run_bitmask, inj_bitmask=inj_bitmask)
