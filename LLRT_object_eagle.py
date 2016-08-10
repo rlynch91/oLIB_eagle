@@ -886,6 +886,6 @@ class LLRT(object):
 		
 		#Check to make sure the minimum was found successfully
 		if min_object['success'] == False:
-			raise ValueError, "Optimization of the bandwidths has failed with message: ", min_object['message']
+			raise ValueError, "Optimization of the bandwidths has failed with message: %s"%(min_object['message'])
 			
 		return min_object['x']

@@ -22,7 +22,7 @@ def check_parameter_space(dic_entry, search_bin, train_details_dic):
 	logBSN_max = train_details_dic['search bins'][search_bin]['high logBSN cut']
 	
 	#Check to see if the event lies within the defined parameter space
-	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (dic_entry['logBSN'] >= logBSN_min) and (dic_entry['logBSN'] <= logBSN_max):
+	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (np.log10(dic_entry['BSN']) >= logBSN_min) and (np.log10(dic_entry['BSN']) <= logBSN_max):
 		flag = True
 	else:
 		flag = False
@@ -141,8 +141,8 @@ if __name__=='__main__':
 					break
 
 	#Save updated dictionary
-	pickle.dump(updated_signal_dic,open('%s/Noise_training_dictionary_new.pkl'%(outdir),'wt'))
-	pickle.dump(updated_noise_dic,open('%s/Signal_training_dictionary_new.pkl'%(outdir),'wt'))
+	pickle.dump(updated_signal_dic,open('%s/Signal_training_dictionary_new.pkl'%(outdir),'wt'))
+	pickle.dump(updated_noise_dic,open('%s/Noise_training_dictionary_new.pkl'%(outdir),'wt'))
 
 	#-----------------------------------------------------------------------
 
@@ -164,8 +164,7 @@ if __name__=='__main__':
 	sig_logBSN = np.ones(len(updated_signal_dic))*np.nan
 	sig_BCI = np.ones(len(updated_signal_dic))*np.nan
 	for i, key in enumerate(updated_signal_dic):
-		print updated_signal_dic[key]
-		sig_logBSN[i] = updated_signal_dic[key]['logBSN']
+		sig_logBSN[i] = np.log10(updated_signal_dic[key]['BSN'])
 		sig_BCI[i] = updated_signal_dic[key]['BCI']
 		
 	sig_logBSN = sig_logBSN[ sig_logBSN >= -np.inf ]
@@ -179,7 +178,7 @@ if __name__=='__main__':
 	noise_logBSN = np.ones(len(updated_noise_dic))*np.nan
 	noise_BCI = np.ones(len(updated_noise_dic))*np.nan
 	for i, key in enumerate(updated_noise_dic):
-		noise_logBSN[i] = updated_noise_dic[key]['logBSN']
+		noise_logBSN[i] = np.log10(updated_noise_dic[key]['BSN'])
 		noise_BCI[i] = updated_noise_dic[key]['BCI']
 	
 	noise_logBSN = noise_logBSN[ noise_logBSN >= -np.inf ]
@@ -205,3 +204,4 @@ if __name__=='__main__':
 	os.system('mv %s/%s_Signal_KDE_bandwidths_new.npy %s/%s_Signal_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('mv %s/Noise_training_dictionary_new.pkl %s/Noise_training_dictionary.pkl'%(outdir,outdir))
 	os.system('mv %s/Signal_training_dictionary_new.pkl %s/Signal_training_dictionary.pkl'%(outdir,outdir))
+	

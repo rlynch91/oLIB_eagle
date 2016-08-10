@@ -26,7 +26,7 @@ def check_parameter_space(dic_entry, search_bin, run_dic):
 	logBSN_max = run_dic['search bins'][search_bin]['high logBSN cut']
 	
 	#Check to see if the event lies within the defined parameter space
-	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (dic_entry['logBSN'] >= logBSN_min) and (dic_entry['logBSN'] <= logBSN_max):
+	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (np.log10(dic_entry['BSN']) >= logBSN_min) and (np.log10(dic_entry['BSN']) <= logBSN_max):
 		flag = True
 	else:
 		flag = False
@@ -280,7 +280,7 @@ if __name__=='__main__':
 
 				for i,event in enumerate(dictionary):
 					if check_parameter_space(dictionary[event],search_bin=search_bin,run_dic=run_dic) == True:
-						logBSNs[i] = dictionary[event]['logBSN']
+						logBSNs[i] = np.log10(dictionary[event]['BSN'])
 						BCIs[i] = dictionary[event]['BCI']
 						events[i] = event
 					else:
@@ -307,7 +307,7 @@ if __name__=='__main__':
 
 				for i,key in enumerate(back_dic):
 					if check_parameter_space(back_dic[key],search_bin=search_bin,run_dic=run_dic) == True:
-						back_coords[i,0] = back_dic[key]['logBSN']
+						back_coords[i,0] = np.log10(back_dic[key]['BSN'])
 						back_coords[i,1] = back_dic[key]['BCI']
 					else:
 						pass
