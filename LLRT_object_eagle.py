@@ -555,7 +555,7 @@ class LLRT(object):
 		return np.sort(self.log_likelihood_ratios(groundtype='Background'))[-1]
 	
 	###	
-	def save_group_KDE(self, model, groupname, outdir):
+	def save_group_KDE(self, model, groupname, outdir, label):
 		"""
 		Save KDE estimations for a given parameter group for a given model (signal or noise)
 		"""
@@ -569,21 +569,21 @@ class LLRT(object):
 			pass
 		
 		#Save binary files cotaining both KDE coordinates and KDE values
-		np.save('%s/%s_%s_log_KDE_coords.npy'%(outdir,groupname,model), dic[groupname]['KDE'][0])
-		np.save('%s/%s_%s_log_KDE_values.npy'%(outdir,groupname,model), dic[groupname]['KDE'][1])
+		np.save('%s/%s_%s_log_KDE_coords_%s.npy'%(outdir,groupname,model,label), dic[groupname]['KDE'][0])
+		np.save('%s/%s_%s_log_KDE_values_%s.npy'%(outdir,groupname,model,label), dic[groupname]['KDE'][1])
 		
 	###	
-	def save_all_KDE(self, outdir):
+	def save_all_KDE(self, outdir, label):
 		"""
 		Save all KDE estimations, for all parameter groups for both signal and noise
 		"""
 		#Iterate over all parameter groups
 		for group in self.group_names:
-			self.save_group_KDE(model='Signal', groupname=group, outdir=outdir)
-			self.save_group_KDE(model='Noise', groupname=group, outdir=outdir)
+			self.save_group_KDE(model='Signal', groupname=group, outdir=outdir, label=label)
+			self.save_group_KDE(model='Noise', groupname=group, outdir=outdir, label=label)
 	
 	###	
-	def save_group_bandwidths(self, model, groupname, outdir):
+	def save_group_bandwidths(self, model, groupname, outdir, label):
 		"""
 		Save KDE bandwidths for a given parameter group for a given model (signal or noise)
 		"""
@@ -597,17 +597,17 @@ class LLRT(object):
 			pass
 		
 		#Save binary files cotaining both KDE coordinates and KDE values
-		np.save('%s/%s_%s_KDE_bandwidths.npy'%(outdir,groupname,model), dic[groupname]['KDE bandwidths'])
+		np.save('%s/%s_%s_KDE_bandwidths_%s.npy'%(outdir,groupname,model,label), dic[groupname]['KDE bandwidths'])
 		
 	###	
-	def save_all_bandwidths(self, outdir):
+	def save_all_bandwidths(self, outdir, label):
 		"""
 		Save all KDE bandwidths, for all parameter groups for both signal and noise
 		"""
 		#Iterate over all parameter groups
 		for group in self.group_names:
-			self.save_group_bandwidths(model='Signal', groupname=group, outdir=outdir)
-			self.save_group_bandwidths(model='Noise', groupname=group, outdir=outdir)
+			self.save_group_bandwidths(model='Signal', groupname=group, outdir=outdir, label=label)
+			self.save_group_bandwidths(model='Noise', groupname=group, outdir=outdir, label=label)
 	
 	###		
 	def plot_group_log_likelihoods(self, groupname, outdir):
