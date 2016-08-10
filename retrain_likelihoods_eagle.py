@@ -22,7 +22,7 @@ def check_parameter_space(dic_entry, search_bin, train_details_dic):
 	logBSN_max = train_details_dic['search bins'][search_bin]['high logBSN cut']
 	
 	#Check to see if the event lies within the defined parameter space
-	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (np.log10(dic_entry['BSN']) >= logBSN_min) and (np.log10(dic_entry['BSN']) <= logBSN_max):
+	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (dic_entry['logBSN'] >= logBSN_min) and (dic_entry['logBSN'] <= logBSN_max):
 		flag = True
 	else:
 		flag = False
@@ -57,8 +57,8 @@ if __name__=='__main__':
 	new_noise_dic = pickle.load(open(opts.new_noise_dic))
 	old_signal_dic = pickle.load(open(opts.old_sig_dic))
 	old_noise_dic = pickle.load(open(opts.old_noise_dic))
-	old_signal_bands = np.genfromtxt(opts.old_sig_bands)
-	old_noise_bands = np.genfromtxt(opts.old_noise_bands)
+	old_signal_bands = np.load(opts.old_sig_bands)
+	old_noise_bands = np.load(opts.old_noise_bands)
 	outdir = opts.outdir
 	max_signal_size = opts.max_signal_size
 	max_noise_size = opts.max_noise_size
@@ -70,14 +70,14 @@ if __name__=='__main__':
 	#################################
 	# Copy old data to backup files #
 	#################################
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
-	os.system('cp ???')
+	os.system('cp %s/%s_Noise_log_KDE_coords.npy %s/%s_Noise_log_KDE_coords_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/%s_Noise_log_KDE_values.npy %s/%s_Noise_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/%s_Signal_log_KDE_coords.npy %s/%s_Signal_log_KDE_coords_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/%s_Signal_log_KDE_values.npy %s/%s_Signal_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/%s_Noise_KDE_bandwidths.npy %s/%s_Noise_KDE_bandwidths_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/%s_Signal_KDE_bandwidths.npy %s/%s_Signal_KDE_bandwidths_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s/Noise_training_dictionary.pkl %s/Noise_training_dictionary_old.pkl'%(outdir,outdir))
+	os.system('cp %s/Signal_training_dictionary.pkl %s/Signal_training_dictionary_old.pkl'%(outdir,outdir))
 
 	################################
 	# Update training dictionaries #
@@ -96,7 +96,7 @@ if __name__=='__main__':
 		for key in new_signal_dic:
 			if check_parameter_space(dic_entry=new_signal_dic[key], search_bin=search_bin, train_details_dic=train_details_dic) and new_signal_dic[key]['Training injection']:
 				#Event should be used in training
-				updated_signal_dic[event] = new_signal_dic[key]
+				updated_signal_dic[event_signal] = new_signal_dic[key]
 				
 				#Update the number of events currently in training dictionary
 				event_signal += 1
@@ -108,7 +108,7 @@ if __name__=='__main__':
 		for key in old_signal_dic:
 			if check_parameter_space(dic_entry=old_signal_dic[key], search_bin=search_bin, train_details_dic=train_details_dic) and old_signal_dic[key]['Training injection']:
 				#Event should be used in training
-				updated_signal_dic[event] = old_signal_dic[key]
+				updated_signal_dic[event_signal] = old_signal_dic[key]
 				
 				#Update the number of events currently in training dictionary
 				event_signal += 1
@@ -121,7 +121,7 @@ if __name__=='__main__':
 		for key in new_noise_dic:
 			if check_parameter_space(dic_entry=new_noise_dic[key], search_bin=search_bin, train_details_dic=train_details_dic):
 				#Event should be used in training
-				updated_noise_dic[event] = new_noise_dic[key]
+				updated_noise_dic[event_noise] = new_noise_dic[key]
 				
 				#Update the number of events currently in training dictionary
 				event_noise += 1
@@ -133,7 +133,7 @@ if __name__=='__main__':
 		for key in old_noise_dic:
 			if check_parameter_space(dic_entry=old_noise_dic[key], search_bin=search_bin, train_details_dic=train_details_dic):
 				#Event should be used in training
-				updated_noise_dic[event] = old_noise_dic[key]
+				updated_noise_dic[event_noise] = old_noise_dic[key]
 				
 				#Update the number of events currently in training dictionary
 				event_noise += 1
@@ -141,8 +141,8 @@ if __name__=='__main__':
 					break
 
 	#Save updated dictionary
-	pickle.dump(updated_signal_dic,open('%s/???_new.pkl'%(outdir),'wt'))
-	pickle.dump(updated_noise_dic,open('%s/???_new.pkl'%(outdir),'wt'))
+	pickle.dump(updated_signal_dic,open('%s/Noise_training_dictionary_new.pkl'%(outdir),'wt'))
+	pickle.dump(updated_noise_dic,open('%s/Signal_training_dictionary_new.pkl'%(outdir),'wt'))
 
 	#-----------------------------------------------------------------------
 
@@ -164,6 +164,7 @@ if __name__=='__main__':
 	sig_logBSN = np.ones(len(updated_signal_dic))*np.nan
 	sig_BCI = np.ones(len(updated_signal_dic))*np.nan
 	for i, key in enumerate(updated_signal_dic):
+		print updated_signal_dic[key]
 		sig_logBSN[i] = updated_signal_dic[key]['logBSN']
 		sig_BCI[i] = updated_signal_dic[key]['BCI']
 		
@@ -196,11 +197,11 @@ if __name__=='__main__':
 	#################################
 	# Move new data to proper files #
 	#################################
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
-	os.system('mv ???')
+	os.system('mv %s/%s_Noise_log_KDE_coords_new.npy %s/%s_Noise_log_KDE_coords.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s/%s_Noise_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s/%s_Signal_log_KDE_coords.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s/%s_Signal_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Noise_KDE_bandwidths_new.npy %s/%s_Noise_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Signal_KDE_bandwidths_new.npy %s/%s_Signal_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/Noise_training_dictionary_new.pkl %s/Noise_training_dictionary.pkl'%(outdir,outdir))
+	os.system('mv %s/Signal_training_dictionary_new.pkl %s/Signal_training_dictionary.pkl'%(outdir,outdir))

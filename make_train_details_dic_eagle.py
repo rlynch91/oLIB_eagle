@@ -2,14 +2,15 @@ import sys
 sys.path.insert(1,'/home/ryan.lynch/numpy/numpy-1.8.2-INSTALL/lib64/python2.7/site-packages')
 import numpy as np
 import pickle
+import os
 
 ###
 dictionary = {}
 
 ###
 dictionary['calc info'] = {}
-dictionary['calc_info']['interp method'] = 'Grid Linear'
-dictionary['calc_info']['extrap method'] = 'Grid Nearest'
+dictionary['calc info']['interp method'] = 'Grid Linear'
+dictionary['calc info']['extrap method'] = 'Grid Nearest'
 
 ###
 dictionary['param info'] = {}
@@ -62,4 +63,19 @@ dictionary['train noise data']['low f']['BCI']['KDE bandwidths'] = np.array([np.
 dictionary['train noise data']['low f']['BCI']['KDE points'] = np.array([100])
 
 ###
-pickle.dump(dictionary, open('???.pkl','wt'))
+dictionary['search bins'] = {}
+dictionary['search bins']['bin names'] = ['low f']
+dictionary['search bins']['low f'] = {}
+dictionary['search bins']['low f']['low logBSN cut'] = 0
+dictionary['search bins']['low f']['high logBSN cut'] = 6
+dictionary['search bins']['low f']['low BCI cut'] = 1
+dictionary['search bins']['low f']['high BCI cut'] = np.inf
+dictionary['search bins']['low f']['low freq cut'] = 48
+dictionary['search bins']['low f']['high freq cut'] = 1024
+dictionary['search bins']['low f']['low quality cut'] = 2
+dictionary['search bins']['low f']['high quality cut'] = 108
+
+###
+if not os.path.exists('/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/'):
+	os.makedirs('/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/')
+pickle.dump(dictionary, open('/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_LLRT_info/training_details_dictionary.pkl','wt'))
