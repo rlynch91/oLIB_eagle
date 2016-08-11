@@ -18,9 +18,11 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 		summary_files[group] = open('%s/%s/%s/%s_%s_%s_summary.txt'%(outdir,mode,group,gps_day,mode,group),'wt')
 	
 	#Initialize collection dictionary
+	total_lts = {}
 	dictionary = {}
 	events = {}
 	for group in ifo_groups:
+		total_lts[group] = 0.
 		dictionary[group] = {}
 		events[group] = 0
 	
@@ -29,6 +31,28 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 	start_times = [float(f.split('_')[1]) for f in files]
 	files_sorted = sorted(zip(start_times,files), key = lambda x:x[0])[::-1]
 	for time,f in files_sorted:
+		#Check to see if livetime was analyzed
+		time_flags = {}
+		tmp_lts = {}
+		for group in ifo_groups:
+			time_flags[group] = False
+			tmp_lts[group] = np.nan
+			if mode == 'sig_train':
+				if os.path.isfile('%s/%s/%s/PostProc_sig_train/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)):
+					time_flags[group] = True
+					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc_sig_train/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)))
+					total_lts[group] += tmp_lts[group]
+			elif mode == '0lag':
+				if os.path.isfile('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)):
+					time_flags[group] = True
+					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)))
+					total_lts[group] += tmp_lts[group]
+			elif (mode == 'back') or (mode == 'noise_train'):
+				if os.path.isfile('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)):
+					time_flags[group] = True
+					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)))
+					total_lts[group] += tmp_lts[group]
+		
 		#Check to see if the dag failed
 		fail_flag = False
 		dag_missing_flag = False
@@ -55,23 +79,24 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 		
 			#Write status to summary files for each group
 			if fail_flag:
-				summary_files[group].write('%s\t%s\n'%(f,'Dag failed'))
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Dag failed'))
 			elif dag_missing_flag:
-				summary_files[group].write('%s\t%s\n'%(f,'Dag not created'))			
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Dag not created'))			
 			elif no_results_flag:
-				summary_files[group].write('%s\t%s\n'%(f,'No results to collect'))
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'No results to collect'))
 			elif collected_flag:
-				summary_files[group].write('%s\t%s\n'%(f,'Succesfully collected results'))
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Succesfully collected results'))
 			else:
-				summary_files[group].write('%s\t%s\n'%(f,'Unknown'))
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Unknown'))
 		
 	#Close summary files
 	for group in ifo_groups:
 		summary_files[group].close()
 		
-	#Save dictionaries
+	#Save dictionaries and livetimes
 	for group in ifo_groups:
 		pickle.dump(dictionary[group], open('%s/%s/%s/%s_%s_%s_results.pkl'%(outdir,mode,group,gps_day,mode,group),'wt'))
+		np.savetxt('%s/%s/%s/%s_%s_%s_livetime.txt'%(outdir,mode,group,gps_day,mode,group),np.array([total_lts[group]]))
 		
 ##############################################
 if __name__=='__main__':
