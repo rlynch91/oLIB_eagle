@@ -4,6 +4,7 @@ import sys
 sys.path.insert(1,'/home/ryan.lynch/numpy/numpy-1.8.2-INSTALL/lib64/python2.7/site-packages')
 import numpy as np
 from pylal import Fr
+import os
 
 #=======================================================================
 
@@ -154,10 +155,9 @@ def executable(ifo, run_dic):
 	
 	#Produce and merge segments from framecache state vectors
 	inj_status = framecache2segs(framecache_file=framecache_file, chname=chname, abs_start=abs_start, abs_stop=abs_stop, outdir=outdir, ifo=ifo, run_bitmask=run_bitmask, inj_bitmask=inj_bitmask)
-	try:
+	if os.path.getsize('%s/%s_%s_%s.seg'%(outdir,ifo,abs_start,abs_stop)) > 0:
 		merge_segs(seg_file='%s/%s_%s_%s.seg'%(outdir,ifo,abs_start,abs_stop))
-	except IOError:
-		pass
+
 	return inj_status
 
 

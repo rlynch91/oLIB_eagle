@@ -75,7 +75,7 @@ def executable(run_dic):
 			os.makedirs("%s/runfiles/"%segdir)
 
 		#open dag file
-		dagfile = open("%s/dag/2ndPipeDag_%s_%s_%s.dag"%(segdir,"".join(ifos),actual_start,stride-overlap),'wt')
+		dagfile = open("%s/dag/2ndPipeDag_%s_%s_%s.dag"%(segdir,"".join(ifos_all),actual_start,stride-overlap),'wt')
 
 		#initialize job number
 		job = 0
@@ -350,7 +350,28 @@ def executable(run_dic):
 
 							#Done with job
 							job += 1
-			
+		
+		########################################
+		### Write DAG to zip and tar results ###
+		########################################
+		zip_and_tar_jobs = []
+
+		#Copy omicron2LIB sub file to segdir
+		os.system('sed "s|SEGDIR|%s|g" %s/zip_and_tar_results_eagle.sub > %s/runfiles/zip_and_tar_results_eagle.sub'%(segdir,infodir,segdir))
+
+		#Write JOB
+		dagfile.write('JOB %s %s/runfiles/zip_and_tar_results_eagle.sub\n'%(job,segdir))
+		#Write VARS
+		dagfile.write('VARS %s macroid="zip_and_tar-%s" macroarguments="-r %s"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
+		#Write RETRY
+		dagfile.write('RETRY %s 0\n\n'%job)
+
+		#Record omicron2LIB job number
+		zip_and_tar_jobs += [job]
+
+		#Done with job
+		job += 1
+				
 		####################################
 		### Write parent-child relations ###
 		####################################
@@ -365,6 +386,7 @@ def executable(run_dic):
 			for child in omicron2LIB_sig_train_jobs:
 				dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 
+		#check if LIB was run
 		if LIB_flag:
 
 			#make each omicron2LIB job a parent to each lalinference_pipe job
@@ -386,6 +408,28 @@ def executable(run_dic):
 			for i in xrange(len(lalinference_pipe_sig_train_jobs)):
 				dagfile.write('PARENT %s CHILD %s\n'%(lalinference_pipe_sig_train_jobs[i],LIB_runs_sig_train_jobs[i]))
 				dagfile.write('PARENT %s CHILD %s\n'%(LIB_runs_sig_train_jobs[i],Bayes2FAR_sig_train_jobs[i]))					
+		
+			#make each Bayes2FAR job a parent to each zip_and_tar job
+			for parent in Bayes2FAR_jobs:
+				for child in zip_and_tar_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+					
+			#make each Bayes2FAR_sig_train job a parent to each zip_and_tar job
+			for parent in Bayes2FAR_sig_train_jobs:
+				for child in zip_and_tar_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+		
+		else:
+			
+			#make each omicron2LIB job a parent to each zip_and_tar job
+			for parent in omicron2LIB_jobs:
+				for child in zip_and_tar_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+		
+			#make each omicron2LIB_sig_train job a parent to each zip_and_tar job
+			for parent in omicron2LIB_sig_train_jobs:
+				for child in zip_and_tar_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 		
 		####################
 		### Save run_dic ###

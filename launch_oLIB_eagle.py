@@ -18,14 +18,14 @@ run_dic = {}
 run_dic['config'] = {}
 run_dic['config']['wait'] = 5
 run_dic['config']['max wait'] = 600
-run_dic['config']['run dir'] = '/home/ryan.lynch/public_html/S6_replay/'
+run_dic['config']['run dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_runs'
 run_dic['config']['info dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/'
 run_dic['config']['LIB bin dir'] = '/home/salvatore.vitale/lalsuites/burst_dev/o2_lib_20160720/bin/'
 run_dic['config']['initial start'] = None
 run_dic['config']['stride'] = 32
 run_dic['config']['overlap'] = 2
 run_dic['config']['sample freq'] = 2048
-run_dic['config']['oSNR thresh'] = 4.5  #5.0
+run_dic['config']['oSNR thresh'] = 5.0
 run_dic['config']['dt clust'] = 0.1
 
 ###
@@ -36,27 +36,26 @@ run_dic['run mode']['DQ runmode'] = 'NonDQV'
 run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = False
 run_dic['run mode']['LIB flag'] = True
-run_dic['run mode']['tar Omicron'] = False
-run_dic['run mode']['tar LIB'] = False
+run_dic['run mode']['tar results'] = True
 
 ###
 run_dic['ifos'] = {}
 run_dic['ifos']['names'] = ['H1','L1']
 run_dic['ifos']['H1'] = {}
-run_dic['ifos']['H1']['channel type'] = 'H1_LDAS_C02_L2'
+run_dic['ifos']['H1']['channel type'] = 'H1_S6_llhoft'
 run_dic['ifos']['H1']['channel name'] = 'LDAS-STRAIN'
-run_dic['ifos']['H1']['state channel name'] = 'IFO-SV_STATE_VECTOR'
+run_dic['ifos']['H1']['state channel name'] = 'LSC-DATA_QUALITY_VECTOR'
 run_dic['ifos']['H1']['run bitmask'] = 1
-run_dic['ifos']['H1']['inj bitmask'] = 8  #448  #480
+run_dic['ifos']['H1']['inj bitmask'] = 1  #448  #480
 run_dic['ifos']['H1']['DQ'] = {}
 run_dic['ifos']['H1']['DQ']['DQ channel names'] = ['LSC-DATA_QUALITY_VECTOR'] #[???]
 run_dic['ifos']['H1']['DQ']['DQ bitmasks'] = [1]  #[???]
 run_dic['ifos']['L1'] = {}
-run_dic['ifos']['L1']['channel type'] = 'L1_LDAS_C02_L2'
+run_dic['ifos']['L1']['channel type'] = 'L1_S6_llhoft'
 run_dic['ifos']['L1']['channel name'] = 'LDAS-STRAIN'
-run_dic['ifos']['L1']['state channel name'] = 'IFO-SV_STATE_VECTOR'
+run_dic['ifos']['L1']['state channel name'] = 'LSC-DATA_QUALITY_VECTOR'
 run_dic['ifos']['L1']['run bitmask'] = 1
-run_dic['ifos']['L1']['inj bitmask'] = 8  #448  #480
+run_dic['ifos']['L1']['inj bitmask'] = 1  #448  #480
 run_dic['ifos']['L1']['DQ'] = {}
 run_dic['ifos']['L1']['DQ']['DQ channel names'] = ['LSC-DATA_QUALITY_VECTOR']  #[???]
 run_dic['ifos']['L1']['DQ']['DQ bitmasks'] = [1]  #[???]
@@ -71,7 +70,7 @@ run_dic['coincidence'] = {}
 run_dic['coincidence']['H1L1'] = {}
 run_dic['coincidence']['H1L1']['ifos'] = ['H1','L1']
 run_dic['coincidence']['H1L1']['coincidence window'] = 0.015
-run_dic['coincidence']['H1L1']['coincidence snr thresh'] = 4.5  #5.0
+run_dic['coincidence']['H1L1']['coincidence snr thresh'] = 5.0
 run_dic['coincidence']['H1L1']['analyze 0lag'] = True
 run_dic['coincidence']['H1L1']['analyze back'] = True
 run_dic['coincidence']['H1L1']['analyze noise training'] = True
@@ -142,8 +141,8 @@ run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['param names'] = ['logB
 run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['interp range'] = np.array([[0., 6.],[0., 30.]])
 
 run_dic['LLRT']['H1L1'] = {}
-run_dic['LLRT']['H1L1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
-run_dic['LLRT']['H1L1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/Cat1Cat4Cat2Cat3_total_livetime.txt'
+run_dic['LLRT']['H1L1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
+run_dic['LLRT']['H1L1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/Cat1Cat4Cat2Cat3_total_livetime.txt'
 run_dic['LLRT']['H1L1']['low f'] = {}
 run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI'] = {}
 run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
@@ -218,7 +217,7 @@ if run_dic['run mode']['line'] == 'Online':
 		run_dic['config']['initial start'] = int(np.genfromtxt(run_dic['config']['run dir']+'/current_start.txt'))
 	else:
 		#Start running on current timestamp
-		run_dic['config']['initial start'] = int(commands.getstatusoutput('%s/lalapps_tconvert now'%bindir)[1]) - 500
+		run_dic['config']['initial start'] = int(commands.getstatusoutput('%s/lalapps_tconvert now'%run_dic['config']['LIB bin dir'])[1]) - 500
 
 #Launch oLIB
 run_oLIB_eagle.executable(run_dic=run_dic)

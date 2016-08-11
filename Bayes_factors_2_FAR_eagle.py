@@ -9,7 +9,6 @@ from ligo.gracedb.rest import GraceDb
 import json
 import LLRT_object_eagle
 import commands
-import tarfile
 
 #############################################
 #Define Functions
@@ -404,12 +403,6 @@ if __name__=='__main__':
 			os.makedirs("%s/results_dic/%s/%s/"%(segdir,coin_group,coin_mode))
 		pickle.dump(dictionary, open(trig_dic_path,'wt'))
 		os.system('> %s/results_dic/%s/%s/results_dic_ready_for_collection.txt'%(segdir,coin_group,coin_mode))
-
-		#Zip LIB folders now that they are no longer needed
-		if run_dic['run mode']['tar LIB']:
-			with tarfile.open('%s/LIB/%s/%s.tar.gz'%(segdir,coin_group,coin_mode), "w:gz") as tar:
-				tar.add('%s/LIB/%s/%s'%(segdir,coin_group,coin_mode))
-			os.system('rm %s/LIB/%s/%s -r'%(segdir,coin_group,coin_mode))
 		
 	elif run_mode == 'Offline':
 		pass

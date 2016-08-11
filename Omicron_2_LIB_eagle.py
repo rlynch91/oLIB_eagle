@@ -5,7 +5,6 @@ sys.path.insert(1,'/home/ryan.lynch/numpy/numpy-1.8.2-INSTALL/lib64/python2.7/si
 import numpy as np
 import os
 import pickle
-import tarfile
 
 #############################################
 #Define Functions
@@ -632,7 +631,7 @@ def intersect_segments(seg_array1, seg_array2, ifos1, ifo2, ts_num, coin_group, 
 	return seg_intersect_nm
 
 ###
-def calculate_livetimes(seg_files1, seg_files2, ts_list_1, ts_list_2, ifos1, ifo2, coin_group, coin_mode, ppdir):
+def calculate_livetimes(seg_files1, seg_files2, ts_list_1, ts_list_2, ifos1, ifo2, coin_group, coin_mode, ppdir, segdir):
 	"""
 	Add up effective segments for 0-lag and for each timeslide to calculate effective livetimes
 	"""	
@@ -675,10 +674,12 @@ def calculate_livetimes(seg_files1, seg_files2, ts_list_1, ts_list_2, ifos1, ifo
 			timeslide_lt += ts_lt
 		
 	#Write summed livetimes to file
+	if not os.path.exists("%s/livetime/%s/%s/"%(segdir,coin_group,coin_mode)):
+		os.makedirs("%s/livetime/%s/%s/"%(segdir,coin_group,coin_mode))
 	if (coin_mode == "0lag") or (coin_mode == "sig_train"):
-		np.savetxt("%s/live_segs/%s/%s/livetime_0lag_%s%s.txt"%(ppdir,coin_group,coin_mode,ifos1,ifo2), np.array([zero_lag_lt]))
+		np.savetxt("%s/livetime/%s/%s/livetime_0lag_%s%s.txt"%(segdir,coin_group,coin_mode,ifos1,ifo2), np.array([zero_lag_lt]))
 	elif (coin_mode == "back") or (coin_mode == "noise_train"):
-		np.savetxt("%s/live_segs/%s/%s/livetime_timeslides_%s%s.txt"%(ppdir,coin_group,coin_mode,ifos1,ifo2), np.array([timeslide_lt]))
+		np.savetxt("%s/livetime/%s/%s/livetime_timeslides_%s%s.txt"%(segdir,coin_group,coin_mode,ifos1,ifo2), np.array([timeslide_lt]))
 	
 	#Return list of new intersected segment files
 	return new_segfiles
@@ -727,7 +728,7 @@ def get_LIB_trigs_from_clustered_trigs(run_dic, seg_files, clust_files, LIB_wind
 		clust_files_new = [clust_files[ifo_new]]*len(timeslides_new)
 						
 		#Live time intersection
-		coin_seg_files = calculate_livetimes(seg_files1=seg_files_prev, seg_files2=seg_files_new, ts_list_1=timeslides_prev, ts_list_2=timeslides_new, ifos1=ifos_prev, ifo2=ifo_new, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir)
+		coin_seg_files = calculate_livetimes(seg_files1=seg_files_prev, seg_files2=seg_files_new, ts_list_1=timeslides_prev, ts_list_2=timeslides_new, ifos1=ifos_prev, ifo2=ifo_new, coin_group=coin_group, coin_mode=coin_mode, ppdir=ppdir, segdir=run_dic['seg dir'])
 		print "Calculated total coincident live time for 0-lag and timeslides"
 
 		#coincidence
@@ -867,18 +868,7 @@ if __name__=='__main__':
 					#Do signal training coincidence		
 					if run_dic['coincidence'][key]['analyze signal training'] == True:
 						get_LIB_trigs_from_clustered_trigs(run_dic=run_dic, seg_files=seg_files, clust_files=clust_files, LIB_window=LIB_window, coin_group=key, coin_mode='sig_train', ppdir=ppdir)
-		
-		#Tar Omicron triggers now that they are no longer needed
-		if run_dic['run mode']['tar Omicron']:
-			if not sig_train_flag:
-				with tarfile.open('%s/raw.tar.gz'%run_dic['seg dir'], "w:gz") as tar:
-					tar.add('%s/raw'%run_dic['seg dir'])
-				os.system('rm %s/raw -r'%run_dic['seg dir'])
-			else:
-				with tarfile.open('%s/raw_sig_train.tar.gz'%run_dic['seg dir'], "w:gz") as tar:
-					tar.add('%s/raw_sig_train'%run_dic['seg dir'])
-				os.system('rm %s/raw_sig_train -r'%run_dic['seg dir'])
-							
+									
 		#Complete
 		print "Complete"
 
