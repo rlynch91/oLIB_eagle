@@ -357,10 +357,12 @@ def executable(run_dic):
 		zip_and_tar_jobs = []
 
 		#Copy omicron2LIB sub file to segdir
-		os.system('sed "s|SEGDIR|%s|g" %s/zip_and_tar_results_eagle.sub > %s/runfiles/zip_and_tar_results_eagle.sub'%(segdir,infodir,segdir))
+		if not os.path.exists("%s/tarfiles/"%segdir):
+			os.makedirs("%s/tarfiles/"%segdir)
+		os.system('sed "s|SEGDIR|%s|g" %s/zip_and_tar_results_eagle.sub > %s/tarfiles/zip_and_tar_results_eagle.sub'%(segdir,infodir,segdir))
 
 		#Write JOB
-		dagfile.write('JOB %s %s/runfiles/zip_and_tar_results_eagle.sub\n'%(job,segdir))
+		dagfile.write('JOB %s %s/tarfiles/zip_and_tar_results_eagle.sub\n'%(job,segdir))
 		#Write VARS
 		dagfile.write('VARS %s macroid="zip_and_tar-%s" macroarguments="-r %s"\n'%(job,job,'%s/run_dic/run_dic_%s_%s.pkl'%(segdir,actual_start,stride-overlap)))
 		#Write RETRY

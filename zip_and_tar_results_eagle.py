@@ -4,6 +4,7 @@ import sys
 sys.path.insert(1,'/home/ryan.lynch/numpy/numpy-1.8.2-INSTALL/lib64/python2.7/site-packages')
 import os
 import tarfile
+import pickle
 
 #############################################
 if __name__=='__main__':
@@ -51,6 +52,9 @@ if __name__=='__main__':
 	
 		#Tar signal training injection folder
 		if os.path.exists("%s/training_injections/"%segdir):
+			#First delete merged signal + noise frames
+			os.system('rm %s/training_injections/merged/* -r'%segdir)
+			#Then tar folder
 			with tarfile.open('%s/training_injections.tar.gz'%segdir, "w:gz") as tar:
 				tar.add('%s/training_injections'%segdir)
 			os.system('rm %s/training_injections -r'%segdir)
@@ -65,3 +69,20 @@ if __name__=='__main__':
 				tar.add('%s/PostProc_sig_train'%segdir)
 			os.system('rm %s/PostProc_sig_train -r'%segdir)
 		
+		#Tar runfiles folder
+		if os.path.exists("%s/runfiles/"%segdir):
+			with tarfile.open('%s/runfiles.tar.gz'%segdir, "w:gz") as tar:
+				tar.add('%s/runfiles'%segdir)
+			os.system('rm %s/runfiles -r'%segdir)
+
+		#Tar framecache folder
+		if os.path.exists("%s/framecache/"%segdir):
+			with tarfile.open('%s/framecache.tar.gz'%segdir, "w:gz") as tar:
+				tar.add('%s/framecache'%segdir)
+			os.system('rm %s/framecache -r'%segdir)
+		
+		#Tar log folder
+		if os.path.exists("%s/log/"%segdir):
+			with tarfile.open('%s/log.tar.gz'%segdir, "w:gz") as tar:
+				tar.add('%s/log'%segdir)
+			os.system('rm %s/log -r'%segdir)
