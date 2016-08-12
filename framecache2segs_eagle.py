@@ -49,7 +49,7 @@ def framecache2segs(framecache_file, chname, abs_start, abs_stop, outdir, ifo, r
 				break
 				
 			#Check if state vector corresponds to desired bitmask
-			elif (int(value) & run_bitmask) == run_bitmask:  #(e.g., 0b00011 = 3 and we want bits 0 and 1 to be on, so we do & with 3)
+			elif ((int(value) & run_bitmask) == run_bitmask) and (int(value)>=0):  #(e.g., 0b00011 = 3 and we want bits 0 and 1 to be on, so we do & with 3)
 				#Data is good, start new seg if needed
 				if not current_start:
 					current_start = int(np.ceil(frame_start + i/float(samp_rate) ))  #data good starting at ith sample, use ceiling so don't underestimate start

@@ -43,7 +43,7 @@ def checkDQ(framecache_file, chname, abs_start, abs_stop, ifo, bitmask):
 				break
 				
 			#Check if DQ vector denotes that a veto is present
-			if ((int(value) & bitmask) != bitmask):  #(e.g., we might want bits ??, ??, or ?? to be on if there are no data-quality vetoes)
+			if ((int(value) & bitmask) != bitmask) or (int(value)<0):  #(e.g., we might want bits ??, ??, or ?? to be on if there are no data-quality vetoes)
 				DQV_flag = True
 
 	cache.close()

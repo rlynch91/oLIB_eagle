@@ -102,7 +102,7 @@ if __name__=='__main__':
 		#Find BSNs and waveform params
 		posterior_files = os.listdir("%s/LIB/%s/%s/posterior_samples/"%(segdir,coin_group,coin_mode))
 		for f in posterior_files:
-			if (f.split('_')[1] == "".join(ifos)) and (f.split('.')[2] == 'dat_B'):
+			if (len(f.split('_')[1].split('1')) == (len(ifos)+1)) and (f.split('.')[2] == 'dat_B'):
 				#Initialize dictionary for event
 				event = int(f.split('-')[1].split(".")[0])
 				

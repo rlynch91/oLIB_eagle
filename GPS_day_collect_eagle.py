@@ -56,10 +56,14 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 		#Check to see if the dag failed
 		fail_flag = False
 		dag_missing_flag = False
+		still_running_flag = False
 		if os.path.exists('%s/%s/%s/dag/'%(rundir,gps_day,f)):
 			for dag_file in os.listdir('%s/%s/%s/dag/'%(rundir,gps_day,f)):
 				if dag_file.split('.')[-1][:6] == 'rescue':
 					fail_flag = True
+				if dag_file.split('.')[-1] == 'lock':
+					still_running_flag = True
+					
 		else:
 			dag_missing_flag = True	
 		
@@ -78,7 +82,9 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 				no_results_flag = True
 		
 			#Write status to summary files for each group
-			if fail_flag:
+			if still_running_flag:
+				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Dag still running (locked)'))			
+			elif fail_flag:
 				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Dag failed'))
 			elif dag_missing_flag:
 				summary_files[group].write('%s\t%s\t%s\n'%(f,tmp_lts[group],'Dag not created'))			
