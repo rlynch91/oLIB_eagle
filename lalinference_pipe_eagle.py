@@ -134,6 +134,9 @@ if os.path.getsize(opts.gps_time_file) > 0:
 	print 'Successfully created DAG file.'
 
 	os.system('mv %s/%s %s/LIB_runs.dag'%(opts.run_path,dag.get_dag_file(),opts.run_path))
+	os.system('sed -e "s|RequestMemory|#RequestMemory|g" %s/resultspage.sub > %s/tmp.sub; mv %s/tmp.sub %s/resultspage.sub'%(opts.run_path,opts.run_path,opts.run_path,opts.run_path))
+	os.system('sed -e "s|RequestMemory|#RequestMemory|g" %s/resultspagecoherent.sub > %s/tmp.sub; mv %s/tmp.sub %s/resultspagecoherent.sub'%(opts.run_path,opts.run_path,opts.run_path,opts.run_path))
+	os.system('sed -e "s|RequestMemory|#RequestMemory|g" %s/skyarea.sub > %s/tmp.sub; mv %s/tmp.sub %s/skyarea.sub'%(opts.run_path,opts.run_path,opts.run_path,opts.run_path))
 
 #-----------------------------------------------------------------------	
 else:

@@ -391,14 +391,18 @@ def executable(run_dic):
 		#check if LIB was run
 		if LIB_flag:
 
-			#make each omicron2LIB job a parent to each lalinference_pipe job
+			#make each omicron2LIB job a parent to each lalinference_pipe job and each zip_and_tar job
 			for parent in omicron2LIB_jobs:
 				for child in lalinference_pipe_jobs:
 					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+				for child in zip_and_tar_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 			
-			#make each omicron2LIB_sig_train job a parent to each lalinference_pipe_sig_train job
+			#make each omicron2LIB_sig_train job a parent to each lalinference_pipe_sig_train job and each zip_and_tar job
 			for parent in omicron2LIB_sig_train_jobs:
 				for child in lalinference_pipe_sig_train_jobs:
+					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
+				for child in zip_and_tar_jobs:
 					dagfile.write('PARENT %s CHILD %s\n'%(parent,child))
 				
 			#make lalinference_pipe jobs parents to LIB_runs jobs, and LIB_runs jobs parents to Bayes2FAR jobs for each run mode 
