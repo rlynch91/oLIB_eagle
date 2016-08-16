@@ -33,7 +33,7 @@ run_dic['run mode']['line'] = 'Online'
 run_dic['run mode']['inj runmode'] = 'NonInj'
 run_dic['run mode']['DQ runmode'] = 'NonDQV'
 run_dic['run mode']['train runmode'] = "Train"
-run_dic['run mode']['gdb flag'] = False
+run_dic['run mode']['gdb flag'] = True
 run_dic['run mode']['LIB flag'] = True
 run_dic['run mode']['tar results'] = False
 
@@ -135,7 +135,7 @@ run_dic['coincidence']['H1L1V1']['training timeslides']['V1'] = np.arange(1,51,1
 
 ###
 run_dic['LLRT'] = {}
-run_dic['LLRT']['FAR thresh'] = 1.e-6
+run_dic['LLRT']['FAR thresh'] = 1.e-5 #1.e-6
 
 run_dic['LLRT']['param info'] = {}
 run_dic['LLRT']['param info']['low f'] = {}

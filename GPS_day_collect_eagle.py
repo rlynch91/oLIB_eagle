@@ -37,20 +37,16 @@ def executable(gps_day, mode, ifo_groups, rundir, outdir):
 		for group in ifo_groups:
 			time_flags[group] = False
 			tmp_lts[group] = np.nan
-			if mode == 'sig_train':
-				if os.path.isfile('%s/%s/%s/PostProc_sig_train/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)):
+
+			if (mode == '0lag') or (mode == 'sig_train'):
+				if os.path.isfile('%s/%s/%s/livetime/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)):
 					time_flags[group] = True
-					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc_sig_train/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)))
-					total_lts[group] += tmp_lts[group]
-			elif mode == '0lag':
-				if os.path.isfile('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)):
-					time_flags[group] = True
-					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)))
+					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/livetime/%s/%s/livetime_0lag_%s.txt'%(rundir,gps_day,f,group,mode,group)))
 					total_lts[group] += tmp_lts[group]
 			elif (mode == 'back') or (mode == 'noise_train'):
-				if os.path.isfile('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)):
+				if os.path.isfile('%s/%s/%s/livetime/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)):
 					time_flags[group] = True
-					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/PostProc/live_segs/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)))
+					tmp_lts[group] = float(np.genfromtxt('%s/%s/%s/livetime/%s/%s/livetime_timeslides_%s.txt'%(rundir,gps_day,f,group,mode,group)))
 					total_lts[group] += tmp_lts[group]
 		
 		#Check to see if the dag failed

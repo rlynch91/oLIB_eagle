@@ -341,7 +341,7 @@ if __name__=='__main__':
 								json.dump(dictionary[event], fp)
 							
 							#Upload dictionary to GraceDb
-							response = gdb.createEvent('Burst','LIB',dic_path, search='AllSky', filecontents=None)
+							response = gdb.createEvent('Test','LIB',dic_path, search='AllSky', filecontents=None) #gdb.createEvent('Burst','LIB',dic_path, search='AllSky', filecontents=None)
 							
 							#Parse GraceDb ID so that labels can be applied
 							response = json.loads(response.read())
