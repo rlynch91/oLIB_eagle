@@ -334,9 +334,9 @@ if __name__=='__main__':
 						#Upload events to GDB if exceed FAR threshold
 						if (dictionary[event]['FAR'] <= FAR_thresh) and (gdb_flag):		
 							#Save dictionary as json file
-							dic_path = segdir+'/GDB/%s.json'%('%s-%s'%(dictionary[event]['gpstime'],event))
-							if not os.path.exists("%s/GDB/"%segdir):
-								os.makedirs("%s/GDB/"%segdir)
+							dic_path = segdir+'/GDB/%s/%s.json'%(coin_group,'%s-%s'%(dictionary[event]['gpstime'],event))
+							if not os.path.exists("%s/GDB/%s/"%(segdir,coin_group)):
+								os.makedirs("%s/GDB/%s/"%(segdir,coin_group))
 							with open(dic_path, 'wt') as fp:
 								json.dump(dictionary[event], fp)
 							

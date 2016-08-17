@@ -126,5 +126,3 @@ if __name__=='__main__':
 	#---------------------------------------------
 	
 	executable(gps_day=gps_day, mode=mode, ifo_groups=ifo_groups, rundir=rundir, outdir=outdir)
-
-

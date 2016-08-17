@@ -281,7 +281,7 @@ def executable(run_dic):
 								
 								sed_string += ' -e "s|MDCCHANNELS|%s|g" -e "s|MDCCACHES|%s|g" -e "s|#mdc|mdc|g" -e "s|#MDC|MDC|g" -e "s|PostProc|PostProc_sig_train|g"'%(tmp_mdc_channels,tmp_mdc_caches)
 								
-							sed_string += ' %s/LIB_runs_eagle.ini > %s/runfiles/LIB_%s_runs_eagle.ini'%(infodir,segdir,mode_label)
+							sed_string += ' %s/LIB_runs_eagle.ini > %s/runfiles/LIB_%s_%s_runs_eagle.ini'%(infodir,segdir,key,mode_label)
 
 							os.system(sed_string)
 
@@ -289,11 +289,11 @@ def executable(run_dic):
 							dagfile.write('JOB %s %s/runfiles/lalinference_pipe_eagle.sub\n'%(job,segdir))
 							#Write VARS
 							if mode_label == '0lag':
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_%s_runs_eagle.ini'%(key,mode_label),segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							elif mode_label == 'sig_train':
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc_sig_train/LIB_trigs/%s/%s/LIB_0lag_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_%s_runs_eagle.ini'%(key,mode_label),segdir+'/LIB/%s/%s'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							else:
-								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_runs_eagle.ini'%mode_label,segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
+								dagfile.write('VARS %s macroid="lalinference_pipe_%s-%s" macroarguments="%s -r %s -p %s/log/ -g %s/PostProc/LIB_trigs/%s/%s/LIB_ts_times_%s.txt --segdir %s --infodir %s --coin-group %s --coin-mode %s"\n'%(job,mode_label,job,segdir+'/runfiles/LIB_%s_%s_runs_eagle.ini'%(key,mode_label),segdir+'/LIB/%s/%s/'%(key,mode_label),segdir,segdir,key,mode_label,key,segdir,infodir,key,mode_label))
 							#Write RETRY
 							dagfile.write('RETRY %s 0\n\n'%job)
 
