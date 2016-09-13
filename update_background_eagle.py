@@ -39,8 +39,8 @@ if __name__=='__main__':
 	#################################
 	# Copy old data to backup files #
 	#################################
-	os.system('cp %s/collected_background_dictionary.pkl %s/collected_background_dictionary_old.pkl'%(outdir,outdir))
-	os.system('cp %s/collected_background_livetime.txt %s/collected_background_livetime_old.txt'%(outdir,outdir))
+	os.system('cp %s %s/collected_background_dictionary_old.pkl'%(opts.old_back_dic,outdir))
+	os.system('cp %s %s/collected_background_livetime_old.txt'%(opts.old_back_lt,outdir))
 
 	################################
 	# Update training dictionaries #

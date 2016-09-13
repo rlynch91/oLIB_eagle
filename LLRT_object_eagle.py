@@ -597,7 +597,7 @@ class LLRT(object):
 			pass
 		
 		#Save binary files cotaining both KDE coordinates and KDE values
-		np.save('%s/%s_%s_KDE_bandwidths_%s.npy'%(outdir,groupname,model,label), dic[groupname]['KDE bandwidths'])
+		np.save('%s/%s_%s_log_KDE_bandwidths_%s.npy'%(outdir,groupname,model,label), dic[groupname]['KDE bandwidths'])
 		
 	###	
 	def save_all_bandwidths(self, outdir, label):

@@ -74,10 +74,10 @@ if __name__=='__main__':
 	os.system('cp %s/%s_Noise_log_KDE_values.npy %s/%s_Noise_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('cp %s/%s_Signal_log_KDE_coords.npy %s/%s_Signal_log_KDE_coords_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('cp %s/%s_Signal_log_KDE_values.npy %s/%s_Signal_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/%s_Noise_KDE_bandwidths.npy %s/%s_Noise_KDE_bandwidths_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/%s_Signal_KDE_bandwidths.npy %s/%s_Signal_KDE_bandwidths_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/Noise_training_dictionary.pkl %s/Noise_training_dictionary_old.pkl'%(outdir,outdir))
-	os.system('cp %s/Signal_training_dictionary.pkl %s/Signal_training_dictionary_old.pkl'%(outdir,outdir))
+	os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(opts.old_noise_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(opts.old_sig_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('cp %s %s/Noise_training_dictionary_old.pkl'%(opts.old_noise_dic,outdir))
+	os.system('cp %s %s/Signal_training_dictionary_old.pkl'%(opts.old_sig_dic,outdir))
 
 	################################
 	# Update training dictionaries #
@@ -200,8 +200,8 @@ if __name__=='__main__':
 	os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s/%s_Noise_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s/%s_Signal_log_KDE_coords.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s/%s_Signal_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Noise_KDE_bandwidths_new.npy %s/%s_Noise_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Signal_KDE_bandwidths_new.npy %s/%s_Signal_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Noise_log_KDE_bandwidths_new.npy %s/%s_Noise_log_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
+	os.system('mv %s/%s_Signal_log_KDE_bandwidths_new.npy %s/%s_Signal_log_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('mv %s/Noise_training_dictionary_new.pkl %s/Noise_training_dictionary.pkl'%(outdir,outdir))
 	os.system('mv %s/Signal_training_dictionary_new.pkl %s/Signal_training_dictionary.pkl'%(outdir,outdir))
 	

@@ -109,7 +109,7 @@ if __name__=='__main__':
 
 	parser.add_option("","--gps-day", default=None, type='string', help="GPS day, in 100000s of seconds, for which to collect")
 	parser.add_option("","--mode", default=None, type='string', help="Type of runmode to collect for (0lag, back, noise_train, or sig_train")
-	parser.add_option("","--ifo-groups", default=None, type='string', help="Comma-separated list of ifo groups to collect for (e.g., H1L1,H1L1V1,...")
+	parser.add_option("","--ifo-groups", default=None, type='string', help="Comma-separated list of ifo groups to collect for (e.g., H1L1,H1L1V1,...)")
 	parser.add_option("","--rundir", default=None, type='string', help="Directory in which to search for gps day directory")
 	parser.add_option("","--outdir", default=None, type='string', help="Directory in which to output the collected data")
 
