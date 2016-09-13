@@ -17,12 +17,12 @@ if __name__=='__main__':
 
 	parser.add_option("", "--ifo-groups", default=None, type="string", help="Comma-separated list of ifo groups to collect for (e.g., H1L1,H1L1V1,...)")
 	parser.add_option("", "--rundir", default=None, type="string", help="Run directory to collect results from")
-	parser.add_option("", "--collectdir", default=None, type="string", help="Directory in which collect results will be written")
+	parser.add_option("", "--collectdir", default=None, type="string", help="Directory in which collected results will be written")
 	parser.add_option("", "--backdir", default=None, type="string", help="Directory in which background results are stored")
 	parser.add_option("", "--retraindir", default=None, type="string", help="Directory in which retraining results are stored")
 	parser.add_option("", "--last-gps-day-path", default=None, type="string", help="Path to file containing the last GPS day that had collection and retraining successfully completed")
 	parser.add_option("", "--bindir", default=None, type="string", help="Bin directory containing the lalsuites installation to be used")
-	parser.add_option("", "--max-bin-size", default=None, type="int", help="Maximum number of events that can be stored in background dictionary")
+	parser.add_option("", "--max-back-size", default=None, type="int", help="Maximum number of events that can be stored in background dictionary")
 	parser.add_option("", "--max-signal-size", default=None, type="int", help="Maximum number of events that can be stored in signal training dictionary")
 	parser.add_option("", "--max-noise-size", default=None, type="int", help="Maximum number of events that can be stored in noise training dictionary")
 	parser.add_option("", "--train-details-dic", default=None, type="string", help="Path to dictionary containing specific details about the retraining")
@@ -32,7 +32,7 @@ if __name__=='__main__':
 
 	opts, args = parser.parse_args()
 
-	ifo_groups = opts.ifo_groups
+	ifo_groups = opts.ifo_groups.split(',')
 	rundir = opts.rundir
 	collectdir = opts.collectdir
 	backdir = opts.backdir
@@ -58,7 +58,7 @@ if __name__=='__main__':
 		GPS_day_collect_eagle.executable(gps_day=gps_day_now, mode=mode, ifo_groups=ifo_groups, rundir=rundir, outdir=collectdir)
 
 	#Get previous gps day that background collection and retraining was successfully completed for
-	gps_day_last = float(np.genfromtxt(last_gps_day_path))
+	gps_day_last = int(np.genfromtxt(last_gps_day_path))
 
 	#Get next day and time threshold (1 day lag) for background collection and retraining
 	gps_day_retrain = gps_day_last + 1
