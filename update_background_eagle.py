@@ -79,8 +79,11 @@ if __name__=='__main__':
 			tmp_key = key
 			tmp_num = 0
 			while int(old_back_dic[tmp_key]['GPS Day']['Day']) == old_gps_day:
-				tmp_key += 1
-				tmp_num += 1
+				if (tmp_key + 1) >= len(old_back_dic):
+					break
+				else:
+					tmp_key += 1
+					tmp_num += 1
 			#If too many events, then break loop
 			if (event + tmp_num) > max_back_size:
 				break

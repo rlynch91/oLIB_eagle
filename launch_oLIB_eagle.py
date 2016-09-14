@@ -138,51 +138,51 @@ run_dic['LLRT'] = {}
 run_dic['LLRT']['FAR thresh'] = 1.e-5 #1.e-6
 
 run_dic['LLRT']['param info'] = {}
-run_dic['LLRT']['param info']['low f'] = {}
-run_dic['LLRT']['param info']['low f']['logBSN_and_BCI'] = {}
-run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['dimension'] = 2
-run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['param names'] = ['logBSN','BCI']
-run_dic['LLRT']['param info']['low f']['logBSN_and_BCI']['interp range'] = np.array([[0., 6.],[0., 30.]])
+run_dic['LLRT']['param info']['low_f'] = {}
+run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['dimension'] = 2
+run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['param names'] = ['logBSN','BCI']
+run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['interp range'] = np.array([[0., 6.],[0., 30.]])
 
 run_dic['LLRT']['H1L1'] = {}
 run_dic['LLRT']['H1L1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
 run_dic['LLRT']['H1L1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/Cat1Cat4Cat2Cat3_total_livetime.txt'
-run_dic['LLRT']['H1L1']['low f'] = {}
-run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI'] = {}
-run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
-run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
-run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
-run_dic['LLRT']['H1L1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
+run_dic['LLRT']['H1L1']['low_f'] = {}
+run_dic['LLRT']['H1L1']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1L1']['low_f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
+run_dic['LLRT']['H1L1']['low_f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
+run_dic['LLRT']['H1L1']['low_f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
+run_dic['LLRT']['H1L1']['low_f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
 
 run_dic['LLRT']['H1V1'] = {}
 run_dic['LLRT']['H1V1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
 run_dic['LLRT']['H1V1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/Cat1Cat4Cat2Cat3_total_livetime.txt'
-run_dic['LLRT']['H1V1']['low f'] = {}
-run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI'] = {}
-run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
-run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
-run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
-run_dic['LLRT']['H1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
+run_dic['LLRT']['H1V1']['low_f'] = {}
+run_dic['LLRT']['H1V1']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
+run_dic['LLRT']['H1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
+run_dic['LLRT']['H1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
+run_dic['LLRT']['H1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
 
 run_dic['LLRT']['L1V1'] = {}
 run_dic['LLRT']['L1V1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
 run_dic['LLRT']['L1V1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/Cat1Cat4Cat2Cat3_total_livetime.txt'
-run_dic['LLRT']['L1V1']['low f'] = {}
-run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI'] = {}
-run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
-run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
-run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
-run_dic['LLRT']['L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
+run_dic['LLRT']['L1V1']['low_f'] = {}
+run_dic['LLRT']['L1V1']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['L1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
+run_dic['LLRT']['L1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
+run_dic['LLRT']['L1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
+run_dic['LLRT']['L1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
 
 run_dic['LLRT']['H1L1V1'] = {}
 run_dic['LLRT']['H1L1V1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
 run_dic['LLRT']['H1L1V1']['back livetime'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/Cat1Cat4Cat2Cat3_total_livetime.txt'
-run_dic['LLRT']['H1L1V1']['low f'] = {}
-run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI'] = {}
-run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
-run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
-run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
-run_dic['LLRT']['H1L1V1']['low f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
+run_dic['LLRT']['H1L1V1']['low_f'] = {}
+run_dic['LLRT']['H1L1V1']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['H1L1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_coords.npy'
+run_dic['LLRT']['H1L1V1']['low_f']['logBSN_and_BCI']['oLIB signal kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Signal_log_KDE_values.npy'
+run_dic['LLRT']['H1L1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde coords'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_coords.npy'
+run_dic['LLRT']['H1L1V1']['low_f']['logBSN_and_BCI']['oLIB noise kde values'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/LLRT_info/H1L1/BSN_and_BCI_Noise_log_KDE_values.npy'
 
 ###
 run_dic['training'] = {}
@@ -203,16 +203,16 @@ run_dic['prior ranges']['max quality'] = 110
 
 ###
 run_dic['search bins'] = {}
-run_dic['search bins']['bin names'] = ['low f']
-run_dic['search bins']['low f'] = {}
-run_dic['search bins']['low f']['low logBSN cut'] = 0
-run_dic['search bins']['low f']['high logBSN cut'] = 6
-run_dic['search bins']['low f']['low BCI cut'] = 1
-run_dic['search bins']['low f']['high BCI cut'] = np.inf
-run_dic['search bins']['low f']['low freq cut'] = 48
-run_dic['search bins']['low f']['high freq cut'] = 1024
-run_dic['search bins']['low f']['low quality cut'] = 2
-run_dic['search bins']['low f']['high quality cut'] = 108
+run_dic['search bins']['bin names'] = ['low_f']
+run_dic['search bins']['low_f'] = {}
+run_dic['search bins']['low_f']['low logBSN cut'] = 0
+run_dic['search bins']['low_f']['high logBSN cut'] = 6
+run_dic['search bins']['low_f']['low BCI cut'] = 1
+run_dic['search bins']['low_f']['high BCI cut'] = np.inf
+run_dic['search bins']['low_f']['low freq cut'] = 48
+run_dic['search bins']['low_f']['high freq cut'] = 1024
+run_dic['search bins']['low_f']['low quality cut'] = 2
+run_dic['search bins']['low_f']['high quality cut'] = 108
 
 #Decide what time to start running on if in online mode
 if run_dic['run mode']['line'] == 'Online':
