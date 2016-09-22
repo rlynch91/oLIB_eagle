@@ -18,6 +18,7 @@ if __name__=='__main__':
 
 	parser.add_option("", "--gps-day-collect", default=None, type="string", help="GPS day to collect, or current day if not given or 'None'")
 	parser.add_option("", "--ifo-groups", default=None, type="string", help="Comma-separated list of ifo groups to collect for (e.g., H1L1,H1L1V1,...)")
+	parser.add_option("", "--infodir", default=None, type="string", help="Directory where the oLIB pipeline code lives")
 	parser.add_option("", "--rundir", default=None, type="string", help="Run directory to collect results from")
 	parser.add_option("", "--collectdir", default=None, type="string", help="Directory in which collected results will be written")
 	parser.add_option("", "--backdir", default=None, type="string", help="Directory in which background results are stored")
@@ -36,6 +37,7 @@ if __name__=='__main__':
 
 	gps_day_collect = opts.gps_day_collect
 	ifo_groups = opts.ifo_groups.split(',')
+	infodir = opts.infodir
 	rundir = opts.rundir
 	collectdir = opts.collectdir
 	backdir = opts.backdir
@@ -79,7 +81,7 @@ if __name__=='__main__':
 				
 				if key == 'background':
 					#Run background collection
-					background_string = 'python update_background_eagle.py --new-back-dic %s --new-back-lt %s '%('%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',group,gps_day_retrain,'back',group), '%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',group,gps_day_retrain,'back',group))
+					background_string = 'python %s/update_background_eagle.py --new-back-dic %s --new-back-lt %s '%(infodir,'%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',group,gps_day_retrain,'back',group), '%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',group,gps_day_retrain,'back',group))
 					background_string += '--old-back-dic %s --old-back-lt %s '%('%s/%s/collected_background_dictionary.pkl'%(backdir,group), '%s/%s/collected_background_livetime.txt'%(backdir,group))
 					background_string += '--outdir %s --max-back-size %s --new-gps-day %s'%('%s/%s/'%(backdir,group),max_back_size,gps_day_retrain)
 					back_status = commands.getstatusoutput(background_string)
@@ -92,7 +94,7 @@ if __name__=='__main__':
 					
 				elif key == 'retraining':
 					#Run retraining
-					retraining_string = 'python retrain_likelihoods_eagle.py --new-sig-dic %s --new-noise-dic %s '%('%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'sig_train',group,gps_day_retrain,'sig_train',group), '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'noise_train',group,gps_day_retrain,'noise_train',group))
+					retraining_string = 'python %s/retrain_likelihoods_eagle.py --new-sig-dic %s --new-noise-dic %s '%(infodir,'%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'sig_train',group,gps_day_retrain,'sig_train',group), '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'noise_train',group,gps_day_retrain,'noise_train',group))
 					retraining_string += '--old-sig-dic %s --old-noise-dic %s '%('%s/%s/Signal_training_dictionary.pkl'%(retraindir,group), '%s/%s/Noise_training_dictionary.pkl'%(retraindir,group))
 					retraining_string += '--old-sig-bands %s --old-noise-bands %s '%('%s/%s/%s_Signal_log_KDE_bandwidths.npy'%(retraindir,group,train_details_dic['param info'][train_bin].keys()[0]),'%s/%s/%s_Noise_log_KDE_bandwidths.npy'%(retraindir,group,train_details_dic['param info'][train_bin].keys()[0]))
 					retraining_string += '--outdir %s --max-signal-size %s --max-noise-size %s '%('%s/%s/'%(retraindir,group),max_signal_size,max_noise_size)
