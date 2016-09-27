@@ -361,7 +361,7 @@ if __name__=='__main__':
 	#Save 25 most significant FAR triggers
 	most_sig_0lag = np.array(sorted(zip(FAR_list_0lag,time_list_0lag,logBSN_list_0lag,BCI_list_0lag,SNR_lists_0lag[ifo_group],freq_list_0lag,Q_list_0lag), key=lambda x:x[0]))
 	most_sig_0lag_file = open(outdir + "/most_sig_0lag_%s.txt"%label,'wt')
-	most_sig_0lag_file.write('Rank\tFAR\tTime\t\tlogBSN\t\tBCI\tNetSNR\t\tFreq\t\tQ\t\t\n')
+	most_sig_0lag_file.write('Rank\tFAR\t\t\tTime\t\tlogBSN\t\tBCI\tNetSNR\t\tFreq\t\tQ\t\t\n')
 	for i,line in enumerate(most_sig_0lag[:25]):
 		most_sig_0lag_file.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n'%(i+1,line[0],line[1],line[2],line[3],line[4],line[5],line[6]))
 	most_sig_0lag_file.close()	

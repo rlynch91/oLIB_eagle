@@ -34,6 +34,8 @@ run_dic['run mode']['inj runmode'] = 'NonInj'
 run_dic['run mode']['DQ runmode'] = 'NonDQV'
 run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = True
+run_dic['run mode']['email flag'] = True
+run_dic['run mode']['email addresses'] = ['rlynch@mit.edu','8476930667@vtext.com']
 run_dic['run mode']['LIB flag'] = True
 run_dic['run mode']['tar results'] = False
 

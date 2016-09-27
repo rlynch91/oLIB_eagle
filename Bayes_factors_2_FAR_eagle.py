@@ -68,6 +68,10 @@ if __name__=='__main__':
 		segdir = run_dic['seg dir']
 		
 		if coin_mode == '0lag':		
+			email_flag = run_dic['run mode']['email flag']
+			if email_flag:
+				email_addresses = run_dic['run mode']['email addresses']
+			
 			gdb_flag = run_dic['run mode']['gdb flag']
 			if gdb_flag:
 				gdb = GraceDb()
@@ -279,6 +283,7 @@ if __name__=='__main__':
 
 				for i,event in enumerate(dictionary):
 					if check_parameter_space(dictionary[event],search_bin=search_bin,run_dic=run_dic) == True:
+						dictionary[event]['search bin'] = search_bin
 						logBSNs[i] = np.log10(dictionary[event]['BSN'])
 						BCIs[i] = dictionary[event]['BCI']
 						events[i] = event
@@ -330,6 +335,27 @@ if __name__=='__main__':
 						dictionary[event]['raw FAR'] = LLRT.calculate_FAR_of_thresh(threshold=event_LLR, livetime=float_back_livetime, groundtype='Background')
 						dictionary[event]['trials factor'] = trials_factor
 						dictionary[event]['FAR'] = dictionary[event]['raw FAR'] * trials_factor
+					
+						#Send email alert if exceed FAR threshold
+						if (dictionary[event]['FAR'] <= FAR_thresh) and (email_flag):
+							email_header = "oLIB 0-lag event found at %s with FAR of %s Hz"%(dictionary[event]['gpstime'],dictionary[event]['FAR'])
+							if gdb_flag:
+								email_body = "This oLIB event *should* be posted to GraceDB momentarily.\n\n"
+							else:
+								email_body = "This oLIB event *will not* to be posted to GraceDB because of the pipeline configuration.\n\n"
+							email_body += "GPS time:  %s\n"%dictionary[event]['gpstime']
+							email_body += "FAR [Hz]: %s\n"%dictionary[event]['FAR']
+							email_body += "IFOs: %s\n"%",".join(ifos)
+							email_body += "logBSN: %s\n"%np.log10(dictionary[event]['BSN'])
+							email_body += "BCI: %s\n"%dictionary[event]['BCI']
+							email_body += "Network SNR: %s\n"%dictionary[event]['Omicron SNR']['Network']
+							email_body += "Mean f_0 [Hz]: %s\n"%dictionary[event]['frequency']['posterior mean']
+							email_body += "Mean Q: %s\n"%dictionary[event]['quality']['posterior mean']
+							email_body += "INJ flag: %s\n"%any([run_dic['data']['inj flags'][ifo] for ifo in ifos])
+							email_body += "DQV flag: %s\n"%any([run_dic['data']['DQV flags'][ifo] for ifo in ifos])
+							email_body += "Search bin: %s\n"%search_bin
+							os.system('echo "%s" | mail -s "%s" %s'%(email_body,email_header," ".join(email_addresses)))
+					
 					
 						#Upload events to GDB if exceed FAR threshold
 						if (dictionary[event]['FAR'] <= FAR_thresh) and (gdb_flag):		

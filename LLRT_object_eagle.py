@@ -858,7 +858,7 @@ class LLRT(object):
 		return min_coords
 
 	###	
-	def find_opt_gaussian_band_BFGS(self, groupname, model, init_coords=None):
+	def find_opt_gaussian_band_BFGS(self, groupname, model, init_coords):
 		"""
 		Calculates optimal bandwidth for a parameter group using the KL criteria and the BFGS algorithm
 		"""
@@ -874,8 +874,8 @@ class LLRT(object):
 		n_dim = dic[groupname]['dimension']
 		data = dic[groupname]['data']
 				
-		#Initialize initial coords 
-		if init_coords == None:
+		#Initialize initial coords if any are passed as np.nan
+		if not (init_coords >= -np.inf).all():
 			#Find rule-of-thumb estimate of optimal bandwidth for each parameter in the group
 			init_coords = np.zeros(n_dim)
 			for d in xrange(n_dim):

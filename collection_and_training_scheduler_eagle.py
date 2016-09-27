@@ -66,14 +66,27 @@ if __name__=='__main__':
 		GPS_day_collect_eagle.executable(gps_day=gps_day_collect, mode=mode, ifo_groups=ifo_groups, rundir=rundir, outdir=collectdir)
 
 	#Get previous gps day that background collection and retraining was successfully completed for
-	gps_day_last = pickle.load(open(last_gps_day_path))
-	run_comments_file = open('%s_run_comments.txt'%last_gps_day_path,'wt')
+	if os.path.isfile(last_gps_day_path):
+		gps_day_last = pickle.load(open(last_gps_day_path))
+	else:
+		gps_day_last = {}
+		gps_day_last['background'] = {}
+		gps_day_last['retraining'] = {}
+		for group in ifo_groups:
+			gps_day_last['background'][group] = None
+			gps_day_last['retraining'][group] = None
+			
+	#Open comments file to log the results of the background update and retraining 
+	run_comments_file = open('%s_run_comments.txt_new'%last_gps_day_path,'wt')
 
 	#Loop over background and retraining ifo groups
 	for key in gps_day_last:
 		for group in ifo_groups:
 			#Get next day and time threshold (1 day lag) for background collection and retraining
-			gps_day_retrain = int(gps_day_last[key][group]) + 1
+			if gps_day_last[key][group]:
+				gps_day_retrain = int(gps_day_last[key][group]) + 1
+			else:
+				gps_day_retrain = gps_day_collect
 			gps_threshold = (gps_day_retrain + 2) * 100000.
 			
 			#If past the threshold, collect background and retrain on (depending on key)
@@ -110,3 +123,7 @@ if __name__=='__main__':
 	#Save updated dictionary containing last completed days for background collection and retraining
 	pickle.dump(gps_day_last,open(last_gps_day_path,'wt'))
 	run_comments_file.close()
+	if os.path.getsize('%s_run_comments.txt_new'%last_gps_day_path) > 0:
+		os.system('mv %s_run_comments.txt_new %s_run_comments.txt'%(last_gps_day_path,last_gps_day_path))
+	else:
+		os.system('rm %s_run_comments.txt_new'%(last_gps_day_path))
