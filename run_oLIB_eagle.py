@@ -287,3 +287,37 @@ def executable(run_dic):
 					
 	elif run_dic['run mode']['line'] == 'Offline':
 		pass
+
+#=======================================================================
+
+if __name__=='__main__':
+	#Parse user options
+	from optparse import OptionParser
+
+	usage = None
+	parser = OptionParser(usage=usage)
+
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+
+	#-------------------------------------------------------------------
+
+	opts, args = parser.parse_args()
+
+	run_dic = pickle.load(open(opts.run_dic))
+	
+	#-------------------------------------------------------------------
+	
+	#Decide what time to start running on if in online mode
+	if run_dic['run mode']['line'] == 'Online':
+		if os.path.exists(run_dic['config']['run dir']+'/current_start.txt'):
+			#Continue the past run based on saved timestamp
+			run_dic['config']['initial start'] = int(np.genfromtxt(run_dic['config']['run dir']+'/current_start.txt'))
+		elif run_dic['config']['initial start']:
+			#Use original user-specified start time
+			pass
+		else:
+			#Start running on current timestamp
+			run_dic['config']['initial start'] = int(commands.getstatusoutput('%s/lalapps_tconvert now'%run_dic['config']['LIB bin dir'])[1]) - 500
+
+	#Launch oLIB
+	executable(run_dic=run_dic)

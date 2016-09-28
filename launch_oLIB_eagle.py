@@ -4,15 +4,16 @@ import sys
 sys.path.insert(1,'/home/ryan.lynch/numpy/numpy-1.8.2-INSTALL/lib64/python2.7/site-packages')
 import numpy as np
 import os
-import commands
-import run_oLIB_eagle
+import pickle
 
 #=======================================================================
 
 #Config file for launching the oLIB pipeline
 
-#initialize the run dictionary that will hold all info about run
+#Initialize the run dictionary that will hold all info about run
 run_dic = {}
+
+#=======================================================================
 
 ###
 run_dic['config'] = {}
@@ -26,6 +27,8 @@ run_dic['config']['overlap'] = 2
 run_dic['config']['sample freq'] = 2048
 run_dic['config']['oSNR thresh'] = 5.0
 run_dic['config']['dt clust'] = 0.1
+run_dic['config']['initial start'] = None
+run_dic['config']['run label'] = None
 
 ###
 run_dic['run mode'] = {}
@@ -259,14 +262,20 @@ run_dic['search bins']['low_f']['high freq cut'] = 1024
 run_dic['search bins']['low_f']['low quality cut'] = 2
 run_dic['search bins']['low_f']['high quality cut'] = 108
 
-#Decide what time to start running on if in online mode
-if run_dic['run mode']['line'] == 'Online':
-	if os.path.exists(run_dic['config']['run dir']+'/current_start.txt'):
-		#Continue past run based on saved timestamp
-		run_dic['config']['initial start'] = int(np.genfromtxt(run_dic['config']['run dir']+'/current_start.txt'))
-	else:
-		#Start running on current timestamp
-		run_dic['config']['initial start'] = int(commands.getstatusoutput('%s/lalapps_tconvert now'%run_dic['config']['LIB bin dir'])[1]) - 500
+###
+run_dic['collection and retraining'] = {}
+run_dic['collection and retraining']['collect dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_results/'
+run_dic['collection and retraining']['max back size'] = 5000
+run_dic['collection and retraining']['max sig train size'] = 5000
+run_dic['collection and retraining']['max noise train size'] = 5000
 
-#Launch oLIB
-run_oLIB_eagle.executable(run_dic=run_dic)
+run_dic['collection and retraining']['low_f'] = {}
+run_dic['collection and retraining']['low_f']['back dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_background_info/'
+run_dic['collection and retraining']['low_f']['retrain dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_LLRT_info/'
+
+#=======================================================================
+
+#Save the run dictionary to the run directory
+if not os.path.exists(run_dic['config']['run dir']):
+	os.makedirs(run_dic['config']['run dir'])
+pickle.dump(run_dic,open(run_dic['config']['run dir']+'/main_run_dic.pkl','wt'))

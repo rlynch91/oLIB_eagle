@@ -16,7 +16,9 @@ if __name__=='__main__':
 	usage = None
 	parser = OptionParser(usage=usage)
 
-	parser.add_option("", "--gps-day-collect", default=None, type="string", help="GPS day to collect, or current day if not given or 'None'")
+	parser.add_option("-g", "--gps-day-collect", default=None, type="string", help="GPS day to collect, or current day if not given or 'None'")
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	
 	parser.add_option("", "--ifo-groups", default=None, type="string", help="Comma-separated list of ifo groups to collect for (e.g., H1L1,H1L1V1,...)")
 	parser.add_option("", "--infodir", default=None, type="string", help="Directory where the oLIB pipeline code lives")
 	parser.add_option("", "--rundir", default=None, type="string", help="Run directory to collect results from")
@@ -36,34 +38,40 @@ if __name__=='__main__':
 	opts, args = parser.parse_args()
 
 	gps_day_collect = opts.gps_day_collect
-	ifo_groups = opts.ifo_groups.split(',')
-	infodir = opts.infodir
-	rundir = opts.rundir
-	collectdir = opts.collectdir
-	backdir = opts.backdir
-	retraindir = opts.retraindir
-	last_gps_day_path = opts.last_gps_day_path
-	bindir = opts.bindir
-	max_back_size = opts.max_back_size
-	max_signal_size = opts.max_signal_size
-	max_noise_size = opts.max_noise_size
-	train_details_dic = pickle.load(open(opts.train_details_dic))
-	train_bin = opts.train_bin
+	run_dic = pickle.load(open(opts.run_dic))
 	
 	#-------------------------------------------------------------------
-
-	#Get full gps time
+	
+	#initialize the variables we need
+	ifo_groups = run_dic['coincidence'].keys()
+	infodir = run_dic['config']['info dir']
+	rundir = run_dic['config']['run dir']
+	collectdir = run_dic['collection and retraining']['collect dir']
+	bindir = run_dic['config']['LIB bin dir']
+	max_back_size = run_dic['collection and retraining']['max back size']
+	max_signal_size = run_dic['collection and retraining']['max sig train size']
+	max_noise_size = run_dic['collection and retraining']['max noise train size']
+	
+	#???
+?	#Get background and retraining directories for this search bin
+?	backdir = run_dic['collection and retraining']['low_f']['back dir']
+?	retraindir = run_dic['collection and retraining']['low_f']['retrain dir']
+	#???
+	
+	#-------------------------------------------------------------------
+		
+	#Get current full gps time
 	gps_time_full = int(commands.getstatusoutput('%s/lalapps_tconvert now'%bindir)[1])
 
-	#Convert full gps time into the current gps day
+	#Convert current full gps time into the current gps day
 	if not gps_day_collect or gps_day_collect == 'None':
 		gps_day_collect = int(float(gps_time_full)/100000.)
 	else:
 		gps_day_collect = int(gps_day_collect)
-
-	#Collect results from the current gps day
-	for mode in ['0lag','back','noise_train','sig_train']:
-		GPS_day_collect_eagle.executable(gps_day=gps_day_collect, mode=mode, ifo_groups=ifo_groups, rundir=rundir, outdir=collectdir)
+#???
+?	#Collect results from the current gps day
+?	for mode in ['0lag','back','noise_train','sig_train']:  #get rid of mode, deal with that in other script
+?		GPS_day_collect_eagle.executable(gps_day=gps_day_collect, mode=mode, ifo_groups=ifo_groups, rundir=rundir, outdir=collectdir)
 
 	#Get previous gps day that background collection and retraining was successfully completed for
 	if os.path.isfile(last_gps_day_path):
@@ -75,6 +83,7 @@ if __name__=='__main__':
 		for group in ifo_groups:
 			gps_day_last['background'][group] = None
 			gps_day_last['retraining'][group] = None
+			#???retraining needs subgroup for each search bin
 			
 	#Open comments file to log the results of the background update and retraining 
 	run_comments_file = open('%s_run_comments.txt_new'%last_gps_day_path,'wt')
@@ -98,7 +107,7 @@ if __name__=='__main__':
 					background_string += '--old-back-dic %s --old-back-lt %s '%('%s/%s/collected_background_dictionary.pkl'%(backdir,group), '%s/%s/collected_background_livetime.txt'%(backdir,group))
 					background_string += '--outdir %s --max-back-size %s --new-gps-day %s'%('%s/%s/'%(backdir,group),max_back_size,gps_day_retrain)
 					back_status = commands.getstatusoutput(background_string)
-					run_comments_file.write('%s %s %s %s \n\n'%(key, group, back_status[0], back_status[1]))
+					run_comments_file.write('%s %s %s %s \n\n'%(key, group, back_status[0], back_status[1]))  #??? also print search bin/back
 					if not back_status[0]:
 						gps_day_last[key][group] = int(gps_day_retrain)
 						print key, group, "Success"

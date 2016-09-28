@@ -42,7 +42,7 @@ if __name__=='__main__':
 	parser = OptionParser(usage=usage)
 
 	#general options
-	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs")
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
 	parser.add_option("-g", "--coin-group", default=None, type="string", help="Coincidence IFO group to collect LIB results for (i.e., H1L1)")
 	parser.add_option("-m", "--coin-mode", default=None, type="string", help="Coincidence mode to collect LIB results for (i.e., 0lag, back, noise train, sig train)")
 
@@ -338,9 +338,9 @@ if __name__=='__main__':
 						if (dictionary[event]['FAR'] <= FAR_thresh) and (email_flag):
 							email_header = "oLIB 0-lag event found at %s with FAR of %s Hz"%(dictionary[event]['gpstime'],dictionary[event]['FAR'])
 							if gdb_flag:
-								email_body = "This oLIB event *should* be posted to GraceDB momentarily.\n"
+								email_body = "This oLIB event *should* be posted to GraceDB momentarily.\n\n"
 							else:
-								email_body = "This oLIB event *will not* to be posted to GraceDB because of the pipeline configuration.\n"
+								email_body = "This oLIB event *will not* to be posted to GraceDB because of the pipeline configuration.\n\n"
 							email_body += "GPS time:  %s\n"%dictionary[event]['gpstime']
 							email_body += "FAR [Hz]: %s\n"%dictionary[event]['FAR']
 							email_body += "IFOs: %s\n"%",".join(ifos)
