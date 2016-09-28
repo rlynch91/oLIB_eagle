@@ -72,6 +72,7 @@ def executable(run_dic):
 	min_quality = run_dic['prior ranges']['min quality']
 	max_quality = run_dic['prior ranges']['max quality']
 	snr_thresh = run_dic['config']['oSNR thresh']
+	LIB_stride = run_dic['prior ranges']['LIB stride']
 	
 	cache_files = {}
 	asd_files = {}
@@ -91,13 +92,13 @@ def executable(run_dic):
 	#Initialize mdc parameters
 	ifos_str = repr(",".join(ifos))  #"'H1,L1'"
 	num_mdc = 1  #number of mdc injection frames generated
-	mdc_start_time = start  #start time of mdc injection frame
-	mdc_end_time = stop  #end time of mdc injection frame
-	padding = int(overlap/2.)  # buffer between edges of frame and injections, value is padding on each end
-
+	mdc_start_time = start - LIB_stride  #start time of mdc injection frame
+	mdc_end_time = stop + LIB_stride #end time of mdc injection frame
 	mdc_duration = mdc_end_time - mdc_start_time
-	trig_end_time = mdc_end_time - padding
-	trig_start_time = mdc_start_time + padding + np.random.randint(low=0, high=min((mdc_duration-2*padding+1),100))
+	padding = int(overlap/2.) + LIB_stride  # buffer between edges of frame and injections, value is padding on each end
+	
+	trig_end_time = stop - int(overlap/2.)
+	trig_start_time = start + int(overlap/2.) + np.random.randint(low=0, high=min((stop-start-overlap+1),100))
 	seed = trig_start_time
 
 	mdc_par={
@@ -137,7 +138,7 @@ def executable(run_dic):
 		"min-snr":(snr_thresh*np.sqrt(len(ifos)))*0.75,
 		"max-snr":1000000.,
 		"ifos":",".join(ifos),
-		"output": "%s/training_injections/raw/SG_seed_%s_hrss_%s_%s_time_%s_%s.xml"%(segdir,seed,min_hrss,max_hrss,mdc_start_time,mdc_end_time)
+		"output": "%s/training_injections/raw/SG_seed_%s_hrss_%s_%s_time_%s_%s.xml"%(segdir,seed,min_hrss,max_hrss,start,stop)
 		}
 
 		for ifo in ifos:
@@ -180,11 +181,11 @@ def executable(run_dic):
 	os.system(frame_string)
 
 	#Make cache file for the injection frames
-	os.system('ls %s/training_injections/raw/*.gwf | lalapps_path2cache >> %s/framecache/MDC_Injections_%s_%s.lcf'%(segdir,segdir,mdc_start_time,mdc_end_time))
+	os.system('ls %s/training_injections/raw/*.gwf | lalapps_path2cache >> %s/framecache/MDC_Injections_%s_%s.lcf'%(segdir,segdir,start,stop))
 
 	#Combine data frames and injection frame, putting it in a cache file
 	for ifo in ifos:
-		cache = open('%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf'%(segdir,ifo,mdc_start_time,mdc_end_time),'wt')
+		cache = open('%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf'%(segdir,ifo,start,stop),'wt')
 
 		#Get paths of data frames
 		dat_files = []

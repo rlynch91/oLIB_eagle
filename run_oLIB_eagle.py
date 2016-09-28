@@ -106,6 +106,7 @@ def executable(run_dic):
 		inj_runmode = run_dic['run mode']['inj runmode']
 		DQ_runmode = run_dic['run mode']['DQ runmode']
 		train_runmode = run_dic['run mode']['train runmode']
+		LIB_stride = run_dic['prior ranges']['LIB stride']
 		
 		channel_types = {}
 		for ifo in ifos:
@@ -149,7 +150,7 @@ def executable(run_dic):
 				#if we haven't reached stop time yet, fetch frames again
 				if not check_after_stop:
 					print "haven't reached stop time, fetching frames for", ifo, start, stop
-					run_dic['data']['frame files'][ifo] = commands.getstatusoutput("%s/gw_data_find --observatory=%s --url-type=file --type=%s --gps-start-time=%s --gps-end-time=%s"%(bindir, ifo.strip("1"), channel_types[ifo], start, stop))[1].split("\n")
+					run_dic['data']['frame files'][ifo] = commands.getstatusoutput("%s/gw_data_find --observatory=%s --url-type=file --type=%s --gps-start-time=%s --gps-end-time=%s"%(bindir, ifo.strip("1"), channel_types[ifo], start-LIB_stride, stop+LIB_stride))[1].split("\n")
 					if run_dic['data']['frame files'][ifo] == [""]:
 						print "no frames found for ifo", ifo, start, stop
 						run_dic['data']['frame times'][ifo] = [np.nan]

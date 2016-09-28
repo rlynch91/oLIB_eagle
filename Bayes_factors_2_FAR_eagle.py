@@ -246,9 +246,7 @@ if __name__=='__main__':
 			os.system('cp %s %s/runfiles/'%(back_livetime_path,segdir))
 			
 			#Build calc_info dictionary
-			calc_info = {}
-			calc_info['interp method'] = 'Grid Linear'
-			calc_info['extrap method'] = 'Grid Nearest'
+			calc_info = run_dic['LLRT']['calc info']
 
 			#Loop over search bins
 			for search_bin in run_dic['search bins']['bin names']:
@@ -340,9 +338,9 @@ if __name__=='__main__':
 						if (dictionary[event]['FAR'] <= FAR_thresh) and (email_flag):
 							email_header = "oLIB 0-lag event found at %s with FAR of %s Hz"%(dictionary[event]['gpstime'],dictionary[event]['FAR'])
 							if gdb_flag:
-								email_body = "This oLIB event *should* be posted to GraceDB momentarily.\n\n"
+								email_body = "This oLIB event *should* be posted to GraceDB momentarily.\n"
 							else:
-								email_body = "This oLIB event *will not* to be posted to GraceDB because of the pipeline configuration.\n\n"
+								email_body = "This oLIB event *will not* to be posted to GraceDB because of the pipeline configuration.\n"
 							email_body += "GPS time:  %s\n"%dictionary[event]['gpstime']
 							email_body += "FAR [Hz]: %s\n"%dictionary[event]['FAR']
 							email_body += "IFOs: %s\n"%",".join(ifos)

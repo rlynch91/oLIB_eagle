@@ -139,12 +139,54 @@ run_dic['coincidence']['H1L1V1']['training timeslides']['V1'] = np.arange(1,51,1
 run_dic['LLRT'] = {}
 run_dic['LLRT']['FAR thresh'] = 1.e-5 #1.e-6
 
+run_dic['LLRT']['calc info'] = {}
+run_dic['LLRT']['calc info']['interp method'] = 'Grid Linear'
+run_dic['LLRT']['calc info']['extrap method'] = 'Grid Nearest'
+
 run_dic['LLRT']['param info'] = {}
 run_dic['LLRT']['param info']['low_f'] = {}
 run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI'] = {}
 run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['dimension'] = 2
 run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['param names'] = ['logBSN','BCI']
 run_dic['LLRT']['param info']['low_f']['logBSN_and_BCI']['interp range'] = np.array([[0., 6.],[0., 30.]])
+
+run_dic['LLRT']['optimize signal training'] = {}
+run_dic['LLRT']['optimize signal training']['low_f'] = {}
+run_dic['LLRT']['optimize signal training']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['optimize signal training']['low_f']['logBSN_and_BCI']['optimization method'] = 'BFGS'
+run_dic['LLRT']['optimize signal training']['low_f']['logBSN_and_BCI']['optimization initial coords'] = np.array([np.nan,np.nan])
+
+run_dic['LLRT']['optimize noise training'] = {}
+run_dic['LLRT']['optimize noise training']['low_f'] = {}
+run_dic['LLRT']['optimize noise training']['low_f']['logBSN_and_BCI'] = {}
+run_dic['LLRT']['optimize noise training']['low_f']['logBSN_and_BCI']['optimization method'] = 'BFGS'
+run_dic['LLRT']['optimize noise training']['low_f']['logBSN_and_BCI']['optimization initial coords'] = np.array([np.nan,np.nan])
+
+run_dic['LLRT']['train signal data'] = {}
+run_dic['LLRT']['train signal data']['low_f'] = {}
+run_dic['LLRT']['train signal data']['low_f']['logBSN'] = {}
+run_dic['LLRT']['train signal data']['low_f']['logBSN']['data'] = np.transpose(np.array([np.nan]))
+run_dic['LLRT']['train signal data']['low_f']['logBSN']['KDE ranges'] = np.array([[0., 6.]])
+run_dic['LLRT']['train signal data']['low_f']['logBSN']['KDE bandwidths'] = np.array([np.nan])
+run_dic['LLRT']['train signal data']['low_f']['logBSN']['KDE points'] = np.array([100])
+run_dic['LLRT']['train signal data']['low_f']['BCI'] = {}
+run_dic['LLRT']['train signal data']['low_f']['BCI']['data'] = np.transpose(np.array([np.nan]))
+run_dic['LLRT']['train signal data']['low_f']['BCI']['KDE ranges'] = np.array([[0., 30.]])
+run_dic['LLRT']['train signal data']['low_f']['BCI']['KDE bandwidths'] = np.array([np.nan])
+run_dic['LLRT']['train signal data']['low_f']['BCI']['KDE points'] = np.array([100])
+
+run_dic['LLRT']['train noise data'] = {}
+run_dic['LLRT']['train noise data']['low_f'] = {}
+run_dic['LLRT']['train noise data']['low_f']['logBSN'] = {}
+run_dic['LLRT']['train noise data']['low_f']['logBSN']['data'] = np.transpose(np.array([np.nan]))
+run_dic['LLRT']['train noise data']['low_f']['logBSN']['KDE ranges'] = np.array([[0., 6.]])
+run_dic['LLRT']['train noise data']['low_f']['logBSN']['KDE bandwidths'] = np.array([np.nan])
+run_dic['LLRT']['train noise data']['low_f']['logBSN']['KDE points'] = np.array([100])
+run_dic['LLRT']['train noise data']['low_f']['BCI'] = {}
+run_dic['LLRT']['train noise data']['low_f']['BCI']['data'] = np.transpose(np.array([np.nan]))
+run_dic['LLRT']['train noise data']['low_f']['BCI']['KDE ranges'] = np.array([[0., 30.]])
+run_dic['LLRT']['train noise data']['low_f']['BCI']['KDE bandwidths'] = np.array([np.nan])
+run_dic['LLRT']['train noise data']['low_f']['BCI']['KDE points'] = np.array([100])
 
 run_dic['LLRT']['H1L1'] = {}
 run_dic['LLRT']['H1L1']['back dic path'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/background_info/H1L1/ts_-2000.0_2000.0_noise_back_events.pkl_Cat1Cat4Cat2Cat3'
@@ -196,6 +238,7 @@ run_dic['training']['asd files']['V1'] = '/home/ryan.lynch/2nd_pipeline/pipeline
 ###
 run_dic['prior ranges'] = {}
 run_dic['prior ranges']['LIB window'] = 0.1
+run_dic['prior ranges']['LIB stride'] = 4.0
 run_dic['prior ranges']['min hrss'] = 1.0e-22  #3.3e-23
 run_dic['prior ranges']['max hrss'] = 1.0e-15
 run_dic['prior ranges']['min freq'] = 32

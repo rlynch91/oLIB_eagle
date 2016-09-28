@@ -39,6 +39,7 @@ def executable(run_dic):
 		sample_freq = run_dic['config']['sample freq']
 		osnr_thresh = run_dic['config']['oSNR thresh']
 		LIB_window = run_dic['prior ranges']['LIB window']
+		LIB_stride = run_dic['prior ranges']['LIB stride']
 		sample_freq = run_dic['config']['sample freq']
 
 		seg_files = {}
@@ -265,7 +266,7 @@ def executable(run_dic):
 							sed_string = 'sed -e "s|IFOSCOMMA|%s|g" -e "s|SEGDIR|%s|g" -e "s|BINDIR|%s|g"'%(tmp_ifos,segdir,bindir)
 							sed_string += ' -e "s|CHANNELTYPES|%s|g" -e "s|CHANNELNAMES|%s|g" -e "s|SAMPFREQ|%s|g"'%(tmp_channel_types,tmp_channel_names,sample_freq)
 							sed_string += ' -e "s|MINHRSS|%s|g" -e "s|MAXHRSS|%s|g" -e "s|MINQUALITY|%s|g" -e "s|MAXQUALITY|%s|g" -e "s|MINFREQ|%s|g" -e "s|MAXFREQ|%s|g"'%(np.log(min_hrss),np.log(max_hrss),min_quality,max_quality,min_freq,max_freq)
-							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g" -e "s|FREQSLOW|%s|g"'%(LIB_window,key,mode_label,tmp_freqs_low)
+							sed_string += ' -e "s|LIBWINDOW|%s|g" -e "s|LIBSTRIDE|%s|g" -e "s|COINGROUP|%s|g" -e "s|COINMODE|%s|g" -e "s|FREQSLOW|%s|g"'%(LIB_window,LIB_stride,key,mode_label,tmp_freqs_low)
 							
 							if mode_label == '0lag' or mode_label == 'sig_train':
 								sed_string += ' -e "s|LAG|0lag|g"'
