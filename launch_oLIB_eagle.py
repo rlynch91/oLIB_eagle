@@ -268,9 +268,8 @@ run_dic['collection and retraining']['collect dir'] = '/home/ryan.lynch/2nd_pipe
 run_dic['collection and retraining']['max back size'] = 5000
 run_dic['collection and retraining']['max sig train size'] = 5000
 run_dic['collection and retraining']['max noise train size'] = 5000
-
+run_dic['collection and retraining']['back dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_background_info/'
 run_dic['collection and retraining']['low_f'] = {}
-run_dic['collection and retraining']['low_f']['back dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_background_info/'
 run_dic['collection and retraining']['low_f']['retrain dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_LLRT_info/'
 
 #=======================================================================
