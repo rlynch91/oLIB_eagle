@@ -119,13 +119,13 @@ if __name__=='__main__':
 	parser = OptionParser(usage=usage)
 
 	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
-	parser.add_option("-g", "--gps-day", default=None, type='string', help="GPS day, in 100000s of seconds, for which to collect")
+	parser.add_option("-g", "--gps-day", default=None, type='int', help="GPS day, in 100000s of seconds, for which to collect")
 
 	#---------------------------------------------
 
 	opts, args = parser.parse_args()
 
-	run_dic = opts.run_dic
+	run_dic = pickle.load(open(opts.run_dic))
 	gps_day = opts.gps_day
 	
 	#---------------------------------------------

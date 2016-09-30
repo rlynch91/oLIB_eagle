@@ -13,34 +13,49 @@ if __name__=='__main__':
 
 	usage = None
 	parser = OptionParser(usage=usage)
-
-	parser.add_option("", "--new-back-dic", default=None, type="string", help="Path to background dictionary with new data")
-	parser.add_option("", "--new-back-lt", default=None, type="string", help="Path to file with new background livetime")
-	parser.add_option("", "--old-back-dic", default=None, type="string", help="Path to background dictionary with old data")
-	parser.add_option("", "--old-back-lt", default=None, type="string", help="Path to file with old background livetime")
-	parser.add_option("", "--outdir", default=None, type="string", help="Path to directory in which to save outputs")
-	parser.add_option("", "--max-back-size", default=None, type="int", help="Maximum number of points to have in background dictionary")
-	parser.add_option("", "--new-gps-day", default=None, type="int", help="GPS day that the new day covers")
+	
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	parser.add_option("-g", "--new-gps-day", default=None, type="int", help="GPS day that the new day covers")
+	parser.add_option("-i", "--ifo-group", default=None, type="string", help="IFO group to update background for (i.e., H1L1)")
 
 	#-----------------------------------------------------------------------
 
 	opts, args = parser.parse_args()
-
-	new_back_dic = pickle.load(open(opts.new_back_dic))
-	new_back_lt = float(np.genfromtxt(opts.new_back_lt))
-	old_back_dic = pickle.load(open(opts.old_back_dic))
-	old_back_lt = float(np.genfromtxt(opts.old_back_lt))
-	outdir = opts.outdir
-	max_back_size = opts.max_back_size
+		
+	run_dic = pickle.load(open(opts.run_dic))
 	new_gps_day = opts.new_gps_day
+	group = opts.ifo_group
 
 	#=======================================================================
 
-	#################################
-	# Copy old data to backup files #
-	#################################
-	os.system('cp %s %s/collected_background_dictionary_old.pkl'%(opts.old_back_dic,outdir))
-	os.system('cp %s %s/collected_background_livetime_old.txt'%(opts.old_back_lt,outdir))
+	####################################
+	# Initialize the variables we need #
+	####################################
+	outdir = '%s/%s/'%(run_dic['collection and retraining']['back dir'],group)
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+	max_back_size = run_dic['collection and retraining']['max back size']
+	collectdir = run_dic['collection and retraining']['collect dir']
+	
+	new_back_dic_path = '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',group,new_gps_day,'back',group)
+	new_back_lt_path = '%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',group,new_gps_day,'back',group)
+	if os.path.isfile(new_back_dic_path) and os.path.isfile(new_back_lt_path):
+		new_back_dic = pickle.load(open(new_back_dic_path))
+		new_back_lt = float(np.genfromtxt(new_back_lt_path))
+	else:
+		new_back_dic = {}
+		new_back_lt = 0.
+		
+	old_back_dic_path = '%s/collected_background_dictionary.pkl'%outdir
+	old_back_lt_path = '%s/collected_background_livetime.txt'%outdir
+	if os.path.isfile(old_back_dic_path) and os.path.isfile(old_back_lt_path):
+		old_back_dic = pickle.load(open(old_back_dic_path))
+		old_back_lt = float(np.genfromtxt(old_back_lt_path))
+		os.system('cp %s %s/collected_background_dictionary_old.pkl'%(old_back_dic_path,outdir))
+		os.system('cp %s %s/collected_background_livetime_old.txt'%(old_back_lt_path,outdir))
+	else:
+		old_back_dic = {}
+		old_back_lt = 0.
 
 	################################
 	# Update training dictionaries #

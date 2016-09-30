@@ -16,15 +16,15 @@ if __name__=='__main__':
 	usage = None
 	parser = OptionParser(usage=usage)
 
-	parser.add_option("-g", "--gps-day-collect", default=None, type="string", help="GPS day to collect, or current day if not given or 'None'")
 	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	parser.add_option("-g", "--gps-day-collect", default=None, type="string", help="GPS day to collect, or current day if not given or 'None'")
 	
 	#-------------------------------------------------------------------
 
 	opts, args = parser.parse_args()
 
-	gps_day_collect = opts.gps_day_collect
 	run_dic = pickle.load(open(opts.run_dic))
+	gps_day_collect = opts.gps_day_collect
 	
 	#-------------------------------------------------------------------
 	
@@ -32,21 +32,11 @@ if __name__=='__main__':
 	ifo_groups = run_dic['coincidence'].keys()
 	infodir = run_dic['config']['info dir']
 	rundir = run_dic['config']['run dir']
-	collectdir = run_dic['collection and retraining']['collect dir']
 	bindir = run_dic['config']['LIB bin dir']
-	max_back_size = run_dic['collection and retraining']['max back size']
-	max_signal_size = run_dic['collection and retraining']['max sig train size']
-	max_noise_size = run_dic['collection and retraining']['max noise train size']
 	
 	last_gps_day_path = rundir + '/last_gps_day_collected_and_trained.pkl'
 	last_gps_day_comments_path = rundir + '/last_gps_day_collected_and_trained_comments.txt'
-	
-	#Get background and retraining directories for this search bin
-	backdir = run_dic['collection and retraining']['back dir']
-	retraindirs = {}
-	for search_bin in run_dic['search bins']['bin names']:
-		retraindir[search_bin] = run_dic['collection and retraining']['low_f']['retrain dir']
-	
+		
 	#-------------------------------------------------------------------
 		
 	#Get current full gps time
@@ -89,12 +79,10 @@ if __name__=='__main__':
 			
 			#If past the threshold, collect background and retrain on (depending on key)
 			if gps_time_full > gps_threshold:
-#???				
+				
 				if key == 'background':
 					#Run background collection
-					background_string = 'python %s/update_background_eagle.py --new-back-dic %s --new-back-lt %s '%(infodir,'%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',group,gps_day_retrain,'back',group), '%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',group,gps_day_retrain,'back',group))
-					background_string += '--old-back-dic %s --old-back-lt %s '%('%s/%s/collected_background_dictionary.pkl'%(backdir,group), '%s/%s/collected_background_livetime.txt'%(backdir,group))
-					background_string += '--outdir %s --max-back-size %s --new-gps-day %s'%('%s/%s/'%(backdir,group),max_back_size,gps_day_retrain)
+					background_string = 'python %s/update_background_eagle.py --run-dic %s --new-gps-day %s --ifo-group %s'%(infodir,opts.run_dic,gps_day_retrain,group)
 					back_status = commands.getstatusoutput(background_string)
 					run_comments_file.write('%s %s %s %s %s \n\n'%(key, 'back', group, back_status[0], back_status[1]))
 					if not back_status[0]:
@@ -102,17 +90,13 @@ if __name__=='__main__':
 						print key, 'back', group, "Success"
 					else:
 						print key, 'back', group, "Failure", back_status[1]
-					
+#???					
 				elif key == 'retraining':
 					#Loop over search bins
 					for search_bin in run_dic['search bins']['bin names']:
 						#Run retraining
 						#???Need to make another sub_folder for search bin???
-						retraining_string = 'python %s/retrain_likelihoods_eagle.py --new-sig-dic %s --new-noise-dic %s '%(infodir,'%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'sig_train',group,gps_day_retrain,'sig_train',group), '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'noise_train',group,gps_day_retrain,'noise_train',group))
-						retraining_string += '--old-sig-dic %s --old-noise-dic %s '%('%s/%s/Signal_training_dictionary.pkl'%(retraindir,group), '%s/%s/Noise_training_dictionary.pkl'%(retraindir,group))
-						retraining_string += '--old-sig-bands %s --old-noise-bands %s '%('%s/%s/%s_Signal_log_KDE_bandwidths.npy'%(retraindir,group,train_details_dic['param info'][train_bin].keys()[0]),'%s/%s/%s_Noise_log_KDE_bandwidths.npy'%(retraindir,group,train_details_dic['param info'][train_bin].keys()[0]))
-						retraining_string += '--outdir %s --max-signal-size %s --max-noise-size %s '%('%s/%s/'%(retraindir,group),max_signal_size,max_noise_size)
-						retraining_string += '--train-details-dic %s --search-bin %s'%(opts.train_details_dic,train_bin)
+						retraining_string = 'python %s/retrain_likelihoods_eagle.py --run-dic %s --new-gps-day %s --ifo-group %s --search-bin %s'%(infodir,opts.run_dic,gps_day_retrain,group,search_bin)
 						retraining_status = commands.getstatusoutput(retraining_string)
 						run_comments_file.write('%s %s %s %s \n\n'%(key, search_bin, group, retraining_status[0], retraining_status[1]))
 						if not retraining_status[0]:

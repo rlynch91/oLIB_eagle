@@ -37,36 +37,47 @@ if __name__=='__main__':
 	usage = None
 	parser = OptionParser(usage=usage)
 
-	parser.add_option("", "--new-sig-dic", default=None, type="string", help="Path to signal training dictionary with new data")
-	parser.add_option("", "--new-noise-dic", default=None, type="string", help="Path to noise training dictionary with new data")
-	parser.add_option("", "--old-sig-dic", default=None, type="string", help="Path to signal training dictionary with old data")
-	parser.add_option("", "--old-noise-dic", default=None, type="string", help="Path to noise training dictionary with old data")
-	parser.add_option("", "--old-sig-bands", default=None, type="string", help="Path to file containing signal bandwidths from previous training")
-	parser.add_option("", "--old-noise-bands", default=None, type="string", help="Path to file containing noise bandwidths from previous training")
-	parser.add_option("", "--outdir", default=None, type="string", help="Path to directory in which to save outputs")
-	parser.add_option("", "--max-signal-size", default=None, type="int", help="Maximum number of points to train signal likelihoods on")
-	parser.add_option("", "--max-noise-size", default=None, type="int", help="Maximum number of points to train noise likelihoods on")
-	parser.add_option("", "--train-details-dic", default=None, type="string", help="Path to dictionary containing training details")
-	parser.add_option("", "--search-bin", default=None, type="string", help="Name of search bin for which to train")
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	parser.add_option("-g", "--new-gps-day", default=None, type="int", help="GPS day that the new day covers")
+	parser.add_option("-i", "--ifo-group", default=None, type="string", help="IFO group to update background for (i.e., H1L1)")
+	parser.add_option("-b", "--search-bin", default=None, type="string", help="Name of search bin for which to train")
 
 	#-----------------------------------------------------------------------
 
 	opts, args = parser.parse_args()
 
-	new_signal_dic = pickle.load(open(opts.new_sig_dic))
-	new_noise_dic = pickle.load(open(opts.new_noise_dic))
-	old_signal_dic = pickle.load(open(opts.old_sig_dic))
-	old_noise_dic = pickle.load(open(opts.old_noise_dic))
-	old_signal_bands = np.load(opts.old_sig_bands)
-	old_noise_bands = np.load(opts.old_noise_bands)
-	outdir = opts.outdir
-	max_signal_size = opts.max_signal_size
-	max_noise_size = opts.max_noise_size
-	train_details_dic = pickle.load(open(opts.train_details_dic))
-	search_bin = opts.search_bin
+?	old_signal_dic = pickle.load(open(opts.old_sig_dic))
+?	old_noise_dic = pickle.load(open(opts.old_noise_dic))
+?	old_signal_bands = np.load(opts.old_sig_bands)
+?	old_noise_bands = np.load(opts.old_noise_bands)
+
+	run_dic = pickle.load(open(opts.run_dic))
+	new_gps_day = opts.new_gps_day
+	group = opts.ifo_group
+	search_bin = opts.search_bin 
 
 	#=======================================================================
-
+	
+	####################################
+	# Initialize the variables we need #
+	####################################
+	outdir = '%s/%s/'%(run_dic['collection and retraining'][search_bin]['retrain dir'],group)
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+	max_signal_size = run_dic['collection and retraining']['max sig train size']
+	max_noise_size = run_dic['collection and retraining']['max noise train size']
+	collectdir = run_dic['collection and retraining']['collect dir']
+	
+	new_signal_dic_path = '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'sig_train',group,new_gps_day,'sig_train',group)
+	new_noise_dic_path = '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'noise_train',group,new_gps_day,'noise_train',group)
+	if os.path.isfile(new_signal_dic_path) and os.path.isfile(new_noise_dic_path):
+		new_signal_dic = pickle.load(open(new_signal_dic_path))
+		new_noise_dic = pickle.load(open(new_noise_dic_path))
+	else:
+		new_signal_dic = {}
+		new_noise_dic = {}
+#???	
+	
 	#################################
 	# Copy old data to backup files #
 	#################################
