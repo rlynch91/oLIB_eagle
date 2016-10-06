@@ -95,7 +95,6 @@ if __name__=='__main__':
 					#Loop over search bins
 					for search_bin in run_dic['search bins']['bin names']:
 						#Run retraining
-						#???Need to make another sub_folder for search bin???
 						retraining_string = 'python %s/retrain_likelihoods_eagle.py --run-dic %s --new-gps-day %s --ifo-group %s --search-bin %s'%(infodir,opts.run_dic,gps_day_retrain,group,search_bin)
 						retraining_status = commands.getstatusoutput(retraining_string)
 						run_comments_file.write('%s %s %s %s \n\n'%(key, search_bin, group, retraining_status[0], retraining_status[1]))
@@ -104,7 +103,10 @@ if __name__=='__main__':
 							print key, search_bin, group, "Success"
 						else:
 							print key, search_bin, group, "Failure", retraining_status[1]
-#???				
+#???
+
+	#???ADD IN FUNCTION THAT DOES TARRING IF WE ARE COMPLETELY DONE WITH A DAY????
+				
 	#Save updated dictionary containing last completed days for background collection and retraining
 	pickle.dump(gps_day_last,open(last_gps_day_path,'wt'))
 	run_comments_file.close()

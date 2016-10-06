@@ -46,11 +46,6 @@ if __name__=='__main__':
 
 	opts, args = parser.parse_args()
 
-?	old_signal_dic = pickle.load(open(opts.old_sig_dic))
-?	old_noise_dic = pickle.load(open(opts.old_noise_dic))
-?	old_signal_bands = np.load(opts.old_sig_bands)
-?	old_noise_bands = np.load(opts.old_noise_bands)
-
 	run_dic = pickle.load(open(opts.run_dic))
 	new_gps_day = opts.new_gps_day
 	group = opts.ifo_group
@@ -76,6 +71,32 @@ if __name__=='__main__':
 	else:
 		new_signal_dic = {}
 		new_noise_dic = {}
+
+	old_signal_dic_path = '%s/Signal_training_dictionary.pkl'%outdir
+	old_noise_dic_path = '%s/Noise_training_dictionary.pkl'%outdir
+	if os.path.isfile(old_signal_dic_path) and os.path.isfile(old_noise_dic_path):
+		old_signal_dic = pickle.load(open(old_signal_dic_path))
+		old_noise_dic = pickle.load(open(old_noise_dic_path))
+		os.system('cp %s %s/Signal_training_dictionary_old.pkl'%(old_signal_dic_path,outdir))
+		os.system('cp %s %s/Noise_training_dictionary_old.pkl'%(old_noise_dic_path,outdir))
+	else:
+		old_signal_dic = {}
+		old_noise_dic = {}
+
+#???NEED TO LOOP OVER SEARCH BIN PARAMETERS, HERE AND FOR ACTUAL RETRAINING???
+	old_signal_bands_path = '%s/%s_Signal_log_KDE_bandwidths.npy'%(outdir,run_dic['LLRT']['param info'][search_bin].keys()???)
+	old_noise_bands_path = '%s/%s_Noise_log_KDE_bandwidths.npy'%(outdir,run_dic['LLRT']['param info'][search_bin].keys()???)
+	if os.path.isfile(old_signal_bands_path) and os.path.isfile(old_noise_bands_path):
+		old_signal_bands = np.load(old_signal_bands_path)
+		old_noise_bands = np.load(old_noise_bands_path)
+		os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(old_signal_bands_path,outdir,run_dic['LLRT']['param info'][search_bin].keys()???))
+		os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(old_noise_bands_path,outdir,run_dic['LLRT']['param info'][search_bin].keys()???))
+	else:
+		old_signal_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][???]['param names'])*np.nan
+		old_noise_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][???]['param names']))*np.nan
+
+	#IN SAME LOOP, MOVE OLD KDE FILES IF THEY EXIST
+
 #???	
 	
 	#################################
@@ -87,8 +108,6 @@ if __name__=='__main__':
 	os.system('cp %s/%s_Signal_log_KDE_values.npy %s/%s_Signal_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(opts.old_noise_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
 	os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(opts.old_sig_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s %s/Noise_training_dictionary_old.pkl'%(opts.old_noise_dic,outdir))
-	os.system('cp %s %s/Signal_training_dictionary_old.pkl'%(opts.old_sig_dic,outdir))
 
 	################################
 	# Update training dictionaries #
