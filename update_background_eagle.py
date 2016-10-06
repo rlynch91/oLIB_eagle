@@ -125,6 +125,6 @@ if __name__=='__main__':
 	#################################
 	# Move new data to proper files #
 	#################################
-	os.system('mv %s/collected_background_dictionary_new.pkl %s/collected_background_dictionary.pkl'%(outdir,outdir))
-	os.system('mv %s/collected_background_livetime_new.txt %s/collected_background_livetime.txt'%(outdir,outdir))
+	os.system('mv %s/collected_background_dictionary_new.pkl %s'%(outdir,old_back_dic_path))
+	os.system('mv %s/collected_background_livetime_new.txt %s'%(outdir,old_back_lt_path))
 	

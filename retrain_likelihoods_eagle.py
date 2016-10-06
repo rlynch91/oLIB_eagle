@@ -63,6 +63,7 @@ if __name__=='__main__':
 	max_noise_size = run_dic['collection and retraining']['max noise train size']
 	collectdir = run_dic['collection and retraining']['collect dir']
 	
+	#Load in the new training dictionaries if available
 	new_signal_dic_path = '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'sig_train',group,new_gps_day,'sig_train',group)
 	new_noise_dic_path = '%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'noise_train',group,new_gps_day,'noise_train',group)
 	if os.path.isfile(new_signal_dic_path) and os.path.isfile(new_noise_dic_path):
@@ -72,6 +73,7 @@ if __name__=='__main__':
 		new_signal_dic = {}
 		new_noise_dic = {}
 
+	#Load in and save as backups the old training dictionaries if available
 	old_signal_dic_path = '%s/Signal_training_dictionary.pkl'%outdir
 	old_noise_dic_path = '%s/Noise_training_dictionary.pkl'%outdir
 	if os.path.isfile(old_signal_dic_path) and os.path.isfile(old_noise_dic_path):
@@ -83,31 +85,39 @@ if __name__=='__main__':
 		old_signal_dic = {}
 		old_noise_dic = {}
 
-#???NEED TO LOOP OVER SEARCH BIN PARAMETERS, HERE AND FOR ACTUAL RETRAINING???
-	old_signal_bands_path = '%s/%s_Signal_log_KDE_bandwidths.npy'%(outdir,run_dic['LLRT']['param info'][search_bin].keys()???)
-	old_noise_bands_path = '%s/%s_Noise_log_KDE_bandwidths.npy'%(outdir,run_dic['LLRT']['param info'][search_bin].keys()???)
-	if os.path.isfile(old_signal_bands_path) and os.path.isfile(old_noise_bands_path):
-		old_signal_bands = np.load(old_signal_bands_path)
-		old_noise_bands = np.load(old_noise_bands_path)
-		os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(old_signal_bands_path,outdir,run_dic['LLRT']['param info'][search_bin].keys()???))
-		os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(old_noise_bands_path,outdir,run_dic['LLRT']['param info'][search_bin].keys()???))
-	else:
-		old_signal_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][???]['param names'])*np.nan
-		old_noise_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][???]['param names']))*np.nan
+	old_signal_bands_path = {}
+	old_noise_bands_path = {}
+	old_signal_bands = {}
+	old_noise_bands = {}
+	old_signal_KDE_coords_path = {}
+	old_signal_KDE_values_path = {}
+	old_noise_KDE_coords_path = {}
+	old_noise_KDE_values_path = {}
+	#Loop over all param_groups for the specified search bin
+	for params in run_dic['LLRT']['param info'][search_bin]:
+		
+		#Load in and save as backups the old training bandwidths if available
+		old_signal_bands_path[params] = '%s/%s_Signal_log_KDE_bandwidths.npy'%(outdir,params)
+		old_noise_bands_path[params] = '%s/%s_Noise_log_KDE_bandwidths.npy'%(outdir,params)
+		if os.path.isfile(old_signal_bands_path[params]) and os.path.isfile(old_noise_bands_path[params]):
+			old_signal_bands[params] = np.load(old_signal_bands_path[params])
+			old_noise_bands[params] = np.load(old_noise_bands_path[params])
+			os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(old_signal_bands_path[params],outdir,params))
+			os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(old_noise_bands_path[params],outdir,params))
+		else:
+			old_signal_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
+			old_noise_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
 
-	#IN SAME LOOP, MOVE OLD KDE FILES IF THEY EXIST
-
-#???	
-	
-	#################################
-	# Copy old data to backup files #
-	#################################
-	os.system('cp %s/%s_Noise_log_KDE_coords.npy %s/%s_Noise_log_KDE_coords_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/%s_Noise_log_KDE_values.npy %s/%s_Noise_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/%s_Signal_log_KDE_coords.npy %s/%s_Signal_log_KDE_coords_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s/%s_Signal_log_KDE_values.npy %s/%s_Signal_log_KDE_values_old.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(opts.old_noise_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(opts.old_sig_bands,outdir,train_details_dic['param info'][search_bin].keys()[0]))
+		#Save as backups the old KDE files if available
+		old_signal_KDE_coords_path[params] = '%s/%s_Signal_log_KDE_coords.npy'%(outdir,params)
+		old_signal_KDE_values_path[params] = '%s/%s_Signal_log_KDE_values.npy'%(outdir,params)
+		old_noise_KDE_coords_path[params] = '%s/%s_Noise_log_KDE_coords.npy'%(outdir,params)
+		old_noise_KDE_values_path[params] = '%s/%s_Noise_log_KDE_values.npy'%(outdir,params)
+		if os.path.isfile(old_signal_KDE_coords_path[params]) and os.path.isfile(old_signal_KDE_values_path[params]) and os.path.isfile(old_noise_KDE_coords_path[params]) and os.path.isfile(old_noise_KDE_values_path[params]):
+			os.system('cp %s %s/%s_Signal_log_KDE_coords_old.npy'%(old_signal_KDE_coords_path[params],outdir,params))
+			os.system('cp %s %s/%s_Signal_log_KDE_values_old.npy'%(old_signal_KDE_values_path[params],outdir,params))
+			os.system('cp %s %s/%s_Noise_log_KDE_coords_old.npy'%(old_noise_KDE_coords_path[params],outdir,params))
+			os.system('cp %s %s/%s_Noise_log_KDE_values_old.npy'%(old_noise_KDE_values_path[params],outdir,params))
 
 	################################
 	# Update training dictionaries #
@@ -181,14 +191,15 @@ if __name__=='__main__':
 	#######################
 
 	#Start building LLRT dictionaries
-	calc_info = train_details_dic['calc info']
-	param_info = train_details_dic['param info'][search_bin]
+	calc_info = run_dic['LLRT']['calc info']
+	param_info = run_dic['LLRT']['param info'][search_bin]
 	
-	optimize_signal_training = train_details_dic['optimize signal training'][search_bin]
-	optimize_signal_training[optimize_signal_training.keys()[0]]['optimization initial coords'] = old_signal_bands
-	
-	optimize_noise_training = train_details_dic['optimize noise training'][search_bin]
-	optimize_noise_training[optimize_noise_training.keys()[0]]['optimization initial coords'] = old_noise_bands
+	for params in param_info:
+		optimize_signal_training = run_dic['LLRT']['optimize signal training'][search_bin]
+		optimize_signal_training[params]['optimization initial coords'] = old_signal_bands
+		
+		optimize_noise_training = run_dic['LLRT']['optimize noise training'][search_bin]
+		optimize_noise_training[params]['optimization initial coords'] = old_noise_bands
 
 	#Collect all signal training coordinates from dictionaries and put in arrays
 	sig_logBSN = np.ones(len(updated_signal_dic))*np.nan
@@ -200,7 +211,7 @@ if __name__=='__main__':
 	sig_logBSN = sig_logBSN[ sig_logBSN >= -np.inf ]
 	sig_BCI = sig_BCI[ sig_BCI >= -np.inf ]
 
-	train_signal_data = train_details_dic['train signal data'][search_bin]
+	train_signal_data = run_dic['LLRT']['train signal data'][search_bin]
 	train_signal_data['logBSN']['data'] = np.transpose(np.array([sig_logBSN]))
 	train_signal_data['BCI']['data'] = np.transpose(np.array([sig_BCI]))
 
@@ -214,7 +225,7 @@ if __name__=='__main__':
 	noise_logBSN = noise_logBSN[ noise_logBSN >= -np.inf ]
 	noise_BCI = noise_BCI[ noise_BCI >= -np.inf ]
 
-	train_noise_data = train_details_dic['train noise data'][search_bin]
+	train_noise_data = run_dic['LLRT']['train noise data'][search_bin]
 	train_noise_data['logBSN']['data'] = np.transpose(np.array([noise_logBSN]))
 	train_noise_data['BCI']['data'] = np.transpose(np.array([noise_BCI]))
 
@@ -226,12 +237,13 @@ if __name__=='__main__':
 	#################################
 	# Move new data to proper files #
 	#################################
-	os.system('mv %s/%s_Noise_log_KDE_coords_new.npy %s/%s_Noise_log_KDE_coords.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s/%s_Noise_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s/%s_Signal_log_KDE_coords.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s/%s_Signal_log_KDE_values.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Noise_log_KDE_bandwidths_new.npy %s/%s_Noise_log_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/%s_Signal_log_KDE_bandwidths_new.npy %s/%s_Signal_log_KDE_bandwidths.npy'%(outdir,train_details_dic['param info'][search_bin].keys()[0],outdir,train_details_dic['param info'][search_bin].keys()[0]))
-	os.system('mv %s/Noise_training_dictionary_new.pkl %s/Noise_training_dictionary.pkl'%(outdir,outdir))
-	os.system('mv %s/Signal_training_dictionary_new.pkl %s/Signal_training_dictionary.pkl'%(outdir,outdir))
+	os.system('mv %s/Signal_training_dictionary_new.pkl %s'%(outdir,old_signal_dic_path))
+	os.system('mv %s/Noise_training_dictionary_new.pkl %s'%(outdir,old_noise_dic_path))
+	for params in param_info:
+		os.system('mv %s/%s_Signal_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_signal_bands_path[params]))
+		os.system('mv %s/%s_Noise_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_noise_bands_path[params]))
+		os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s'%(outdir,params,old_signal_KDE_coords_path[params]))
+		os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s'%(outdir,params,old_signal_KDE_values_path[params]))
+		os.system('mv %s/%s_Noise_log_KDE_coords_new.npy %s'%(outdir,params,old_noise_KDE_coords_path[params]))
+		os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s'%(outdir,params,old_noise_KDE_values_path[params]))
 	
