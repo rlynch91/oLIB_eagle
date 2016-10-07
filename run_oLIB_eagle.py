@@ -298,6 +298,7 @@ if __name__=='__main__':
 	parser = OptionParser(usage=usage)
 
 	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	parser.add_option("", "--run-label", default=None, type="string", help="Label to help identify if the job is running")
 
 	#-------------------------------------------------------------------
 

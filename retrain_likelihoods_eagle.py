@@ -11,15 +11,15 @@ import os
 #Define Functions
 
 ###
-def check_parameter_space(dic_entry, search_bin, train_details_dic):
-	q_min = train_details_dic['search bins'][search_bin]['low quality cut']
-	q_max = train_details_dic['search bins'][search_bin]['high quality cut']
-	f_min = train_details_dic['search bins'][search_bin]['low freq cut']
-	f_max = train_details_dic['search bins'][search_bin]['high freq cut']
-	BCI_min = train_details_dic['search bins'][search_bin]['low BCI cut']
-	BCI_max = train_details_dic['search bins'][search_bin]['high BCI cut']
-	logBSN_min = train_details_dic['search bins'][search_bin]['low logBSN cut']
-	logBSN_max = train_details_dic['search bins'][search_bin]['high logBSN cut']
+def check_parameter_space(dic_entry, search_bin, run_dic):
+	q_min = run_dic['search bins'][search_bin]['low quality cut']
+	q_max = run_dic['search bins'][search_bin]['high quality cut']
+	f_min = run_dic['search bins'][search_bin]['low freq cut']
+	f_max = run_dic['search bins'][search_bin]['high freq cut']
+	BCI_min = run_dic['search bins'][search_bin]['low BCI cut']
+	BCI_max = run_dic['search bins'][search_bin]['high BCI cut']
+	logBSN_min = run_dic['search bins'][search_bin]['low logBSN cut']
+	logBSN_max = run_dic['search bins'][search_bin]['high logBSN cut']
 	
 	#Check to see if the event lies within the defined parameter space
 	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (np.log10(dic_entry['BSN']) >= logBSN_min) and (np.log10(dic_entry['BSN']) <= logBSN_max):
@@ -134,7 +134,7 @@ if __name__=='__main__':
 	#First add the new signal training events
 	if event_signal < max_signal_size:
 		for key in new_signal_dic:
-			if check_parameter_space(dic_entry=new_signal_dic[key], search_bin=search_bin, train_details_dic=train_details_dic) and new_signal_dic[key]['Training injection']:
+			if check_parameter_space(dic_entry=new_signal_dic[key], search_bin=search_bin, run_dic=run_dic) and new_signal_dic[key]['Training injection']:
 				#Event should be used in training
 				updated_signal_dic[event_signal] = new_signal_dic[key]
 				
@@ -146,7 +146,7 @@ if __name__=='__main__':
 	#Then add the old signal training events
 	if event_signal < max_signal_size:
 		for key in old_signal_dic:
-			if check_parameter_space(dic_entry=old_signal_dic[key], search_bin=search_bin, train_details_dic=train_details_dic) and old_signal_dic[key]['Training injection']:
+			if check_parameter_space(dic_entry=old_signal_dic[key], search_bin=search_bin, run_dic=run_dic) and old_signal_dic[key]['Training injection']:
 				#Event should be used in training
 				updated_signal_dic[event_signal] = old_signal_dic[key]
 				
@@ -159,7 +159,7 @@ if __name__=='__main__':
 	#First add the new noise training events
 	if event_noise < max_noise_size:
 		for key in new_noise_dic:
-			if check_parameter_space(dic_entry=new_noise_dic[key], search_bin=search_bin, train_details_dic=train_details_dic):
+			if check_parameter_space(dic_entry=new_noise_dic[key], search_bin=search_bin, run_dic=run_dic):
 				#Event should be used in training
 				updated_noise_dic[event_noise] = new_noise_dic[key]
 				
@@ -171,7 +171,7 @@ if __name__=='__main__':
 	#Then add the old noise training events
 	if event_noise < max_noise_size:
 		for key in old_noise_dic:
-			if check_parameter_space(dic_entry=old_noise_dic[key], search_bin=search_bin, train_details_dic=train_details_dic):
+			if check_parameter_space(dic_entry=old_noise_dic[key], search_bin=search_bin, run_dic=run_dic):
 				#Event should be used in training
 				updated_noise_dic[event_noise] = old_noise_dic[key]
 				

@@ -179,29 +179,29 @@ if __name__=='__main__':
 	usage = None
 	parser = OptionParser(usage=usage)
 
-	parser.add_option("","--gpstime", default=None, type='float', help="GPS time to search a week back from")
-	parser.add_option("","--collectdir", default=None, type='string', help="Path to directory containing the collected results")
-	parser.add_option("","--outdir", default=None, type='string', help="Path to directory in which to output plots")
-	parser.add_option("","--ifo-group", default=None, type="string", help="IFO group for which to make summary page (e.g., 'H1L1'")
-	parser.add_option("","--label", default=None, type='string', help="Label to describe what search data is being collected for")
-	parser.add_option("","--user-name", default=None, type='string', help="User name that the pipeline job is running under")
-	parser.add_option("","--run-script", default=None, type='string', help="Pipeline job name to search for to check if it is running")
-	parser.add_option("","--infodir", default=None, type='string', help="Path to directory where the index.html templates live")
+	parser.add_option("-r", "--run-dic", default=None, type="string", help="Path to run_dic (containing all info about the runs)")
+	parser.add_option("-g", "--gpstime", default=None, type='float', help="GPS time to search a week back from")
+	parser.add_option("-i","--ifo-group", default=None, type="string", help="IFO group for which to make summary page (e.g., 'H1L1'")
+	parser.add_option("", "--run-label", default=None, type="string", help="Label to help identify if the job is running")
 
 	#---------------------------------------------
 
 	opts, args = parser.parse_args()
 
+	run_dic = pickle.load(open(opts.run_dic))
 	gpstime = opts.gpstime
-	collectdir = opts.collectdir
-	outdir = opts.outdir
 	ifo_group = opts.ifo_group
-	label = opts.label
-	user_name = opts.user_name
-	run_script = opts.run_script
-	infodir = opts.infodir
 
 	#############################################
+	#Initialize the variables we need
+	collectdir = run_dic['collection and retraining']['collect dir']
+	infodir = run_dic['config']['info dir']
+	user_name = run_dic['config']['username']
+	run_label = run_dic['config']['run label']
+	label = run_dic['summary page'][ifo_group]['label']
+	outdir = run_dic['summary page'][ifo_group]['outdir']
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
 	
 	#Find ifos in the ifo group
 	ifos = ifo_group.strip('1').split('1')
@@ -338,7 +338,7 @@ if __name__=='__main__':
 	job_status_file.write('Date: %s\n'%commands.getstatusoutput('lalapps_tconvert -d %s'%gps_check)[1])
 	job_status_file.close()
 	
-	proc_list = commands.getstatusoutput('ps -Fu %s | grep %s | grep /usr/bin/python'%(user_name,run_script))[1].split('\n')
+	proc_list = commands.getstatusoutput('ps -Fu %s | grep run_oLIB_eagle.py | grep %s'%(user_name,run_label))[1].split('\n')
 	for proc in proc_list:
 		proc_split = proc.split()
 		if not any(['grep' in element for element in proc_split]):

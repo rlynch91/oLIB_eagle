@@ -29,6 +29,8 @@ run_dic['config']['oSNR thresh'] = 5.0
 run_dic['config']['dt clust'] = 0.1
 run_dic['config']['initial start'] = None
 run_dic['config']['run label'] = None
+run_dic['config']['username'] = 'ryan.lynch'
+
 
 ###
 run_dic['run mode'] = {}
@@ -39,6 +41,7 @@ run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = True
 run_dic['run mode']['email flag'] = True
 run_dic['run mode']['email addresses'] = ['rlynch@mit.edu','8476930667@vtext.com']
+run_dic['run mode']['email throttle'] = 3600.
 run_dic['run mode']['LIB flag'] = True
 run_dic['run mode']['tar results'] = False
 
@@ -264,6 +267,7 @@ run_dic['search bins']['low_f']['high quality cut'] = 108
 
 ###
 run_dic['collection and retraining'] = {}
+run_dic['collection and retraining']['retrain delay'] = 1
 run_dic['collection and retraining']['collect dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_results/'
 run_dic['collection and retraining']['max back size'] = 5000
 run_dic['collection and retraining']['max sig train size'] = 5000
@@ -271,6 +275,14 @@ run_dic['collection and retraining']['max noise train size'] = 5000
 run_dic['collection and retraining']['back dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_background_info/'
 run_dic['collection and retraining']['low_f'] = {}
 run_dic['collection and retraining']['low_f']['retrain dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_LLRT_info/'
+
+###
+run_dic['summary page'] = {}
+run_dic['summary page']['user name'] = 'ryan.lynch'
+
+run_dic['summary page']['H1L1'] = {}
+run_dic['summary page']['H1L1']['label'] = 'low frequency'
+run_dic['summary page']['H1L1']['outdir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_runs/summary/H1L1_page'
 
 #=======================================================================
 
