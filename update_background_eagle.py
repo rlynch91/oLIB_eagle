@@ -105,9 +105,13 @@ if __name__=='__main__':
 			#Else, add livetime for this new gps day
 			else:
 				updated_lt += float(old_back_dic[key]['GPS Day']['Livetime'])
+		
+		#Make sure we don't add the same day twice
+		elif int(old_back_dic[key]['GPS Day']['Day']) == old_gps_day:
+			continue
 			
 		#Make sure we are going backwords in time
-		elif int(old_back_dic[key]['GPS Day']['Day']) > old_gps_day:
+		else:
 			raise ValueError, "The old background dictionary isn't sorted from newest events to oldest"
 		
 		#If we've made is this far, then add the events

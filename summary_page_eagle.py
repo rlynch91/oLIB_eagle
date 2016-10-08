@@ -276,43 +276,43 @@ if __name__=='__main__':
 	try:
 		cumulative_SNR_plot(snr_array_0lag=np.array(SNR_lists_0lag[ifo_group]),snr_array_back=np.array(SNR_lists_back[ifo_group]),livetime_0lag=livetime_0lag,livetime_back=livetime_back,ifos=ifo_group,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/cumrate_vs_SNR_%s_%s'%(ifo_group,label))
+		os.system("> " + outdir + '/cumrate_vs_SNR_%s_%s.png'%(ifo_group,label))
 	
 	try:
 		trig_rate_vs_time_plot(time_array=np.array(time_list_0lag),snr_array=np.array(SNR_lists_0lag[ifo_group]),t_start=gps_days[0]*100000.,t_stop=(gps_days[-1]+1)*100000.,ifos=ifo_group,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/glitchrate_%s_%s'%(ifo_group,label))
+		os.system("> " + outdir + '/glitchrate_%s_%s.png'%(ifo_group,label))
 	
 	for ifo in ifos:
 		try:
 			cumulative_SNR_plot(snr_array_0lag=np.array(SNR_lists_0lag[ifo]),snr_array_back=np.array(SNR_lists_back[ifo]),livetime_0lag=livetime_0lag,livetime_back=livetime_back,ifos=ifo,label=label,outdir=outdir)
 		except (NameError,ValueError,IndexError):
-			os.system("> " + outdir + '/cumrate_vs_SNR_%s_%s'%(ifo,label))
+			os.system("> " + outdir + '/cumrate_vs_SNR_%s_%s.png'%(ifo,label))
 		
 		try:
 			trig_rate_vs_time_plot(time_array=np.array(time_list_0lag),snr_array=np.array(SNR_lists_0lag[ifo]),t_start=gps_days[0]*100000.,t_stop=(gps_days[-1]+1)*100000.,ifos=ifo,label=label,outdir=outdir)
 		except (NameError,ValueError,IndexError):
-			os.system("> " + outdir + '/glitchrate_%s_%s'%(ifo,label))
+			os.system("> " + outdir + '/glitchrate_%s_%s.png'%(ifo,label))
 	
 	try:
 		cumulative_logBSN_plot(logBSN_array_0lag=np.array(logBSN_list_0lag),logBSN_array_back=np.array(logBSN_list_back),livetime_0lag=livetime_0lag,livetime_back=livetime_back,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/cumrate_vs_logBSN_%s'%(label))
+		os.system("> " + outdir + '/cumrate_vs_logBSN_%s.png'%(label))
 
 	try:
 		cumulative_BCI_plot(BCI_array_0lag=np.array(BCI_list_0lag),BCI_array_back=np.array(BCI_list_back),livetime_0lag=livetime_0lag,livetime_back=livetime_back,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/cumrate_vs_BCI_%s'%(label))
+		os.system("> " + outdir + '/cumrate_vs_BCI_%s.png'%(label))
 
 	try:
 		cumulative_frequency_plot(freq_array_0lag=np.array(freq_list_0lag),freq_array_back=np.array(freq_list_back),livetime_0lag=livetime_0lag,livetime_back=livetime_back,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/cumrate_vs_freq_%s'%(label))
+		os.system("> " + outdir + '/cumrate_vs_freq_%s.png'%(label))
 
 	try:
 		cumulative_Q_plot(Q_array_0lag=np.array(Q_list_0lag),Q_array_back=np.array(Q_list_back),livetime_0lag=livetime_0lag,livetime_back=livetime_back,label=label,outdir=outdir)
 	except (NameError,ValueError,IndexError):
-		os.system("> " + outdir + '/cumrate_vs_Q_%s'%(label))
+		os.system("> " + outdir + '/cumrate_vs_Q_%s.png'%(label))
 
 	#Make html containing links to the plots
 	plots_html_file = open(outdir + '/plots_html_%s.txt'%label,'wt')

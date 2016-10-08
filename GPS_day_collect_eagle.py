@@ -7,7 +7,7 @@ import pickle
 import os
 
 ###
-def executable(run_dic,gps_day)
+def executable(run_dic,gps_day):
 	"""
 	"""
 	#Initialize the variables we need

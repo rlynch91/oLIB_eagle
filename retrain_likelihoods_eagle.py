@@ -105,8 +105,8 @@ if __name__=='__main__':
 			os.system('cp %s %s/%s_Signal_log_KDE_bandwidths_old.npy'%(old_signal_bands_path[params],outdir,params))
 			os.system('cp %s %s/%s_Noise_log_KDE_bandwidths_old.npy'%(old_noise_bands_path[params],outdir,params))
 		else:
-			old_signal_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
-			old_noise_bands = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
+			old_signal_bands[params] = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
+			old_noise_bands[params] = np.ones(len(run_dic['LLRT']['param info'][search_bin][params]['param names']))*np.nan
 
 		#Save as backups the old KDE files if available
 		old_signal_KDE_coords_path[params] = '%s/%s_Signal_log_KDE_coords.npy'%(outdir,params)
@@ -137,6 +137,7 @@ if __name__=='__main__':
 			if check_parameter_space(dic_entry=new_signal_dic[key], search_bin=search_bin, run_dic=run_dic) and new_signal_dic[key]['Training injection']:
 				#Event should be used in training
 				updated_signal_dic[event_signal] = new_signal_dic[key]
+				updated_signal_dic[event_signal]['GPS Day'] = new_gps_day
 				
 				#Update the number of events currently in training dictionary
 				event_signal += 1
@@ -146,7 +147,7 @@ if __name__=='__main__':
 	#Then add the old signal training events
 	if event_signal < max_signal_size:
 		for key in old_signal_dic:
-			if check_parameter_space(dic_entry=old_signal_dic[key], search_bin=search_bin, run_dic=run_dic) and old_signal_dic[key]['Training injection']:
+			if check_parameter_space(dic_entry=old_signal_dic[key], search_bin=search_bin, run_dic=run_dic) and old_signal_dic[key]['Training injection'] and old_signal_dic[key]['GPS Day'] < int(new_gps_day):
 				#Event should be used in training
 				updated_signal_dic[event_signal] = old_signal_dic[key]
 				
@@ -162,6 +163,7 @@ if __name__=='__main__':
 			if check_parameter_space(dic_entry=new_noise_dic[key], search_bin=search_bin, run_dic=run_dic):
 				#Event should be used in training
 				updated_noise_dic[event_noise] = new_noise_dic[key]
+				updated_noise_dic[event_noise]['GPS Day'] = new_gps_day
 				
 				#Update the number of events currently in training dictionary
 				event_noise += 1
@@ -171,7 +173,7 @@ if __name__=='__main__':
 	#Then add the old noise training events
 	if event_noise < max_noise_size:
 		for key in old_noise_dic:
-			if check_parameter_space(dic_entry=old_noise_dic[key], search_bin=search_bin, run_dic=run_dic):
+			if check_parameter_space(dic_entry=old_noise_dic[key], search_bin=search_bin, run_dic=run_dic) and old_noise_dic[key]['GPS Day'] < int(new_gps_day):
 				#Event should be used in training
 				updated_noise_dic[event_noise] = old_noise_dic[key]
 				
@@ -196,10 +198,10 @@ if __name__=='__main__':
 	
 	for params in param_info:
 		optimize_signal_training = run_dic['LLRT']['optimize signal training'][search_bin]
-		optimize_signal_training[params]['optimization initial coords'] = old_signal_bands
+		optimize_signal_training[params]['optimization initial coords'] = old_signal_bands[params]
 		
 		optimize_noise_training = run_dic['LLRT']['optimize noise training'][search_bin]
-		optimize_noise_training[params]['optimization initial coords'] = old_noise_bands
+		optimize_noise_training[params]['optimization initial coords'] = old_noise_bands[params]
 
 	#Collect all signal training coordinates from dictionaries and put in arrays
 	sig_logBSN = np.ones(len(updated_signal_dic))*np.nan

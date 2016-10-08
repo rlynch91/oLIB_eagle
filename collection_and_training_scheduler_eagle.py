@@ -108,7 +108,7 @@ if __name__=='__main__':
 						#Run retraining
 						retraining_string = 'python %s/retrain_likelihoods_eagle.py --run-dic %s --new-gps-day %s --ifo-group %s --search-bin %s'%(infodir,opts.run_dic,gps_day_retrain,group,search_bin)
 						retraining_status = commands.getstatusoutput(retraining_string)
-						run_comments_file.write('%s %s %s %s \n\n'%(key, search_bin, group, retraining_status[0], retraining_status[1]))
+						run_comments_file.write('%s %s %s %s %s \n\n'%(key, search_bin, group, retraining_status[0], retraining_status[1]))
 						if not retraining_status[0]:
 							gps_day_last[key][group][search_bin] = int(gps_day_retrain)
 							print key, search_bin, group, "Success"
@@ -129,7 +129,7 @@ if __name__=='__main__':
 						
 		#If a new gps day has been successfully completed, tar that gps day folder
 		if min_after_gps_day_last > min_before_gps_day_last:
-			tar_path = '%s/%s'%(rundir,min_before_gps_day_last)
+			tar_path = '%s/%s'%(rundir,min_after_gps_day_last)
 			with tarfile.open('%s.tar.gz'%tar_path, "w:gz") as tar:
 				tar.add(tar_path)
 			os.system('rm %s -r'%tar_path)
@@ -137,7 +137,7 @@ if __name__=='__main__':
 	#Save updated dictionary containing last completed days for background collection and retraining
 	pickle.dump(gps_day_last,open(last_gps_day_path,'wt'))
 	run_comments_file.close()
-	if os.path.getsize(last_gps_day_comments_path) > 0:
+	if os.path.getsize('%s_new'%last_gps_day_comments_path) > 0:
 		os.system('mv %s_new %s'%(last_gps_day_comments_path,last_gps_day_comments_path))
 	else:
 		os.system('rm %s_new'%(last_gps_day_comments_path))

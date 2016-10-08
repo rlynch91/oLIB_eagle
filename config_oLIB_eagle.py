@@ -19,7 +19,7 @@ run_dic = {}
 run_dic['config'] = {}
 run_dic['config']['wait'] = 5
 run_dic['config']['max wait'] = 600
-run_dic['config']['run dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_runs'
+run_dic['config']['run dir'] = '/home/ryan.lynch/public_html/S6_replay'
 run_dic['config']['info dir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/'
 run_dic['config']['LIB bin dir'] = '/home/salvatore.vitale/lalsuites/burst_dev/o2_lib_20160720/bin/'
 run_dic['config']['stride'] = 32
@@ -27,8 +27,8 @@ run_dic['config']['overlap'] = 2
 run_dic['config']['sample freq'] = 2048
 run_dic['config']['oSNR thresh'] = 5.0
 run_dic['config']['dt clust'] = 0.1
-run_dic['config']['initial start'] = None
-run_dic['config']['run label'] = None
+run_dic['config']['initial start'] = 1159832215
+run_dic['config']['run label'] = 'S6_testing_lowf'
 run_dic['config']['username'] = 'ryan.lynch'
 
 
@@ -43,7 +43,7 @@ run_dic['run mode']['email flag'] = True
 run_dic['run mode']['email addresses'] = ['rlynch@mit.edu','8476930667@vtext.com']
 run_dic['run mode']['email throttle'] = 3600.
 run_dic['run mode']['LIB flag'] = True
-run_dic['run mode']['tar results'] = False
+run_dic['run mode']['tar results'] = True
 
 ###
 run_dic['ifos'] = {}
@@ -281,8 +281,8 @@ run_dic['summary page'] = {}
 run_dic['summary page']['user name'] = 'ryan.lynch'
 
 run_dic['summary page']['H1L1'] = {}
-run_dic['summary page']['H1L1']['label'] = 'low frequency'
-run_dic['summary page']['H1L1']['outdir'] = '/home/ryan.lynch/2nd_pipeline/pipeline_eagle/test_runs/summary/H1L1_page'
+run_dic['summary page']['H1L1']['label'] = 'low_frequency'
+run_dic['summary page']['H1L1']['outdir'] = '/home/ryan.lynch/public_html/S6_replay/summary/H1L1_page'
 
 #=======================================================================
 
