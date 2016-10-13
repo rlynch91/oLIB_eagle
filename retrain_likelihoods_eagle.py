@@ -59,7 +59,9 @@ if __name__=='__main__':
 	outdir = '%s/%s/'%(run_dic['collection and retraining'][search_bin]['retrain dir'],group)
 	if not os.path.exists(outdir):
 		os.makedirs(outdir)
+	min_signal_size = run_dic['collection and retraining']['min sig train size']
 	max_signal_size = run_dic['collection and retraining']['max sig train size']
+	min_noise_size = run_dic['collection and retraining']['min noise train size']
 	max_noise_size = run_dic['collection and retraining']['max noise train size']
 	collectdir = run_dic['collection and retraining']['collect dir']
 	
@@ -231,21 +233,23 @@ if __name__=='__main__':
 	train_noise_data['logBSN']['data'] = np.transpose(np.array([noise_logBSN]))
 	train_noise_data['BCI']['data'] = np.transpose(np.array([noise_BCI]))
 
-	#Initialize LLRT object (which launches likelihood training), and then save the trained likelihoods to temporary files
-	LLRT = LLRT_object_eagle.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=None, background_data=None, optimize_signal_training=optimize_signal_training, optimize_noise_training=optimize_noise_training)
-	LLRT.save_all_KDE(outdir,label='new')
-	LLRT.save_all_bandwidths(outdir,label='new')
+	#Initialize LLRT object if there are enough data points (which launches likelihood training), and then save the trained likelihoods to temporary files
+	if (len(train_signal_data['logBSN']['data']) >= min_signal_size) and (len(train_noise_data['logBSN']['data']) >= min_noise_size):
+		LLRT = LLRT_object_eagle.LLRT(calc_info=calc_info, param_info=param_info, train_signal_data=train_signal_data, train_noise_data=train_noise_data, foreground_data=None, background_data=None, optimize_signal_training=optimize_signal_training, optimize_noise_training=optimize_noise_training)
+		LLRT.save_all_KDE(outdir,label='new')
+		LLRT.save_all_bandwidths(outdir,label='new')
 
 	#################################
 	# Move new data to proper files #
 	#################################
 	os.system('mv %s/Signal_training_dictionary_new.pkl %s'%(outdir,old_signal_dic_path))
 	os.system('mv %s/Noise_training_dictionary_new.pkl %s'%(outdir,old_noise_dic_path))
-	for params in param_info:
-		os.system('mv %s/%s_Signal_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_signal_bands_path[params]))
-		os.system('mv %s/%s_Noise_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_noise_bands_path[params]))
-		os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s'%(outdir,params,old_signal_KDE_coords_path[params]))
-		os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s'%(outdir,params,old_signal_KDE_values_path[params]))
-		os.system('mv %s/%s_Noise_log_KDE_coords_new.npy %s'%(outdir,params,old_noise_KDE_coords_path[params]))
-		os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s'%(outdir,params,old_noise_KDE_values_path[params]))
+	if (len(train_signal_data['logBSN']['data']) >= min_signal_size) and (len(train_noise_data['logBSN']['data']) >= min_noise_size):
+		for params in param_info:
+			os.system('mv %s/%s_Signal_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_signal_bands_path[params]))
+			os.system('mv %s/%s_Noise_log_KDE_bandwidths_new.npy %s'%(outdir,params,old_noise_bands_path[params]))
+			os.system('mv %s/%s_Signal_log_KDE_coords_new.npy %s'%(outdir,params,old_signal_KDE_coords_path[params]))
+			os.system('mv %s/%s_Signal_log_KDE_values_new.npy %s'%(outdir,params,old_signal_KDE_values_path[params]))
+			os.system('mv %s/%s_Noise_log_KDE_coords_new.npy %s'%(outdir,params,old_noise_KDE_coords_path[params]))
+			os.system('mv %s/%s_Noise_log_KDE_values_new.npy %s'%(outdir,params,old_noise_KDE_values_path[params]))
 	
