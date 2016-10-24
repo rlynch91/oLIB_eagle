@@ -35,6 +35,7 @@ if __name__=='__main__':
 	infodir = run_dic['config']['info dir']
 	rundir = run_dic['config']['run dir']
 	bindir = run_dic['config']['LIB bin dir']
+	collect_delay = int(run_dic['collection and retraining']['collect delay'])
 	retrain_delay = int(run_dic['collection and retraining']['retrain delay'])
 	
 	last_gps_day_path = rundir + '/last_gps_day_collected_and_trained.pkl'
@@ -47,7 +48,7 @@ if __name__=='__main__':
 
 	#Convert current full gps time into the current gps day
 	if not gps_day_collect or gps_day_collect == 'None':
-		gps_day_collect = int(float(gps_time_full)/100000.)
+		gps_day_collect = int((float(gps_time_full)-collect_delay)/100000.)
 	else:
 		gps_day_collect = int(gps_day_collect)
 

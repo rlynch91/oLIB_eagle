@@ -316,7 +316,8 @@ run_dic['search bins']['low_Q']['high quality cut'] = 2.
 
 ###
 run_dic['collection and retraining'] = {}
-run_dic['collection and retraining']['retrain delay'] = 1
+run_dic['collection and retraining']['collect delay'] = 10000  #seconds
+run_dic['collection and retraining']['retrain delay'] = 1  #days
 run_dic['collection and retraining']['collect dir'] = '/home/ryan.lynch/public_html/ER10_back_train/test_results/'
 run_dic['collection and retraining']['max back size'] = 5000
 run_dic['collection and retraining']['min sig train size'] = 10
