@@ -24,7 +24,7 @@ then
 
 	current_gps_day=$((`lalapps_tconvert` / 100000))
 
-	nohup $infodir/collection_and_training_scheduler_eagle.py -r $rundic -g $current_gps_day --run-label $runlabel > /dev/null 2>&1 &
+	nohup $infodir/collection_and_training_scheduler_eagle.py -r $rundic -g None --run-label $runlabel > /dev/null 2>&1 &
 
 fi
 
