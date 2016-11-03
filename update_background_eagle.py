@@ -106,12 +106,12 @@ if __name__=='__main__':
 			else:
 				updated_lt += float(old_back_dic[key]['GPS Day']['Livetime'])
 		
-		#Make sure we don't add the same day twice
-		elif int(old_back_dic[key]['GPS Day']['Day']) == old_gps_day:
-			continue
+		#Make sure we don't add the same new gps day twice
+		elif int(old_back_dic[key]['GPS Day']['Day']) == int(new_gps_day):
+			raise ValueError, "The old background dictionary already contains the new gps day"
 			
-		#Make sure we are going backwords in time
-		else:
+		#Make sure we are going backwards in time
+		elif int(old_back_dic[key]['GPS Day']['Day']) > old_gps_day:
 			raise ValueError, "The old background dictionary isn't sorted from newest events to oldest"
 		
 		#If we've made is this far, then add the events
