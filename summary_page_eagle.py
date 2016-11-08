@@ -237,41 +237,46 @@ if __name__=='__main__':
 	#Loop over the gps days in the week, collecting the results and livetime for the 0lag and background
 	for day in gps_days:
 		try:
-			#Load in results dictionaries
+			#Load in 0-lag events and livetime
 			dic_0lag = pickle.load(open('%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'0lag',ifo_group,day,'0lag',ifo_group)))
-			dic_back = pickle.load(open('%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',ifo_group,day,'back',ifo_group)))
-			
-			#Load in livetimes
 			livetime_0lag += float(np.genfromtxt('%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'0lag',ifo_group,day,'0lag',ifo_group)))
-			livetime_back += float(np.genfromtxt('%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',ifo_group,day,'back',ifo_group)))
-		except IOError:
-			continue
 		
-		#Loop over all events in 0lag dictionary
-		for key in dic_0lag:			
-			SNR_lists_0lag[ifo_group] += [dic_0lag[key]['Omicron SNR']['Network']]
-			for ifo in ifos:
-				SNR_lists_0lag[ifo] += [dic_0lag[key]['Omicron SNR'][ifo]]
-			logBSN_list_0lag += [dic_0lag[key]['logBSN']]
-			BCI_list_0lag += [dic_0lag[key]['BCI']]
-			freq_list_0lag += [dic_0lag[key]['frequency']['posterior mean']]
-			Q_list_0lag += [dic_0lag[key]['quality']['posterior mean']]
-			time_list_0lag += [dic_0lag[key]['gpstime']]
-			try:
-				FAR_list_0lag += [dic_0lag[key]['FAR']]
-			except KeyError:
-				FAR_list_0lag += [np.inf]
+			#Loop over all events in 0lag dictionary
+			for key in dic_0lag:			
+				SNR_lists_0lag[ifo_group] += [dic_0lag[key]['Omicron SNR']['Network']]
+				for ifo in ifos:
+					SNR_lists_0lag[ifo] += [dic_0lag[key]['Omicron SNR'][ifo]]
+				logBSN_list_0lag += [dic_0lag[key]['logBSN']]
+				BCI_list_0lag += [dic_0lag[key]['BCI']]
+				freq_list_0lag += [dic_0lag[key]['frequency']['posterior mean']]
+				Q_list_0lag += [dic_0lag[key]['quality']['posterior mean']]
+				time_list_0lag += [dic_0lag[key]['gpstime']]
+				try:
+					FAR_list_0lag += [dic_0lag[key]['FAR']]
+				except KeyError:
+					FAR_list_0lag += [np.inf]
+		
+		except IOError:
+			pass
 			
-		#Loop over all events in background dictionary
-		for key in dic_back:
-			SNR_lists_back[ifo_group] += [dic_back[key]['Omicron SNR']['Network']]
-			for ifo in ifos:
-				SNR_lists_back[ifo] += [dic_back[key]['Omicron SNR'][ifo]]
-			logBSN_list_back += [dic_back[key]['logBSN']]
-			BCI_list_back += [dic_back[key]['BCI']]
-			freq_list_back += [dic_back[key]['frequency']['posterior mean']]
-			Q_list_back += [dic_back[key]['quality']['posterior mean']]
-			
+		try:
+			#Load in background events and livetime
+			dic_back = pickle.load(open('%s/%s/%s/%s_%s_%s_results.pkl'%(collectdir,'back',ifo_group,day,'back',ifo_group)))
+			livetime_back += float(np.genfromtxt('%s/%s/%s/%s_%s_%s_livetime.txt'%(collectdir,'back',ifo_group,day,'back',ifo_group)))
+		
+			#Loop over all events in background dictionary
+			for key in dic_back:
+				SNR_lists_back[ifo_group] += [dic_back[key]['Omicron SNR']['Network']]
+				for ifo in ifos:
+					SNR_lists_back[ifo] += [dic_back[key]['Omicron SNR'][ifo]]
+				logBSN_list_back += [dic_back[key]['logBSN']]
+				BCI_list_back += [dic_back[key]['BCI']]
+				freq_list_back += [dic_back[key]['frequency']['posterior mean']]
+				Q_list_back += [dic_back[key]['quality']['posterior mean']]
+		
+		except IOError:
+			pass
+								
 	#Make necessary plots
 	try:
 		cumulative_SNR_plot(snr_array_0lag=np.array(SNR_lists_0lag[ifo_group]),snr_array_back=np.array(SNR_lists_back[ifo_group]),livetime_0lag=livetime_0lag,livetime_back=livetime_back,ifos=ifo_group,label=label,outdir=outdir)
