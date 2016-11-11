@@ -357,12 +357,21 @@ if __name__=='__main__':
 					
 						#Upload events to GDB if exceed FAR threshold
 						if (dictionary[event]['FAR'] <= FAR_thresh) and (gdb_flag):		
+							#Convert dictionary to GDB format
+							gdb_dic = {}
+							for key in dictionary[event]:
+								if type(dictionary[event][key]) == dict:
+									for sub_key in dictionary[event][key]:
+										gdb_dic['%s_%s'%("_".join(key.split()),"_".join(sub_key.split()))] = dictionary[event][key][sub_key]
+								else:
+									gdb_dic['%s'%("_".join(key.split()))] = dictionary[event][key]
+							
 							#Save dictionary as json file
 							dic_path = segdir+'/GDB/%s/%s.json'%(coin_group,'%s-%s'%(dictionary[event]['gpstime'],event))
 							if not os.path.exists("%s/GDB/%s/"%(segdir,coin_group)):
 								os.makedirs("%s/GDB/%s/"%(segdir,coin_group))
 							with open(dic_path, 'wt') as fp:
-								json.dump(dictionary[event], fp)
+								json.dump(gdb_dic, fp)
 							
 							#Upload dictionary to GraceDb
 							response = gdb.createEvent('Burst','LIB',dic_path, search='AllSky', filecontents=None) #gdb.createEvent('Test','LIB',dic_path, search='AllSky', filecontents=None)
