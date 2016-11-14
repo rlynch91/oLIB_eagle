@@ -258,7 +258,7 @@ class LLRT(object):
 		
 		#Calculate height contribution of each data point over the grid
 		for i in xrange(len(data)):
-			height_kde +=  np.exp( -0.5 * np.sum( ((data[i,:] - location_kde)/bandwidths)**2., axis=-1) ) / (np.product(bandwidths) * (2.*np.pi)**(n_params/2.))	
+			height_kde +=  np.exp( -0.5 * np.sum( ((data[i,:] - location_kde)/bandwidths)**2., axis=-1) ) / (np.sqrt(np.product(bandwidths**2.)) * (2.*np.pi)**(n_params/2.))	
 
 		height_kde /= float(len(data))
 		log_height_kde = np.log10(height_kde)
@@ -302,7 +302,7 @@ class LLRT(object):
 		log_height_kde = np.zeros(grid_shape)
 		
 		#Calculate height contribution of each data point over the grid
-		log_height_kde += -np.log10(np.product(bandwidths) * (2.*np.pi)**(n_params/2.) * float(len(data)))
+		log_height_kde += -np.log10(np.sqrt(np.product(bandwidths**2.)) * (2.*np.pi)**(n_params/2.) * float(len(data)))
 		for i in xrange(len(data)):
 			if i == 0:
 				A =  -0.5 * np.log10(np.e) * np.sum( ((data[i,:] - location_kde)/bandwidths)**2., axis=-1)
@@ -783,10 +783,10 @@ class LLRT(object):
 			KL_jacob += tmp_KL_deriv / tmp_KL_func - 1.
 			
 		KL_func /= n_data
-		KL_func -= np.log10( (n_data-1.) * np.sqrt( (2.*np.pi)**n_dim * np.prod(H[:])**2.) )
+		KL_func -= np.log10( (n_data-1.) * np.sqrt( (2.*np.pi)**n_dim * np.prod(H[:]**2.)) )
 		
-		KL_jacob /= (n_data * np.log(10.) * H[:])
-
+		KL_jacob /= (n_data * np.log(10.) * np.sqrt(H[:]**2.))	
+		
 		return -KL_func, -KL_jacob		
 
 	###
@@ -882,7 +882,7 @@ class LLRT(object):
 				init_coords[d] = self.oneD_rule_of_thumb_bandwidth_gaussian(data[:,d])
 		
 		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
-		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True)
+		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True,options={'gtol': 1e-03})
 		
 		#Check to make sure the minimum was found successfully
 		if min_object['success'] == False:
