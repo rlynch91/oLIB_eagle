@@ -783,9 +783,9 @@ class LLRT(object):
 			KL_jacob += tmp_KL_deriv / tmp_KL_func - 1.
 			
 		KL_func /= n_data
-		KL_func -= np.log10( (n_data-1.) * np.sqrt( (2.*np.pi)**n_dim * np.prod(H[:]**2.)) )
+		KL_func -= np.log10( (n_data-1.) * np.sqrt( (2.*np.pi)**n_dim * np.prod(H[:]**2.) ) )
 		
-		KL_jacob /= (n_data * np.log(10.) * np.sqrt(H[:]**2.))	
+		KL_jacob /= (n_data * np.log(10.) * H[:])	
 		
 		return -KL_func, -KL_jacob		
 
@@ -882,7 +882,7 @@ class LLRT(object):
 				init_coords[d] = self.oneD_rule_of_thumb_bandwidth_gaussian(data[:,d])
 		
 		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
-		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True,options={'gtol': 1e-03})
+		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True,options={'gtol': 1e-05})
 		
 		#Check to make sure the minimum was found successfully
 		if min_object['success'] == False:
