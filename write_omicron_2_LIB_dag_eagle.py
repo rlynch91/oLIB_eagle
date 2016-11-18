@@ -152,7 +152,7 @@ def executable(run_dic):
 		omicron2LIB_jobs = []
 
 		#Copy omicron2LIB sub file to segdir
-		os.system('sed "s|SEGDIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_eagle.sub'%(segdir,infodir,segdir))
+		os.system('sed -e "s|SEGDIR|%s|g" -e "s|INFODIR|%s|g" %s/omicron2LIB_eagle.sub > %s/runfiles/omicron2LIB_eagle.sub'%(segdir,infodir,infodir,segdir))
 
 		#Create PostProc folder
 		if not os.path.exists("%s/PostProc/"%segdir):
@@ -220,7 +220,7 @@ def executable(run_dic):
 			Bayes2FAR_sig_train_jobs = []
 
 			#Copy lalinference_pipe sub file to segdir
-			os.system('sed "s|SEGDIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,segdir))
+			os.system('sed -e "s|SEGDIR|%s|g" -e "s|INFODIR|%s|g" %s/lalinference_pipe_eagle.sub > %s/runfiles/lalinference_pipe_eagle.sub'%(segdir,infodir,infodir,segdir))
 			
 			#Loop over all coincidence groups
 			for key in run_dic['coincidence']:
@@ -334,7 +334,7 @@ def executable(run_dic):
 								os.makedirs("%s/GDB/"%segdir)
 
 							#Copy Bayes2FAR sub file to segdir
-							os.system('sed "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(segdir,infodir,segdir,key,mode_label))
+							os.system('sed -e "s|SEGDIR|%s|g" -e "s|INFODIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(segdir,infodir,infodir,segdir,key,mode_label))
 
 							#Write JOB
 							dagfile.write('JOB %s %s/runfiles/Bayes2FAR_eagle_%s_%s.sub\n'%(job,segdir,key,mode_label))
@@ -357,10 +357,10 @@ def executable(run_dic):
 		########################################
 		zip_and_tar_jobs = []
 
-		#Copy omicron2LIB sub file to segdir
+		#Copy zip_and_tar sub file to segdir
 		if not os.path.exists("%s/tarfiles/"%segdir):
 			os.makedirs("%s/tarfiles/"%segdir)
-		os.system('sed "s|SEGDIR|%s|g" %s/zip_and_tar_results_eagle.sub > %s/tarfiles/zip_and_tar_results_eagle.sub'%(segdir,infodir,segdir))
+		os.system('sed -e "s|SEGDIR|%s|g" -e "s|INFODIR|%s|g" %s/zip_and_tar_results_eagle.sub > %s/tarfiles/zip_and_tar_results_eagle.sub'%(segdir,infodir,infodir,segdir))
 
 		#Write JOB
 		dagfile.write('JOB %s %s/tarfiles/zip_and_tar_results_eagle.sub\n'%(job,segdir))
@@ -369,7 +369,7 @@ def executable(run_dic):
 		#Write RETRY
 		dagfile.write('RETRY %s 0\n\n'%job)
 
-		#Record omicron2LIB job number
+		#Record zip_and_tar job number
 		zip_and_tar_jobs += [job]
 
 		#Done with job

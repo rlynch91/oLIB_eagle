@@ -1,6 +1,6 @@
 universe     = vanilla
 accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
-executable   = /home/ryan.lynch/2nd_pipeline/pipeline_eagle/lalinference_pipe_eagle.py 
+executable   = INFODIR/lalinference_pipe_eagle.py 
 arguments    = $(macroarguments)
 getenv	     = True
 log          = SEGDIR/log/$(macroid).log 

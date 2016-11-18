@@ -1,6 +1,6 @@
 universe     = vanilla
 accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
-executable   = /home/ryan.lynch/2nd_pipeline/pipeline_eagle/zip_and_tar_results_eagle.py
+executable   = INFODIR/zip_and_tar_results_eagle.py
 arguments    = $(macroarguments)
 getenv	     = True
 log          = SEGDIR/tarfiles/$(macroid).log 
