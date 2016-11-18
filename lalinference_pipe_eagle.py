@@ -151,4 +151,4 @@ else:
 	dagfile.close()
 	
 	#Finally let Bayes2FAR fail gracefully
-	os.system('sed -e "s|%s|/bin/|g" -e "s|Bayes_factors_2_FAR_eagle.py|true|g" -e "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(opts.infodir,opts.segdir,opts.infodir,opts.segdir,opts.coin_group,opts.coin_mode))
+	os.system('sed -e "s|INFODIR|/bin/|g" -e "s|Bayes_factors_2_FAR_eagle.py|true|g" -e "s|SEGDIR|%s|g" %s/Bayes2FAR_eagle.sub > %s/runfiles/Bayes2FAR_eagle_%s_%s.sub'%(opts.segdir,opts.infodir,opts.segdir,opts.coin_group,opts.coin_mode))
