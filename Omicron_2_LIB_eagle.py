@@ -205,47 +205,49 @@ def coincidence(trig_list_1, trig_list_2, tshift1, tshift2, tshift_num, ifos1, i
 	#Iterate through list 1, comparing to list 2
 	i2_min = 0
 	
-	for current_line in trig_list_1:
-		current_elements = current_line.split()
-		t_current = float(current_elements[0]) + float(tshift1)
-		f_current = float(current_elements[1])
-		snr_current = float(current_elements[2])
-		Q_current = float(current_elements[3])
-		
-		#Update reference index for list 2
-		t2_min = float(trig_list_2[i2_min].split()[0]) + float(tshift2)
-		while abs(t_current - t2_min) > t_coin:
-			if (t2_min - t_current) >  t_coin:
-				break
-			elif (i2_min + 1) >= len(trig_list_2):
-				break
-			else:
-				i2_min += 1
-				t2_min = float(trig_list_2[i2_min].split()[0]) + float(tshift2)
-		
-		#Search for coincident templates within time window
-		i2_compare = i2_min
-		compare_elements = trig_list_2[i2_compare].split()
-		t_compare = float(compare_elements[0]) + float(tshift2)
-		f_compare = float(compare_elements[1])
-		snr_compare = float(compare_elements[2])
-		Q_compare = float(compare_elements[3])
-		
-		while abs(t_current - t_compare) <= t_coin:
-			if (f_current == f_compare) and (Q_current == Q_compare) and (snr_current >= snr_coin) and (snr_compare >= snr_coin):
-				if len(current_elements) <= 4:
-					coin_file.write( "%10.10f %10.10f %10.10f %10.10f %s %s\n"%((t_current+t_compare)/2., (f_current+f_compare)/2., np.sqrt(snr_current**2. + snr_compare**2.), (Q_current+Q_compare)/2., " ".join(current_elements), " ".join(compare_elements)) )
+	if (len(trig_list_1) > 0) and (len(trig_list_2) > 0):
+	
+		for current_line in trig_list_1:
+			current_elements = current_line.split()
+			t_current = float(current_elements[0]) + float(tshift1)
+			f_current = float(current_elements[1])
+			snr_current = float(current_elements[2])
+			Q_current = float(current_elements[3])
+			
+			#Update reference index for list 2
+			t2_min = float(trig_list_2[i2_min].split()[0]) + float(tshift2)
+			while abs(t_current - t2_min) > t_coin:
+				if (t2_min - t_current) >  t_coin:
+					break
+				elif (i2_min + 1) >= len(trig_list_2):
+					break
 				else:
-					coin_file.write( "%10.10f %10.10f %10.10f %10.10f %s %s\n"%((t_current+t_compare)/2., (f_current+f_compare)/2., np.sqrt(snr_current**2. + snr_compare**2.), (Q_current+Q_compare)/2., " ".join(current_elements[4:]), " ".join(compare_elements)) )
-			if (i2_compare + 1) >= len(trig_list_2):
-				break
-
-			i2_compare += 1
+					i2_min += 1
+					t2_min = float(trig_list_2[i2_min].split()[0]) + float(tshift2)
+			
+			#Search for coincident templates within time window
+			i2_compare = i2_min
 			compare_elements = trig_list_2[i2_compare].split()
 			t_compare = float(compare_elements[0]) + float(tshift2)
 			f_compare = float(compare_elements[1])
 			snr_compare = float(compare_elements[2])
 			Q_compare = float(compare_elements[3])
+			
+			while abs(t_current - t_compare) <= t_coin:
+				if (f_current == f_compare) and (Q_current == Q_compare) and (snr_current >= snr_coin) and (snr_compare >= snr_coin):
+					if len(current_elements) <= 4:
+						coin_file.write( "%10.10f %10.10f %10.10f %10.10f %s %s\n"%((t_current+t_compare)/2., (f_current+f_compare)/2., np.sqrt(snr_current**2. + snr_compare**2.), (Q_current+Q_compare)/2., " ".join(current_elements), " ".join(compare_elements)) )
+					else:
+						coin_file.write( "%10.10f %10.10f %10.10f %10.10f %s %s\n"%((t_current+t_compare)/2., (f_current+f_compare)/2., np.sqrt(snr_current**2. + snr_compare**2.), (Q_current+Q_compare)/2., " ".join(current_elements[4:]), " ".join(compare_elements)) )
+				if (i2_compare + 1) >= len(trig_list_2):
+					break
+
+				i2_compare += 1
+				compare_elements = trig_list_2[i2_compare].split()
+				t_compare = float(compare_elements[0]) + float(tshift2)
+				f_compare = float(compare_elements[1])
+				snr_compare = float(compare_elements[2])
+				Q_compare = float(compare_elements[3])
 	
 	coin_file.close()
 	
