@@ -1,0 +1,11 @@
+universe     = vanilla
+accounting_group = ligo.prod.o2.burst.allsky.omicron_lib
+executable   = /home/detchar/opt/virgosoft/Omicron/v2r2/Linux-x86_64/omicron.exe
+arguments    = $(macroarguments)
+getenv	     = True
+log          = SEGDIR/log/$(macroid).log
+output       = SEGDIR/log/$(macroid).out
+error        = SEGDIR/log/$(macroid).err
+notification = never
+queue 1
+
