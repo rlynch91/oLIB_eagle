@@ -1,5 +1,5 @@
 universe     = vanilla
-accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
+accounting_group = ligo.prod.o2.burst.allsky.omicron_lib
 executable   = /home/detchar/opt/virgosoft/Omicron/v2r1/Linux-x86_64/omicron.exe
 arguments    = $(macroarguments)
 getenv	     = True

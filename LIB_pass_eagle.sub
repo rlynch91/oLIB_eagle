@@ -1,5 +1,5 @@
 universe     = vanilla
-accounting_group = ligo.prod.o1.burst.allsky.omicron_lib
+accounting_group = ligo.prod.o2.burst.allsky.omicron_lib
 executable   = /bin/true
 getenv	     = True
 log          = SEGDIR/log/$(macroid).log 
