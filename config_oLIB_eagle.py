@@ -16,6 +16,12 @@ run_dic = {}
 #=======================================================================
 
 ###
+run_dic['version'] = {}
+run_dic['version']['oLIB'] = 'ER10_code_freeze'
+run_dic['version']['omicron'] ='v2r1'
+run_dic['version']['LIB'] = '80a31deb98600444739e22f7b232ca5c9fe94603'
+
+###
 run_dic['config'] = {}
 run_dic['config']['wait'] = 5
 run_dic['config']['max wait'] = 2000
