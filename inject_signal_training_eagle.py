@@ -12,36 +12,28 @@ from pylal import Fr
 def add_signal_frames_to_noise_frames(noise_frame_file, noise_frame_channel, inj_frame_files, inj_frame_channel, ifo, outfile):
 	"""
 	Take noise frame and time-sorted injection frames, and write a single output frame containing both channels between start and stop of noise frame
-	"""	
+	"""		
 	#Load in noise frames and create value and time arrays
 	noise_value_array, noise_start_time, __, noise_dt, __, __ = Fr.frgetvect1d(filename=noise_frame_file,channel='%s:%s'%(ifo,noise_frame_channel))
 	len_noise_array = len(noise_value_array)
 	noise_time_array = np.arange(noise_start_time, noise_start_time + noise_dt*len_noise_array, noise_dt)
 
+	#Initialize injection times to actually add
+	inj_final_array = np.zeros(len(noise_value_array))
+
 	#Load in inj frames and create value and time arrays
-	inj_value_array = np.array([])
-	inj_time_array = np.array([])
 	for i,inj_frame_file in enumerate(inj_frame_files):
-		inj_array, inj_start_time, __, inj_dt, __, __ = Fr.frgetvect1d(filename=inj_frame_file,channel='%s:%s'%(ifo,inj_frame_channel))
-		len_inj_array = len(inj_array)
-		inj_value_array = np.concatenate( (inj_value_array, inj_array) )
-		inj_time_array = np.concatenate( (inj_time_array, np.arange(inj_start_time, inj_start_time + inj_dt*len_inj_array, inj_dt)) )
+		#Load in injection information for this frame
+		inj_value_array, inj_start_time, __, inj_dt, __, __ = Fr.frgetvect1d(filename=inj_frame_file,channel='%s:%s'%(ifo,inj_frame_channel))
+		len_inj_array = len(inj_value_array)
+		inj_time_array = np.arange(inj_start_time, inj_start_time + inj_dt*len_inj_array, inj_dt)
 		
-	#Loop through noise times, keeping inj values at corresponding times
-	inj_final_array = np.ones(len(noise_value_array))*np.nan
-	i_inj = 0
-	t_inj = inj_time_array[i_inj]
-	for i_noise,t_noise in enumerate(noise_time_array):
-		while t_inj < t_noise:
-			if i_inj >= (len(inj_time_array)-1):
-				break
-			else:
-				i_inj += 1
-				t_inj = inj_time_array[i_inj]
-		if t_inj == t_noise:
-			inj_final_array[i_noise] = inj_value_array[i_inj]
-		else:
-			inj_final_array[i_noise] = 0.
+		#Keep on injection information contained within the noise frame
+		tmp_truth_array = (inj_time_array >= noise_time_array[0]) * (inj_time_array <= noise_time_array[-1])
+		tmp_value_array = inj_value_array[tmp_truth_array]
+		tmp_time_array = inj_time_array[tmp_truth_array]
+		
+		inj_final_array[ (noise_time_array >= tmp_time_array[0]) * (noise_time_array <= tmp_time_array[-1]) ] += tmp_value_array
 	
 	#Save the final noise + inj array
 	frames_dic = {}
