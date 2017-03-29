@@ -149,6 +149,7 @@ run_dic['coincidence']['H1L1']['training timeslides']['L1'] = np.arange(-1000,0,
 ###
 run_dic['LLRT'] = {}
 run_dic['LLRT']['FAR thresh'] = 1.e-4 #1.e-6
+run_dic['LLRT']['trials factor'] = 3
 
 run_dic['LLRT']['calc info'] = {}
 run_dic['LLRT']['calc info']['interp method'] = 'Grid Linear'

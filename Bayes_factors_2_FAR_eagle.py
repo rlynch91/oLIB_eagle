@@ -238,7 +238,7 @@ if __name__=='__main__':
 			FAR_thresh = run_dic['LLRT']['FAR thresh']
 			back_dic_path = run_dic['LLRT'][coin_group]['back dic path']
 			back_livetime_path = run_dic['LLRT'][coin_group]['back livetime']
-			trials_factor = len(run_dic['search bins']['bin names'])
+			trials_factor = run_dic['LLRT']['trials factor']
 			
 			if not os.path.exists("%s/runfiles/"%segdir):
 				os.makedirs("%s/runfiles/"%segdir)

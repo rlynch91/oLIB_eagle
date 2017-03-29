@@ -25,12 +25,12 @@ def run_inject_signal_training(run_dic):
 	if np.sum([run_dic['data']['success flags'][ifo_test] for ifo_test in run_dic['ifos']['names']]):
 		
 		#Inject signals
-		inject_signal_training_eagle.executable(run_dic=run_dic)
+		cache_locations = inject_signal_training_eagle.executable(run_dic=run_dic)
 		
 		#Point to injection cache
 		for ifo in run_dic['ifos']['names']:
 			if run_dic['data']['success flags'][ifo]:
-				run_dic['data']['signal train cache files'][ifo] = "%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf"%(run_dic['seg dir'],ifo,run_dic['times']['start'],run_dic['times']['stop'])
+				run_dic['data']['signal train cache files'][ifo] = cache_locations[ifo]
 		print "Injected events for signal training"
 	
 	else:

@@ -13,7 +13,7 @@ def add_signal_frames_to_noise_frames(noise_frame_file, noise_frame_channel, inj
 	"""
 	Take noise frame and time-sorted injection frames, and write a single output frame containing both channels between start and stop of noise frame
 	"""		
-	#Load in noise frames and create value and time arrays
+	#Load in noise frame and create value and time arrays
 	noise_value_array, noise_start_time, __, noise_dt, __, __ = Fr.frgetvect1d(filename=noise_frame_file,channel='%s:%s'%(ifo,noise_frame_channel))
 	len_noise_array = len(noise_value_array)
 	noise_time_array = np.arange(noise_start_time, noise_start_time + noise_dt*len_noise_array, noise_dt)
@@ -28,7 +28,7 @@ def add_signal_frames_to_noise_frames(noise_frame_file, noise_frame_channel, inj
 		len_inj_array = len(inj_value_array)
 		inj_time_array = np.arange(inj_start_time, inj_start_time + inj_dt*len_inj_array, inj_dt)
 		
-		#Keep on injection information contained within the noise frame
+		#Keep only injection information contained within the noise frame
 		tmp_truth_array = (inj_time_array >= noise_time_array[0]) * (inj_time_array <= noise_time_array[-1])
 		tmp_value_array = inj_value_array[tmp_truth_array]
 		tmp_time_array = inj_time_array[tmp_truth_array]
@@ -39,6 +39,40 @@ def add_signal_frames_to_noise_frames(noise_frame_file, noise_frame_channel, inj
 	frames_dic = {}
 	frames_dic['noise'] = dict(name='%s:%s'%(ifo,noise_frame_channel), data=noise_value_array, start=noise_start_time, dx=noise_dt, type=1)
 	frames_dic['inj'] = dict(name='%s:%s'%(ifo,inj_frame_channel), data=inj_final_array, start=noise_start_time, dx=noise_dt, type=1)
+
+	Fr.frputvect(outfile, frames_dic.values())
+
+###
+def add_noise_frames_to_signal_frames(noise_frame_files, noise_frame_channel, inj_frame_file, inj_frame_channel, ifo, outfile):
+	"""
+	Take noise frame and time-sorted injection frames, and write a single output frame containing both channels between start and stop of noise frame
+	"""		
+	#Load in injection frame and create value and time arrays
+	inj_value_array, inj_start_time, __, inj_dt, __, __ = Fr.frgetvect1d(filename=inj_frame_file,channel='%s:%s'%(ifo,inj_frame_channel))
+	len_inj_array = len(inj_value_array)
+	inj_time_array = np.arange(inj_start_time, inj_start_time + inj_dt*len_inj_array, inj_dt)
+	
+	#Initialize noise times to actually add
+	noise_final_array = np.zeros(len(inj_value_array))
+
+	#Load in inj frames and create value and time arrays
+	for i,noise_frame_file in enumerate(noise_frame_files):
+		#Load in noise information for this frame
+		noise_value_array, noise_start_time, __, noise_dt, __, __ = Fr.frgetvect1d(filename=noise_frame_file,channel='%s:%s'%(ifo,noise_frame_channel))
+		len_noise_array = len(noise_value_array)
+		noise_time_array = np.arange(noise_start_time, noise_start_time + noise_dt*len_noise_array, noise_dt)
+		
+		#Keep on injection information contained within the noise frame
+		tmp_truth_array = (noise_time_array >= inj_time_array[0]) * (noise_time_array <= inj_time_array[-1])
+		tmp_value_array = noise_value_array[tmp_truth_array]
+		tmp_time_array = noise_time_array[tmp_truth_array]
+		
+		noise_final_array[ (inj_time_array >= tmp_time_array[0]) * (inj_time_array <= tmp_time_array[-1]) ] += tmp_value_array
+	
+	#Save the final noise + inj array
+	frames_dic = {}
+	frames_dic['noise'] = dict(name='%s:%s'%(ifo,noise_frame_channel), data=noise_final_array, start=inj_start_time, dx=inj_dt, type=1)
+	frames_dic['inj'] = dict(name='%s:%s'%(ifo,inj_frame_channel), data=inj_value_array, start=inj_start_time, dx=inj_dt, type=1)
 
 	Fr.frputvect(outfile, frames_dic.values())
 	
@@ -176,8 +210,10 @@ def executable(run_dic):
 	os.system('ls %s/training_injections/raw/*.gwf | lalapps_path2cache >> %s/framecache/MDC_Injections_%s_%s.lcf'%(segdir,segdir,start,stop))
 
 	#Combine data frames and injection frame, putting it in a cache file
+	cache_locations={}
 	for ifo in ifos:
-		cache = open('%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf'%(segdir,ifo,start,stop),'wt')
+		cache_locations[ifo] = '%s/framecache/MDC_DatInjMerge_%s_%s_%s.lcf'%(segdir,ifo,start,stop)
+		cache = open(cache_locations[ifo],'wt')
 
 		#Get paths of data frames
 		dat_files = []
@@ -191,15 +227,21 @@ def executable(run_dic):
 			dat_files.append(frame_file)
 			dat_starts.append(int(words[2]))
 			dat_durations.append(int(words[3]))
+		dat_cache.close()
 
 		#Get paths of injection frames
 		inj_files = commands.getstatusoutput("ls %s/training_injections/raw/*.gwf"%segdir)[1]
 		inj_files = [i.strip() for i in re.split('\n', inj_files)]
+		inj_starts = [int(i.split('-')[2]) for i in inj_files]
+		inj_durations = [int(i.split('-')[3].strip('.gwf')) for i in inj_files]
 
-		for i,dat_file in enumerate(dat_files):
-			out_file = "%s/training_injections/merged/%s-DatInjMerge-%u-%u.gwf"%(segdir, ifo, dat_starts[i], dat_durations[i])
-			add_signal_frames_to_noise_frames(noise_frame_file=dat_file, noise_frame_channel=ch_names[ifo], inj_frame_files=inj_files, inj_frame_channel='Science', ifo=ifo, outfile=out_file)
+		for i,inj_file in enumerate(inj_files):
+			out_file = "%s/training_injections/merged/%s-DatInjMerge-%u-%u.gwf"%(segdir, ifo, inj_starts[i], inj_durations[i])
+			add_noise_frames_to_signal_frames(noise_frame_files=dat_files, noise_frame_channel=ch_names[ifo], inj_frame_file=inj_file, inj_frame_channel='Science', ifo=ifo, outfile=out_file)
 			out_file_actual = commands.getstatusoutput("readlink -f %s"%out_file)[1]
-			cache.write("%s DatInjMerge %s %s %s\n"%(ifo, dat_starts[i], dat_durations[i], "file://localhost"+out_file_actual))			
+			cache.write("%s DatInjMerge %s %s %s\n"%(ifo, inj_starts[i], inj_durations[i], "file://localhost"+out_file_actual))			
 		
 		cache.close()
+
+	#return merged framecache locations
+	return cache_locations
