@@ -53,7 +53,7 @@ if __name__=='__main__':
 		gps_day_collect = int(gps_day_collect)
 
 	#Collect results from the current gps day
-	if os.path.isfile('%s/%s/'%(rundir,gps_day_collect)):
+	if os.path.isdir('%s/%s/'%(rundir,gps_day_collect)):
 		GPS_day_collect_eagle.executable(run_dic=run_dic,gps_day=gps_day_collect)
 	
 	#Get previous gps day that background collection and retraining was successfully completed for
