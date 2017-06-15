@@ -74,7 +74,10 @@ if __name__=='__main__':
 			
 			gdb_flag = run_dic['run mode']['gdb flag']
 			if gdb_flag:
-				gdb = GraceDb()
+				if run_dic['run mode']['gdb server'] == 'Production':
+					gdb = GraceDb()
+				elif run_dic['run mode']['gdb server'] == 'Test':
+					gdb = GraceDb('https://gracedb-test.ligo.org/api/')
 		
 		elif coin_mode == 'sig_train':
 			bindir = run_dic['config']['LIB bin dir']
