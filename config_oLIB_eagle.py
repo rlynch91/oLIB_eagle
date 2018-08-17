@@ -20,6 +20,7 @@ run_dic['version'] = {}
 run_dic['version']['oLIB'] = 'ER10_code_freeze'
 run_dic['version']['omicron'] ='v2r1'
 run_dic['version']['LIB'] = '80a31deb98600444739e22f7b232ca5c9fe94603'
+run_dic['version']['calibration'] = 'C00'
 
 ###
 run_dic['config'] = {}
@@ -44,7 +45,7 @@ run_dic['run mode']['inj runmode'] = 'NonInj'
 run_dic['run mode']['DQ runmode'] = 'NonDQV'
 run_dic['run mode']['train runmode'] = "Train"
 run_dic['run mode']['gdb flag'] = True
-run_dic['run mode']['gdb server'] == 'Production'
+run_dic['run mode']['gdb server'] = 'Production'
 run_dic['run mode']['email flag'] = True
 run_dic['run mode']['email addresses'] = ['rlynch@mit.edu','8476930667@vtext.com']
 run_dic['run mode']['email throttle'] = 3600.
@@ -312,6 +313,7 @@ run_dic['search bins']['high_Q']['low freq cut'] = 48
 run_dic['search bins']['high_Q']['high freq cut'] = 1024
 run_dic['search bins']['high_Q']['low quality cut'] = 2.
 run_dic['search bins']['high_Q']['high quality cut'] = 108.
+run_dic['search bins']['high_Q']['BSN ratio cuts'] = [ ('H1','L1',9), ('H1','V1',np.inf), ('L1','V1',np.inf) ]
 run_dic['search bins']['low_Q'] = {}
 run_dic['search bins']['low_Q']['low logBSN cut'] = 0
 run_dic['search bins']['low_Q']['high logBSN cut'] = 6
@@ -321,6 +323,7 @@ run_dic['search bins']['low_Q']['low freq cut'] = 32
 run_dic['search bins']['low_Q']['high freq cut'] = 1024
 run_dic['search bins']['low_Q']['low quality cut'] = 0.1
 run_dic['search bins']['low_Q']['high quality cut'] = 2.
+run_dic['search bins']['low_Q']['BSN ratio cuts'] = [ ('H1','L1',9), ('H1','V1',np.inf), ('L1','V1',np.inf) ]
 
 ###
 run_dic['collection and retraining'] = {}

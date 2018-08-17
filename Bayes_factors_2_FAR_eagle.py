@@ -15,6 +15,7 @@ import commands
 
 ###
 def check_parameter_space(dic_entry, search_bin, run_dic):
+	#Get cuts
 	q_min = run_dic['search bins'][search_bin]['low quality cut']
 	q_max = run_dic['search bins'][search_bin]['high quality cut']
 	f_min = run_dic['search bins'][search_bin]['low freq cut']
@@ -24,11 +25,15 @@ def check_parameter_space(dic_entry, search_bin, run_dic):
 	logBSN_min = run_dic['search bins'][search_bin]['low logBSN cut']
 	logBSN_max = run_dic['search bins'][search_bin]['high logBSN cut']
 	
+	ifos = dic_entry['instruments'].split(',')
+	BSN_ratio_cuts_all = np.array(run_dic['search bins'][search_bin]['BSN ratio cuts'])
+	BSN_ratio_cuts = BSN_ratio_cuts_all[ [(x[0] in ifos) and (x[1] in ifos) for x in BSN_ratio_cuts_all] ]
+	
 	#Check to see if the event lies within the defined parameter space
+	flag = False
 	if (dic_entry['quality']['posterior median'] >= q_min) and (dic_entry['quality']['posterior median'] <= q_max) and (dic_entry['frequency']['posterior median'] >= f_min) and (dic_entry['frequency']['posterior median'] <= f_max) and (dic_entry['BCI'] >= BCI_min) and (dic_entry['BCI'] <= BCI_max) and (np.log10(dic_entry['BSN']) >= logBSN_min) and (np.log10(dic_entry['BSN']) <= logBSN_max):
-		flag = True
-	else:
-		flag = False
+		if np.prod([ max(dic_entry['Single-IFO BSN'][x[0]]/dic_entry['Single-IFO BSN'][x[1]], dic_entry['Single-IFO BSN'][x[1]]/dic_entry['Single-IFO BSN'][x[0]]) <= float(x[2]) for x in BSN_ratio_cuts ]):
+			flag = True
 		
 	return flag
 
@@ -117,6 +122,11 @@ if __name__=='__main__':
 				dictionary[event]['instruments'] = ",".join(ifos)
 				dictionary[event]['nevents'] = 1
 				dictionary[event]['likelihood']= None
+				dictionary[event]['run mode'] = run_mode
+				dictionary[event]['oLIB version'] = run_dic['version']['oLIB']
+				dictionary[event]['omicron version'] = run_dic['version']['omicron']
+				dictionary[event]['LIB version'] = run_dic['version']['LIB']
+				dictionary[event]['calibration'] = run_dic['version']['calibration']
 				
 				#Add BSN to dictionary
 				post_file = open("%s/LIB/%s/%s/posterior_samples/%s"%(segdir,coin_group,coin_mode,f), 'rt')
@@ -168,6 +178,22 @@ if __name__=='__main__':
 				dictionary[event]['hrss'] = {}
 				dictionary[event]['hrss']['posterior mean'] = np.mean(hrss_samps)
 				dictionary[event]['hrss']['posterior median'] = np.median(hrss_samps)
+
+		#Collect single-ifo BSNs
+		for f in posterior_files:
+			if (len(f.split('_')[1].split('1')) == 2) and (f.split('.')[2] == 'dat_B'):
+				#Get IFO and event
+				ifo = f.split('_')[1]
+				event = int(f.split('-')[1].split(".")[0])
+				
+				#Add single-ifo BSN to dictionary
+				post_file = open("%s/LIB/%s/%s/posterior_samples/%s"%(segdir,coin_group,coin_mode,f), 'rt')
+				for line in post_file:
+					bsn = float(line.split()[0])
+				if 'Single-IFO BSN' not in dictionary[event]:
+					dictionary[event]['Single-IFO BSN'] = {}
+				dictionary[event]['Single-IFO BSN'][ifo] = bsn
+				post_file.close()
 
 		#Find BCIs		
 		coherence_files = os.listdir("%s/LIB/%s/%s/coherence_test/"%(segdir,coin_group,coin_mode))

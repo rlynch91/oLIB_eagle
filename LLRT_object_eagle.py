@@ -882,7 +882,7 @@ class LLRT(object):
 				init_coords[d] = self.oneD_rule_of_thumb_bandwidth_gaussian(data[:,d])
 		
 		#Calculate the KL criteria function at each point on the grid, keeping track of the coordinates that yield the minimum value
-		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True,options={'gtol': 1e-05})
+		min_object = scipy_optimize.minimize(fun=self.KL_function_gaussian, x0=init_coords, args=(data,), method='BFGS', jac=True,options={'gtol': 1e-03})
 		
 		#Check to make sure the minimum was found successfully
 		if min_object['success'] == False:
